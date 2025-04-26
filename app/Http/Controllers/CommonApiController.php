@@ -27,6 +27,7 @@ class CommonApiController extends Controller
             return response()->json(['error' => false, 'message' => "data found","data"=>$data],200);
         }
 
+
     }
 
     public function facilityType($id=null)
