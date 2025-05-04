@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ProductConfiguration;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PatientController\PatientAdmissionController;
 use App\Models\GenericName;
 use App\Models\ItemForm;
 use App\Models\ItemMake;
@@ -211,6 +212,10 @@ class CategoryController extends Controller
     public function deactivate_record()
     {
         DB::table(request()->table)->whereId(request()->id)->update(["is_active"=>0]);
+        if(request()->has('admission_id')){
+            (new PatientAdmissionController())->updateAdmissionDetails(request()->admission_id);
+
+        }
         return ["status"=>true,"message"=>"Record saved successfully"];
 
     }

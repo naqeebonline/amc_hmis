@@ -6,6 +6,12 @@
         .table> :not(caption)>*>* {
             padding: 5px;
         }
+        .red-row {
+            background-color: #e9747f !important;
+            color:white;
+        }
+
+
     </style>
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
@@ -75,6 +81,7 @@
                                     <th>Admission Date</th>
                                     <th>Discharge Date</th>
                                     <th>Status</th>
+                                    <th>Payment Received</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -87,6 +94,49 @@
                 </div>
             </div>
             <!-- /traffic sources -->
+        </div>
+    </div>
+
+
+    <div class="modal fade my_modal" id="patient_admission_edit_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog " role="document">
+            <form class="modal-content form-submit-event" id="cancel_admission_form">
+                <input type="hidden" id="cancel_admission_id" name="id" value="0">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Update Informations</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Consultant Name<span
+                                        class="asterisk">*</span></label>
+                            <input id="edit_admission_id" value="" type="hidden">
+
+
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Sehat Card Reference No<span
+                                        class="asterisk">*</span></label>
+
+                            <input type="number" class="form-control" name="edit_sc_ref_no" id="edit_sc_ref_no">
+                        </div>
+
+                    </div>
+
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close                </button>
+                    <div id="update_admission" class="btn btn-primary">Update</div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -127,6 +177,50 @@
 
         });
 
+        $("body").on("click", ".edit_record", function(e) {
+            record_id = $(this).attr("data-id");
+            var details = JSON.parse($(this).attr("data-details"));
+
+
+            $('#edit_admission_id').val(details.id);
+            $('#edit_sc_ref_no').val(details.sc_ref_no);
+
+            $('#patient_admission_edit_modal').modal("show");
+
+
+            return false;
+        });
+
+        $("body").on("click","#update_admission",function (e) {
+
+            var admission_id = $('#edit_admission_id').val();
+            var sc_ref_no = $('#edit_sc_ref_no').val();
+            var procedure_rate = $('#procedure_rate').val();
+
+            /*var consultant_share = $('#edit_consultant_id').find(':selected').attr('date_consultant_share');
+            var procedure_rate = $('#edit_procedure_type_id').find(':selected').attr('data-net_rate');*/
+
+            $.ajax({
+                type: "post",
+                url: "{{ route('pos.update_patient_admission_info') }}",
+                data: {
+
+                    admission_id: admission_id,
+                    sc_ref_no: sc_ref_no,
+
+                    "_token": "{{ csrf_token() }}"
+                },
+                success: function(res) {
+
+                    $("#edit_admission_id").val('');
+                    $("#edit_sc_ref_no").val('');
+                    $('#patient_admission_edit_modal').modal("hide");
+                    user_table.ajax.reload();
+
+                }
+            });
+        });
+
         setTimeout(function() {
             $("#filter_by_procedure_type").select2();
             $("#consultant_id").select2();
@@ -156,7 +250,7 @@
             processing: true,
             serverSide: true,
 
-            pageLength: 100,
+            pageLength: 20,
             ajax: {
                 url: "{{ route('pos.list_all_patients') }}",
                 data: function (d) {
@@ -235,16 +329,34 @@
                     searchable: true
                 },
                 {
+                    data: null, // Use `null` because we will combine two fields
+                    name: 'payment_received', // Use one field for search or sorting
+                    searchable: true,
+                    render: function(data, type, row) {
+                        if (data.payment_received == true) { // Change condition as needed
+                            return "<b style='color:green'>Payment Received</b>"
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+                {
                     data: 'actions',
                     name: 'actions',
                     searchable: true
                 },
 
             ],
+            createdRow: function(row, data, dataIndex) {
+
+                if (data.payment_received == true) { // Change condition as needed
+                    $(row).addClass('red-row');
+                }
+            },
 
             responsive: true,
-            processing: true,
-            serverSide: true,
+
+
             searching: true,
             sorting: true,
             paging: true,
@@ -260,4 +372,6 @@
 
 
     </script>
+
+
 @endpush

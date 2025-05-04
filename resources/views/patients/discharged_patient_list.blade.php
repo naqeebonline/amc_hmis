@@ -207,7 +207,7 @@
             processing: true,
             serverSide: true,
 
-            pageLength: 10,
+            pageLength: 50,
             ajax: {
                 url: "{{ route('pos.discharged_patient_list') }}",
                 data: function (d) {

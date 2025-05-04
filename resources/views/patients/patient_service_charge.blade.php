@@ -404,12 +404,14 @@
 
          $("body").on("click", ".delete_service_record", function(e) {
             var id = $(this).attr("data-id");
+             var  admission_id = $("#admission_id").val();
             if (confirm('Are you sure to delete this record ?')) {
                 $.ajax({
                     type: 'post',
                     url: "{{ route('pos.deactivate_record') }}",
                     data: {
                         id: id,
+                        admission_id: admission_id,
                         table: "patient_service_charges",
                         _token: '{{ csrf_token() }}'
 

@@ -198,7 +198,7 @@
 </head>
 
 <body>
-<div class="">
+<div class="invoice-container">
     <header>
         <div class="company-details">
             <h1 style="text-align: center;margin-left: 50%;width: 100%;">Akakhel Medical Complex</h1>
@@ -220,22 +220,18 @@
             <thead>
             <tr>
 
-                <th style="width: 5%;"></th>
                 <th style="width: 5%;">S.No</th>
-                <th style="width: 5%;">Referal No</th>
-                {{--<th style="width: 10%;">Patient Name</th>--}}
-                <th style="width: 10%;">Admission Date</th>
+                <th style="width: 10%;">Patient Name</th>
                 <th style="width: 18%;">Procedure</th>
-                <th style="width: 16%;">Consultant</th>
+                <th style="width: 10%;">Consultant</th>
 
-                <th style="width: 10%;">Procedure Rate</th>
-                <th style="width: 7%;">Share %</th>
+                <th style="width: 16%;">Procedure Rate</th>
                 <th style="width: 7%;">Consultant Share Amount</th>
-                {{--<th style="width: 7%;">Investigation Cost</th>
+                <th style="width: 7%;">Investigation Cost</th>
                 <th style="width: 7%;">Service Charges</th>
-                <th style="width: 7%;">Medicine Cost</th>--}}
-               {{-- <th style="width: 7%;">Total Cost</th>
-                <th style="width: 7%;">Balance</th>--}}
+                <th style="width: 7%;">Medicine Cost</th>
+                <th style="width: 7%;">Total Cost</th>
+                <th style="width: 7%;">Balance</th>
 
 
             </tr>
@@ -255,15 +251,12 @@
                 ?>
 
                 <tr>
-                    <td><input type="checkbox" class="admission_payment" checked value="{{$admission->id}}"></td>
                     <td>{{$key + 1}}</td>
-                    <td>{{$admission->sc_ref_no ?? ""}}</td>
-                    {{--<td>{{$admission->patient->name ?? ""}}</td>--}}
-                    <td>{{date("d-m-Y",strtotime($admission->admission_date)) ?? ""}}</td>
+                    <td>{{$admission->patient->name ?? ""}}</td>
 
-                    <td>{{--Type: {{$admission->procedure_type->type ?? ""}}
-                        <br>--}}
-                        {{--Name: --}}{{$admission->procedure_type->name ?? ""}}
+                    <td>Type: {{$admission->procedure_type->type ?? ""}}
+                        <br>
+                        Name: {{$admission->procedure_type->name ?? ""}}
                     </td>
                     <td>{{$admission->consultant->name ?? ""}} , {{$admission->sub_consultant->name ?? ""}}</td>
                     <td>{{$admission->getAdmissionDetails['procedure_amount1']}} <br>
@@ -271,16 +264,13 @@
                             <span> x {{$admission->getAdmissionDetails['daysDifference']}} days = {{ ($admission->getAdmissionDetails['procedure_amount'])  }}</span>
                         @endif
                     </td>
-                    <td>{{$admission->consultant_share ?? ""}} %</td>
                     <td>{{$admission->getAdmissionDetails['consultant_share_amount']}}</td>
-                   {{-- <td>{{$admission->getAdmissionDetails['investigation_amount']}}</td>
+                    <td>{{$admission->getAdmissionDetails['investigation_amount']}}</td>
                     <td>{{$admission->getAdmissionDetails['service_charges']}}</td>
-                    <td>{{$admission->getAdmissionDetails['medicine_amount']}}</td>--}}
-                    {{--<td>{{ $total_cost = (($admission->getAdmissionDetails['consultant_share_amount']) + ($admission->getAdmissionDetails['investigation_amount']) + ($admission->getAdmissionDetails['service_charges']) + ($admission->getAdmissionDetails['medicine_amount'])) }}</td>
-                    <td>{{ ($admission->getAdmissionDetails['procedure_amount']) - ($total_cost) }}</td>--}}
-                    <?php
-                     $total_cost = (($admission->getAdmissionDetails['consultant_share_amount']) + ($admission->getAdmissionDetails['investigation_amount']) + ($admission->getAdmissionDetails['service_charges']) + ($admission->getAdmissionDetails['medicine_amount']));
-                    $grandTotalCost += $total_cost; ?>
+                    <td>{{$admission->getAdmissionDetails['medicine_amount']}}</td>
+                    <td>{{ $total_cost = (($admission->getAdmissionDetails['consultant_share_amount']) + ($admission->getAdmissionDetails['investigation_amount']) + ($admission->getAdmissionDetails['service_charges']) + ($admission->getAdmissionDetails['medicine_amount'])) }}</td>
+                    <td>{{ ($admission->getAdmissionDetails['procedure_amount']) - ($total_cost) }}</td>
+                    <?php $grandTotalCost += $total_cost; ?>
                 </tr>
 
             @endforeach
@@ -289,16 +279,13 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td></td>
-                <td></td>
                 <td style="font-weight: bold">{{$totalProcedureAmount}}</td>
-                <td ></td>
                 <td style="font-weight: bold">{{$totalConsultantAmount}}</td>
-                {{--<td style="font-weight: bold">{{$totalInvAmount}}</td>
+                <td style="font-weight: bold">{{$totalInvAmount}}</td>
                 <td style="font-weight: bold"></td>
-                <td style="font-weight: bold">{{$totalMedicine_amount}}</td>--}}
-                {{--<td style="font-weight: bold">{{ $grandTotalCost }}</td>
-                <td style="font-weight: bold"> {{ ($totalProcedureAmount) - ($grandTotalCost) }}</td>--}}
+                <td style="font-weight: bold">{{$totalMedicine_amount}}</td>
+                <td style="font-weight: bold">{{ $grandTotalCost }}</td>
+                <td style="font-weight: bold"> {{ ($totalProcedureAmount) - ($grandTotalCost) }}</td>
             </tr>
 
 
@@ -306,48 +293,12 @@
             </tbody>
 
         </table>
-        <a class="btn btn-primary save_invoice" style="background-color: green; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer;">Save Invoice</a>
     </section>
 
 
 
 
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    let selectedAdmissions = @json($allData);
-    $(document).on('click', '.save_invoice', function (e) {
-        e.preventDefault(); // Prevent default action if it's a link or submit
-        let confirmAction = confirm("Are you sure you want to save this invoice?");
-        if (confirmAction) {
-            var url = "{{route('pos.generatePayment',[$from_date,$to_date,$consultant_id])}}?save_payment=yes&id="+JSON.stringify(selectedAdmissions);
-            window.location = url;
-        } else {
-            // Do nothing, stay on the page
-        }
-    });
-
-    $(document).on('change', '.admission_payment', function () {
-        const admissionId = $(this).val();
-
-        if ($(this).is(':checked')) {
-            // Add if not already in the array
-            if (!selectedAdmissions.includes(admissionId)) {
-                selectedAdmissions.push(admissionId);
-            }
-        } else {
-            // Remove if unchecked
-            selectedAdmissions = selectedAdmissions.filter(id => id != admissionId);
-        }
-
-        //console.log(selectedAdmissions,selectedAdmissions.length); // For testing
-    });
-
-
-</script>
-
-
 </body>
 
 </html>

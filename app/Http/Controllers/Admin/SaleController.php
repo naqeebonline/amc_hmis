@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PatientController\PatientAdmissionController;
 use App\Models\Customer;
 use App\Models\GrnDetails;
 use App\Models\Market;
@@ -267,6 +268,8 @@ class SaleController extends Controller
             WardRequest::whereId(request()->ward_request_id)->update(["issued_by"=>auth()->user()->id,"issued_at"=>date("Y-m-d H:i:s"),"status"=>1]);
         }
 
+        (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
+
         return ["status"=>true,"message" => "Sale Completed Successfully","id"=>$last_id];
     }
 
@@ -473,6 +476,8 @@ class SaleController extends Controller
     {
         $sale_details = SaleDetails::where(["SDID"=>request()->SDID])->first();
         $sale = Sale::where(["SaleID"=>$sale_details->SaleID])->first();
+        $admission_id = $sale->admission_id;
+
 
         $retrun_qty = request()->ReturnQuantity;
         $total_return_price = ($sale_details->UnitePrice) * ($retrun_qty);
@@ -499,6 +504,7 @@ class SaleController extends Controller
             "ProductStatus"     =>1
         );
         GrnDetails::where(['GDID'=>$sale_details->GDID])->update($grn_detailDate);
+        (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
         return response()->json(["status"=>true,"message"=>"done"]);
         //$this->Zk_Common_Model->update_records('grn_details',$grn_detailDate,array('GDID'=>$GDID));
     }

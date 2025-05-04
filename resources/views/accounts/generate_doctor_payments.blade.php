@@ -67,11 +67,11 @@
                             class="table table-responsive  data_mf_table table-condensed">
                             <thead>
                                 <tr>
-                                    <th>Patient MR no.</th>
+
                                     <th>Patient Name</th>
                                     <th>Sehat Card Refrence No</th>
 
-                                    <th>Guardian Name</th>
+
                                     <th>Consultant</th>
                                     <th>Procedure Type</th>
                                     {{--<th>Ward Name</th>
@@ -79,8 +79,10 @@
 
                                     <th>Admission Date</th>
                                     <th>Discharge Date</th>
-                                    <th>Consultant Share</th>
                                     <th>Procedure Rate</th>
+                                    <th>Consultant Share</th>
+                                    <th>Share Amount</th>
+
                                     <th>Status</th>
 
                                     <th>Action</th>
@@ -110,6 +112,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Sehat Card Reference No<span
+                                        class="asterisk">*</span></label>
+
+                            <input type="number" class="form-control" name="edit_sc_ref_no" id="edit_sc_ref_no">
+                        </div>
 
                         <div class="col-md-12 mb-3">
                             <label for="nameBasic" class="form-label">Consultant Name<span
@@ -178,14 +187,19 @@
         $("body").on("click", ".print_all_details", function(e) {
             var from_date = $("#from_date").val();
             var to_date = $("#to_date").val();
+            var consultant_id = $("#filter_by_consultant_id").val();
             if(from_date == '' || to_date == ''){
                 alert("Please select Date");
+                return false;
+            }
+            if(consultant_id == ''){
+                alert("Please select consultant");
                 return false;
             }
           //  var procedure_type_id = $("#filter_by_procedure_type").val();
             /*if(procedure_type_id == '')
                 procedure_type_id = 0;*/
-            var consultant_id = $("#filter_by_consultant_id").val();
+
             var url = "{{route('pos.generatePayment')}}/"+from_date+"/"+to_date+"/"+consultant_id;
             window.open(url, '_blank');
             //newWindow.focus();
@@ -242,11 +256,7 @@
 
             columns: [
 
-                {
-                    data: 'patient.mr_no',
-                    name: 'patient.mr_no',
-                    searchable: true
-                },
+
                 {
                     data: 'patient.name',
                     name: 'patient.name',
@@ -258,11 +268,7 @@
                     searchable: true
                 },
 
-                {
-                    data: 'guardian_name',
-                    name: 'guardian_name',
-                    searchable: true
-                },
+
                 {
                     data: 'consultant.name',
                     name: 'consultant.name',
@@ -311,15 +317,21 @@
                     searchable: true
                 },
                 {
+                    data: 'procedure_rate',
+                    name: 'procedure_rate',
+                    searchable: true
+                },
+                {
                     data: 'consultant_share',
                     name: 'consultant_share',
                     searchable: true
                 },
                 {
-                    data: 'procedure_rate',
-                    name: 'procedure_rate',
+                    data: 'consultant_share_amount',
+                    name: 'consultant_share_amount',
                     searchable: true
                 },
+
                 {
                     data: 'admission_status',
                     name: 'admission_status',
@@ -379,6 +391,7 @@
             let dateOnly = fullDateTime.split(' ')[0];
 
             $('#edit_admission_id').val(details.id);
+            $('#edit_sc_ref_no').val(details.sc_ref_no);
             $('#edit_consultant_id').val(details.consultant_id).trigger('change');
             $('#edit_procedure_type_id').val(details.procedure_type_id).trigger('change');
             $('#consultant_share').val(details.consultant_share);
@@ -393,6 +406,8 @@
             var consultant_id =  $("#edit_consultant_id").val();
             var procedure_type_id =  $("#edit_procedure_type_id").val();
             var admission_id = $('#edit_admission_id').val();
+            var sc_ref_no = $('#edit_sc_ref_no').val();
+
             var consultant_share = $('#consultant_share').val();
             var procedure_rate = $('#procedure_rate').val();
 
@@ -403,6 +418,7 @@
                 type: "post",
                 url: "{{ route('pos.update_patient_admission') }}",
                 data: {
+                    edit_sc_ref_no: sc_ref_no,
                     consultant_id: consultant_id,
                     procedure_type_id: procedure_type_id,
                     admission_id: admission_id,

@@ -202,6 +202,8 @@
     <header>
         <div class="company-details">
             <h1 style="text-align: center;margin-left: 50%;width: 100%;">Akakhel Medical Complex</h1>
+            <h1 style="text-align: center;margin-left: 50%;width: 100%; font-size: 16px;">Doctor Invoice</h1>
+
 
         </div>
 
@@ -220,7 +222,6 @@
             <thead>
             <tr>
 
-                <th style="width: 5%;"></th>
                 <th style="width: 5%;">S.No</th>
                 <th style="width: 5%;">Referal No</th>
                 {{--<th style="width: 10%;">Patient Name</th>--}}
@@ -255,7 +256,7 @@
                 ?>
 
                 <tr>
-                    <td><input type="checkbox" class="admission_payment" checked value="{{$admission->id}}"></td>
+
                     <td>{{$key + 1}}</td>
                     <td>{{$admission->sc_ref_no ?? ""}}</td>
                     {{--<td>{{$admission->patient->name ?? ""}}</td>--}}
@@ -285,7 +286,7 @@
 
             @endforeach
             <tr>
-                <td></td>
+
                 <td></td>
                 <td></td>
                 <td></td>
@@ -306,7 +307,7 @@
             </tbody>
 
         </table>
-        <a class="btn btn-primary save_invoice" style="background-color: green; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer;">Save Invoice</a>
+
     </section>
 
 
@@ -315,37 +316,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    let selectedAdmissions = @json($allData);
-    $(document).on('click', '.save_invoice', function (e) {
-        e.preventDefault(); // Prevent default action if it's a link or submit
-        let confirmAction = confirm("Are you sure you want to save this invoice?");
-        if (confirmAction) {
-            var url = "{{route('pos.generatePayment',[$from_date,$to_date,$consultant_id])}}?save_payment=yes&id="+JSON.stringify(selectedAdmissions);
-            window.location = url;
-        } else {
-            // Do nothing, stay on the page
-        }
-    });
 
-    $(document).on('change', '.admission_payment', function () {
-        const admissionId = $(this).val();
-
-        if ($(this).is(':checked')) {
-            // Add if not already in the array
-            if (!selectedAdmissions.includes(admissionId)) {
-                selectedAdmissions.push(admissionId);
-            }
-        } else {
-            // Remove if unchecked
-            selectedAdmissions = selectedAdmissions.filter(id => id != admissionId);
-        }
-
-        //console.log(selectedAdmissions,selectedAdmissions.length); // For testing
-    });
-
-
-</script>
 
 
 </body>

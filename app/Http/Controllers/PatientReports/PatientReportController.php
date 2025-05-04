@@ -42,9 +42,17 @@ class PatientReportController extends Controller
                 //dd(date("Y-m-d", strtotime($patient->admission_date)));
                 return  date("Y-m-d", strtotime($patient->admission_date));
             })
+            ->addColumn("payment_received", function ($patient) {
+                //dd(date("Y-m-d", strtotime($patient->admission_date)));
+                if($patient->amount_received_from_sehat_card > 0){
+                    return true;
+                }else{
+                    return false;
+                }
+            })
             ->addColumn("actions", function ($patient) {
                 $buttons =  '<a target="_blank" href="' . route('pos.print_patient_admission', [$patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bx-printer tf-icons"></i></a>
-                      
+                   <a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-warning edit_record"><i class="tf-icons bx bx-pencil"></i></a>   
                         ';
                 if ($patient->procedure_type_id == 6) {
                     $buttons = $buttons . '<a  href="' . route('pos.patient_baby', [$patient->patient_id, $patient->id]) . '"  class="btn btn-primary btn-sm mt-2">View Baby Information</a>';
@@ -53,12 +61,11 @@ class PatientReportController extends Controller
 
                 return $buttons;
             })
-            ->rawColumns(["edit_admission_date", "actions"])
+            ->rawColumns(["edit_admission_date","payment_received", "actions"])
             ->make(true);
     }
     public function patient_admission_report()
     {
-        
        $data['title'] = "Patient Admission Report";
        $data['procedure_type'] = ProcedureType::where(["is_active"=>1])->get();
        $data['consultant'] = Consultants::where(["is_active"=>1])->get();

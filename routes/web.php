@@ -190,9 +190,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post("admission-cancelation", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "admission_cancelation"])->name("pos.admission_cancelation");
     Route::get("print_patient_admission/{admission_id}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_patient_admission"])->name("pos.print_patient_admission");
     Route::get("discharged_patient", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "discharged_patient"])->name("pos.discharged_patient");
+    Route::get("updatePatientData/{from_id}/{to_id}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "updatePatientData"])->name("pos.updatePatientData");
     Route::get("discharged_patient_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "discharged_patient_list"])->name("pos.discharged_patient_list");
     Route::post("cencel_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "cencel_patient_admission"])->name("pos.cencel_patient_admission");
-
+    Route::get("sehatcard_patients_statistics", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatcard_patients_statistics"])->name("pos.sehatcard_patients_statistics");
+    Route::get("list-admission-statistics", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "list_admission_statistics"])->name("pos.list_admission_statistics");
     
     Route::get("patient-account/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_account"])->name("pos.patient_account");
     Route::get("get_admission_investigations/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_admission_investigations"])->name("pos.get_admission_investigations");
@@ -307,6 +309,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("print_admitted_patient_treatment_report/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_admitted_patient_treatment_report"])->name("pos.print_admitted_patient_treatment_report");
     Route::get("patient_treatment_chart_report/{patient_id?}/{admission_id?}/{medicine_type_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_treatment_chart_report"])->name("pos.patient_treatment_chart_report");
     Route::post("update_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_patient_admission"])->name("pos.update_patient_admission");
+    Route::post("update_patient_admission_info", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_patient_admission_info"])->name("pos.update_patient_admission_info");
     Route::get("canceled_patients", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "canceled_patients"])->name("pos.canceled_patients");
     Route::get("canceled_patient_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "canceled_patient_list"])->name("pos.canceled_patient_list");
     Route::get("calculatePatientMedecineAmount/{admission_id?}", [\App\Http\Controllers\PatientController\PatientExpenseController::class, "calculatePatientMedecineAmount"])->name("pos.calculatePatientMedecineAmount");
@@ -351,5 +354,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("consultant_sc_balance/{id?}", [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, "consultant_sc_balance"])->name("pos.consultant_sc_balance");
     Route::post("save_sc_payments/{id?}", [\App\Http\Controllers\Accounts\DoctorPaymentsController::class,  "save_sc_payments"])->name("pos.save_sc_payments");
     Route::get("get_sc_payments_to_doctors/{id?}", [\App\Http\Controllers\Accounts\DoctorPaymentsController::class,  "get_sc_payments_to_doctors"])->name("pos.get_sc_payments_to_doctors");
+    Route::get("print_doctor_invoice/{id?}", [\App\Http\Controllers\Accounts\DoctorPaymentsController::class,  "print_doctor_invoice"])->name("pos.print_doctor_invoice");
+
+    Route::get('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'showForm'])->name('pos.import_form');
+    Route::post('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'import'])->name('pos.import');
+    Route::post('/saveSehatCardPayment', [\App\Http\Controllers\CsvImportController::class, 'saveSehatCardPayment'])->name('pos.saveSehatCardPayment');
+
 
 });

@@ -27,16 +27,16 @@ class DoctorPaymentsController extends Controller
 
     public function load_discharge_patients_for_doctor_payments()
     {
-        $patients = PatientAdmission::where(["is_active" => 1, "admission_status" => "Discharged","consultant_shares_payment_invoice_id"=>0])
+        $patients = PatientAdmission::where(["is_active" => 1,"consultant_shares_payment_invoice_id"=>0])
             ->with("patient", "ward", "bed", 'procedure_type', 'consultant','sub_consultant')
 
             ->when(request()->from_date, function ($query) {
                 $fromDate = Carbon::parse(request()->from_date)->endOfDay();
-                $query->where('discharge_date','>=',date("Y-m-d",strtotime($fromDate)));
+                $query->where('admission_date','>=',date("Y-m-d",strtotime($fromDate)));
             })
             ->when(request()->to_date, function ($query) {
                 $toDate = Carbon::parse(request()->to_date)->endOfDay();
-                $query->where('discharge_date','<=',date("Y-m-d",strtotime($toDate)));
+                $query->where('admission_date','<=',date("Y-m-d",strtotime($toDate)));
             })
             ->when(request()->procedure_type_id, function ($query) {
                 //  dd("here");
@@ -67,19 +67,8 @@ class DoctorPaymentsController extends Controller
                 }
                 return $buttons;
             })
-            ->addColumn("alert", function ($patient) {
-                $res = (new PatientExpenseController())->getAdmissionDetails($patient->id);
-                return  $res['alert'];
-            })
-            ->addColumn("totalCost", function ($patient) {
-                $res = (new PatientExpenseController())->getAdmissionDetails($patient->id);
-                return  $res['totalCost'];
-            })
-            ->addColumn("balance", function ($patient)  {
-                $res = (new PatientExpenseController())->getAdmissionDetails($patient->id);
-                return  $res['balance'];
-            })
-            ->rawColumns(["alert","totalCost","balance","edit_admission_date", "actions"])
+
+            ->rawColumns(["edit_admission_date", "actions"])
             ->make(true);
     }
 
@@ -122,16 +111,16 @@ class DoctorPaymentsController extends Controller
             return redirect()->route("pos.generate-doctor-invoice");
         }else{
 
-            $admission = PatientAdmission::where(["is_active" => 1, "admission_status" => "Discharged","consultant_shares_payment_invoice_id"=>0])
+            $admission = PatientAdmission::where(["is_active" => 1,"consultant_shares_payment_invoice_id"=>0])
                 ->with("patient", "ward", "bed", 'procedure_type', 'consultant','sub_consultant')
 
                 ->when(request()->from_date, function ($query) {
                     $fromDate = Carbon::parse(request()->from_date)->endOfDay();
-                    $query->where('discharge_date','>=',date("Y-m-d",strtotime($fromDate)));
+                    $query->where('admission_date','>=',date("Y-m-d",strtotime($fromDate)));
                 })
                 ->when(request()->to_date, function ($query) {
                     $toDate = Carbon::parse(request()->to_date)->endOfDay();
-                    $query->where('discharge_date','<=',date("Y-m-d",strtotime($toDate)));
+                    $query->where('admission_date','<=',date("Y-m-d",strtotime($toDate)));
                 })
                 ->when(request()->procedure_type_id, function ($query) {
                     //  dd("here");
@@ -201,8 +190,8 @@ class DoctorPaymentsController extends Controller
 
             ->addColumn('action', function ($data) {
 
-                return '<a class="btn btn-sm btn-success" href="'.route('pos.print_purchase',[$data->SCID, $data->GRNID]).'">Print Bill</a>
-                <a class="btn btn-sm btn-success" href="'.route('pos.add_bill_items',[$data->GRNID]).'">Edit</a>
+                return '<a class="btn btn-sm btn-success" target="_blank" href="'.route('pos.print_doctor_invoice',[$data->id]).'">Print Invoice</a>
+               
                
                     <a class="btn btn-sm btn-danger">Delete</a>';
             })
@@ -230,5 +219,26 @@ class DoctorPaymentsController extends Controller
             ->make(true);
 
 
+    }
+
+    public function print_doctor_invoice($id)
+    {
+        $data['title'] = "Doctor Invoice";
+        $res = ConsultantShareInvoice::whereId($id)->first();
+
+        $admission = PatientAdmission::with('patient','procedure_type','consultant',"sub_consultant")
+            ->whereIn("patient_admissions.id",json_decode($res->admission_ids))
+            ->get();
+        $total_share_amount = 0;
+        foreach ($admission as $key => $value){
+            $value->getAdmissionDetails = (new PatientExpenseController())->getAdmissionDetails($value->id);
+            $value->consultant_share = $value->getAdmissionDetails['consultant_share'];
+            $total_share_amount = ($total_share_amount) + $value->getAdmissionDetails['consultant_share_amount'];
+
+        }
+        $data['data'] = $admission;
+
+    //    dd($admission);
+        return view("accounts.print_doctor_invoice",$data);
     }
 }

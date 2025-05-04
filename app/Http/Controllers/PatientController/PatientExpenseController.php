@@ -39,7 +39,7 @@ class PatientExpenseController extends Controller
            // ->limit(5)
             ->get();
         foreach ($admission as $key => $value){
-            $value->getAdmissionDetails = $this->getAdmissionDetails($value->id);
+            $value->getAdmissionDetails = $this->getAdmissionDetails1($value);
         }
         $data['data'] = $admission;
 
@@ -217,33 +217,84 @@ class PatientExpenseController extends Controller
 
         $data['consultant_share_amount'] = $share_amount;
 
-        $investigations = PatientInvestigation::with('subCategory')->where(["admission_id"=>$admission_id,"is_active"=>1])->get();
-        $investigationAmount = 0;
-        foreach ($investigations as $key => $value){
-            $investigationAmount += $value->subCategory->price;
-        }
 
-        $data['investigation_amount'] = $investigationAmount;
-        $data['service_charges'] = PatientServiceCharges::where(["admission_id"=>$admission_id,"is_active"=>1])->sum('service_rate');
+
+        $data['investigation_amount'] = $admission->investigation_cost;
+        $data['service_charges'] = $admission->service_charges_cost;
         $patient_id = $admission->patient_id;
-        $sale_details = SaleDetails::with("product", "sale")
-            ->when($patient_id, function ($query) use ($patient_id) {
-                $query->where('patient_id', $patient_id);
-            })
-            ->when($admission_id, function ($query) use ($admission_id) {
-                $query->where('admission_id', $admission_id);
-            })->get();
 
+        $data['medicine_amount'] =$admission->medicine_cost;
 
-        $i=1; $taxAmount = 0; $totalAmount = 0;
-        foreach($sale_details as $d) {
-            // dd($d);
-            $quantity = ($d->Quantity);
-            $consumed = $quantity - $d->ReturnQuantity;
-            $amount = ($consumed * $d->UnitePrice);
-            $totalAmount = $totalAmount + $amount;
+        $total_cost = (($data['consultant_share_amount']) + ($data['investigation_amount']) + ($data['service_charges']) + ($data['medicine_amount']));
+        $balance = ($data['procedure_amount']) - ($total_cost);
+        $data['totalCost'] = $total_cost;
+        $data['balance'] = $balance;
+        $alertBalnce = ($data['procedure_amount']) * (25/100);
+        $data['alert_balance'] = $alertBalnce;
+        $data['alert'] = false;
+        if($balance <= $alertBalnce){
+            $data['alert'] = true;
         }
-        $data['medicine_amount'] =$totalAmount;
+
+        return $data;
+
+
+    }
+
+    public function getAdmissionDetails1($value)
+    {
+        $admission = $value;
+
+        $data['procedure_amount1'] = $admission->procedure_rate ?? '';
+        $data['procedure_amount'] = $admission->procedure_rate ?? '';
+        $data["is_medical_case"] = false;
+        $data["daysDifference"] = 0;
+
+        $data['consultant_share'] = $admission->consultant_share;
+        if($admission->procedure_rate == 0){
+            $data['procedure_amount1'] = $admission->procedure_type->net_rate;
+            $data['procedure_amount'] = $admission->procedure_type->net_rate;
+        }
+        /*if($admission->consultant_share == 0){
+            $data['consultant_share'] = $admission->consultant->share_percentage;
+        }*/
+
+        if($admission->procedure_type->type == "Medical"){
+            //    dd($admission);
+            $data["is_medical_case"] = true;
+            $admissionDate = Carbon::parse($admission->admission_date);
+            $dischargeDate = Carbon::parse($admission->discharge_date);
+            if($admission->discharge_date == '' || $admission->discharge_date == NULL){
+
+                $dischargeDate = Carbon::parse(date("Y-m-d")) ;
+            }
+            $daysDifference = $admissionDate->diffInDays($dischargeDate) + 1;
+            $data['procedure_amount'] = ($data['procedure_amount']) * ($daysDifference);
+            $data['daysDifference'] = $daysDifference;
+
+
+        }
+
+
+
+        //----- share percentange ---------//
+        $share_amount = 0;
+        if($data['consultant_share'] !='' && $data['consultant_share'] > 0){
+            $percentage = $data['consultant_share']/100;
+            $share_amount = ($data['procedure_amount']) * ($percentage);
+        }
+
+
+
+        $data['consultant_share_amount'] = $share_amount;
+
+
+
+        $data['investigation_amount'] = $admission->investigation_cost;
+        $data['service_charges'] = $admission->service_charges_cost;
+        $patient_id = $admission->patient_id;
+
+        $data['medicine_amount'] =$admission->medicine_cost;
 
         $total_cost = (($data['consultant_share_amount']) + ($data['investigation_amount']) + ($data['service_charges']) + ($data['medicine_amount']));
         $balance = ($data['procedure_amount']) - ($total_cost);
