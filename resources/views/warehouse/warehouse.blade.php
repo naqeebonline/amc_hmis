@@ -24,6 +24,15 @@
                         <div class="col-md-2">
                             <a class="btn btn-primary" href="{{route('pos.print_pharmacy_audit_form')}}">Start Audit</a>
                         </div>
+
+                        <div class="col-md-4">
+                            <select class="form-control" name="store_id" id="store_id">
+                                <option value="">Please select Store....</option>
+                                @foreach($store as $key => $value)
+                                    <option  value="{{$value->id}}" {{session('store_id') == $value->id ? "selected" : ''}}>{{$value->store_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -92,6 +101,7 @@
                 ajax: {
                     url: '{{route("pos.get_ware_house_stock")}}',
                     data: function (d) {
+                        d.store_id = "{{$selected_store_id}}";
                         d.user_id = $('#attendance_user_filter').val();
                         d.attendance_date_from = $('#attendance_date_from').val();
                         d.attendance_date_to = $('#attendance_date_to').val();

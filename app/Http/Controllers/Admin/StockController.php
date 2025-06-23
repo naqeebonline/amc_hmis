@@ -15,6 +15,7 @@ use App\Models\PaymentDetail;
 use App\Models\Product;
 use App\Models\ProductConsumption;
 use App\Models\Sale;
+use App\Models\Store;
 use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,10 +23,39 @@ use Yajra\DataTables\Facades\DataTables;
 
 class StockController extends Controller
 {
+
+    public function set_user_store_id($store_id = '')
+    {
+        $store = Store::whereId($store_id)->first();
+        if($store){
+            session(['store_id' => $store_id]);
+            session(['store_name' => $store->store_name]);
+            session(['is_free' => $store->use_purchase_price_as_sale_price]);
+        }else{
+            session(['store_id' => '']);
+            session(['store_name' => '']);
+            session(['is_free' => 0]);
+        }
+
+        $type = $_GET['type'] ?? "";
+        if($type == 'next'){
+            return redirect()->to(session()->pull('intended_url', '/'));
+        }else{
+            return redirect()->back();
+        }
+
+    }
+
+    public function select_store()
+    {
+        $stores = Store::all();
+        return view('warehouse.select_store', compact('stores'));
+    }
     public function add_new_stock()
     {
 
         $data["title"] = "Add New Stock";
+        $data['store'] = Store::get();
         $data['products'] = Product::with(["generic_name"])->orderBy("ProductName", "ASC")->get();
         $data['suppliers'] = Customer::where(["Type" => 1])->orderBy("Name", "ASC")->get();
 
@@ -63,10 +93,15 @@ class StockController extends Controller
 
     public function ware_house_stock()
     {
-
         $data["title"] = "Warehouse";
         $data['market'] = Market::where(["IsActive" => 1])->get()->sortBy('Name');
-        $data['products'] = Product::orderBy("ProductName", "ASC")->get();
+        $data['products'] = Product::orderBy("ProductName", "ASC")
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->get();
+        $data['store'] = Store::get();
+        $data['selected_store_id'] = $_GET['store_id'] ?? 1;
         $totalAmount=0;
         foreach($data['products'] as $getQuantity){
             $newAvaliableQty = GrnDetails::where(["ProductID"=> $getQuantity->ProductID])->sum('RemainingQuantity');
@@ -80,7 +115,11 @@ class StockController extends Controller
 
     public function get_ware_house_stock()
     {
-        $data = Product::orderBy("ProductName", "ASC");
+
+        $data = Product::orderBy("ProductName", "ASC")
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            });
     return DataTables::of($data)
         ->addColumn('action', function ($cert) {
             return '<a href="' . route('pos.product_purchase_details',[$cert->ProductID]) .'" class="btn btn-success ">Purchase Details</a>';
@@ -153,6 +192,7 @@ class StockController extends Controller
             "data" => $request->all()
         ]);*/
         $Invoice = request()->invoice_number ?? "";
+        $store_id = request()->store_id ?? "";
         $SupplierID = request()->SID;
         $Freight = 0;
         $PDate = date("Y-m-d",strtotime(request()->bill_date));
@@ -174,6 +214,7 @@ class StockController extends Controller
         $PurchaseArray = array(
             'SCID'          => $SupplierID,
             'bill_json_form'          => "nill",
+            'store_id'          => $store_id,
             'InvoiceNo'     => $Invoice,
             'Freight'       => 0,
             'Dated'         => $PDate,
@@ -262,6 +303,7 @@ class StockController extends Controller
     public function update_grn(){
 
         $id = 0;
+
         foreach(request()->GDID as $key=>$value){
             $gst = (request()->gst_tax[$key])/100 ;
             $gst_tax_amount = (request()->pack_price[$key] * request()->pack_qty[$key]) * $gst;
@@ -296,7 +338,9 @@ class StockController extends Controller
     }
 
     public function add_item_to_bill(){
+
         $data = request()->except(["id","_token"]);
+
         $itemExists = GrnRequestDetails::where(["GRNID"=>request()->GRNID,"ProductID"=>request()->ProductID])->exists();
         if ($itemExists) {
             // Redirect back with error message
@@ -314,6 +358,7 @@ class StockController extends Controller
 
         $data['gst_tax_amount'] = $gst_tax_amount;
         $data['advance_tax_amount'] = $advance_tax_amount;
+        $data['store_id'] = request()->store_id;
         GrnRequestDetails::create($data);
         $this->calculateBill(request()->GRNID);
         return redirect()->route('pos.add_bill_items', [
@@ -380,7 +425,11 @@ class StockController extends Controller
     public function list_grn_request()
     {
 
-        $data =  GrnRequest::with("supplier")->orderBy("GRNID","DESC");
+        $data =  GrnRequest::with(["supplier","store"])
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->orderBy("GRNID","DESC");
         //  <a class="btn btn-sm btn-primary" href="'.route('pos.edit_purchase_bill',[$data->GRNID]).'">Edit</a>
         return DataTables::of($data)
             ->addColumn('action', function ($data) {
@@ -388,12 +437,12 @@ class StockController extends Controller
                 $buttons = '';
                 if($data->bill_status == 0){
 
-                    $buttons= '<a  target="_blank" class="btn btn-sm btn-success" href="'.route('pos.add_bill_items',[$data->GRNID]).'">Edit</a>';
+                    $buttons= '<a  target="_blank" class="btn btn-sm btn-success" href="'.route('pos.add_bill_items',[$data->GRNID]).'">Edit</a>&nbsp;&nbsp;';
                     /*$buttons = $buttons.'<a class="btn btn-sm btn-danger">Delete</a>';*/
-                    $buttons = $buttons.'<a class="btn btn-sm btn-primary approve_bill" bill_id="'.$data->GRNID.'">Approve Bill</a>';
+                    $buttons = $buttons.'<a class="btn btn-sm btn-primary approve_bill" bill_id="'.$data->GRNID.'">Approve Bill</a>&nbsp;&nbsp;';
 
                 }
-                $buttons = $buttons.'<a target="_blank" class="btn btn-sm btn-success" href="'.route('pos.print_purchase_request',[$data->SCID, $data->GRNID]).'">Print Bill</a>';
+                $buttons = $buttons.'<a target="_blank" class="btn btn-sm btn-success" href="'.route('pos.print_purchase_request',[$data->SCID, $data->GRNID]).'">Print</a>';
                 return $buttons;
             })
             ->addColumn('bill_c_status', function ($data) {
@@ -681,10 +730,23 @@ class StockController extends Controller
 
     public function avaliableQuantity($productID)
     {
-        $qty = GrnDetails::where(["ProductID"=> $productID])->sum('RemainingQuantity');
-        $consumed = ProductConsumption::where(["product_id"=> $productID])->sum('quantity');
+        $store_id = session('store_id') ?? '';
+        $qty = GrnDetails::where(["ProductID"=> $productID])
+            ->when($store_id,function ($q) use($store_id){
+                $q->where('store_id',$store_id);
+            })
+            ->sum('RemainingQuantity');
+        $consumed = ProductConsumption::where(["product_id"=> $productID])
+            ->when($store_id,function ($q) use($store_id){
+                $q->where('store_id',$store_id);
+            })
+            ->sum('quantity');
         $qty = ($qty) - ($consumed);
-        Product::where(["ProductID"=>$productID])->update(["avaliable_quantity"=>$qty]);
+        Product::where(["ProductID"=>$productID])
+            ->when($store_id,function ($q) use($store_id){
+                $q->where('store_id',$store_id);
+            })
+            ->update(["avaliable_quantity"=>$qty]);
         return $qty;
     }
 }

@@ -37,18 +37,19 @@
 
                                     <thead>
                                     <tr>
-                                        <th  style="width: 10%">Supplier Name</th>
-                                        <th  style="width: 10%">Invoice</th>
+                                        <th  style="width: 15%">Store Name</th>
+                                        <th  style="width: 15%">Supplier Name</th>
+                                        <th  >Invoice</th>
 
-                                        <th style="width: 10%">Dated</th>
-                                        <th style="width: 10%">Amount</th>
-                                        <th style="width: 10%">Discount</th>
-                                        <th style="width: 10%">Per Item Discount</th>
-                                        <th style="width: 10%">Final Amount</th>
+                                        <th >Dated</th>
+                                        <th>Amount</th>
+                                        <th >Discount</th>
+                                        <th >Per Item Discount</th>
+                                        <th >Final Amount</th>
 
-                                        <th style="width: 40%">Bill Status</th>
+                                        <th >Bill Status</th>
 
-                                        <th  style="width: 20%">Action</th>
+                                        <th  style="width: 50%">Action</th>
                                     </tr>
                                     </thead>
 
@@ -176,6 +177,7 @@
 
                 columns: [
 
+                    {data: 'store.store_name', name: 'store.store_name',searchable: true},
                     {data: 'supplier.Name', name: 'supplier.Name',searchable: true},
                     {data: 'InvoiceNo', name: 'InvoiceNo',searchable: true},
 

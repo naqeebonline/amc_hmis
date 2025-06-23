@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\ReceiveablesDetail;
 use App\Models\Sale;
 use App\Models\SaleDetails;
+use App\Models\Store;
 use App\Models\TempSale;
 use App\Models\TempSaleDetails;
 use App\Models\WardRequest;
@@ -23,8 +24,82 @@ use Yajra\DataTables\Facades\DataTables;
 
 class SaleController extends Controller
 {
-    public function add_new_sale()
+    public function sehat_card_pharmacy_sale()
     {
+        $store = Store::whereId(env('SEHAT_CARD_PHARMACY_STORE_ID'))->first();
+
+        if($store){
+            session(['store_id' => $store->id]);
+            session(['store_name' => $store->store_name]);
+            session(['is_free' => $store->use_purchase_price_as_sale_price]);
+        }
+
+
+        $type = $_GET['type'] ?? "";
+        $data['type'] = $type;
+        $data["ward_request"] = $_GET["ward_request"] ?? "";
+        $data['patient_id'] = "";
+        $data['list_products'] = [];
+
+        if($data['ward_request']){
+            $ward_request = WardRequest::whereId($data['ward_request'])->first();
+            $data['patient_id'] = $ward_request->patient_id;
+            $ward_request_details = WardRequestDetails::with(['products'])->where(["wr_id"=>$ward_request->id])->get();
+            $list_products = [];
+            foreach ($ward_request_details as $key => $value){
+                $avliable_qty = (new StockController())->avaliableQuantity($value->product_id);
+                $res = [
+                    "ProductID" => $value->product_id,
+                    "Product" => $value->products->ProductName,
+                    "Name" => $value->products->ProductName,
+                    "UnitePrice" => $value->products->PurchasePrice,
+                    "Quantity" => $value->quantity,
+                    "Total" => ($value->quantity) * ($value->products->PurchasePrice),
+                    "AvailableQuantity" => $avliable_qty,
+                    "taxAmount" => 0,
+                    "taxPercentage" => 0,
+                    "currentAvailableQuantity" => $avliable_qty,
+                    "dose_type" => '-',
+                ];
+                array_push($list_products,$res);
+            }
+            $data['list_products'] = $list_products;
+
+        }
+        $data["title"] = "Add New Sale";
+        $data['products'] = Product::orderBy("ProductName", "ASC")
+            ->when($type == 'Home', function ($query) {
+                return $query->where("item_form_id","!=",16);
+            })
+           /* ->when(session('store_id'),function ($q){
+                $q->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'));
+            })*/
+            ->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'))
+           ->get();
+        foreach ($data['products'] as $key => $value){
+            $value->avaliable_qty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');
+
+        }
+        //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
+        $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1,"patient_type"=>"sehat_card"])
+            ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
+            ->with(["patient"])->get();
+
+        $data['invoiceNo'] = $this->returnInvoiceNumber();
+
+        return view("sale.new_sale", $data);
+    }
+
+
+    public function retail_pharmacy_sale()
+    {
+        $store = Store::where("id","!=",env('SEHAT_CARD_PHARMACY_STORE_ID'))->first();
+        if($store){
+            session(['store_id' => $store->id]);
+            session(['store_name' => $store->store_name]);
+            session(['is_free' => $store->use_purchase_price_as_sale_price]);
+        }
+
         $type = $_GET['type'] ?? "";
         $data['type'] = $type;
         $data["ward_request"] = $_GET["ward_request"] ?? "";
@@ -57,21 +132,24 @@ class SaleController extends Controller
         }
         $data["title"] = "Add New Sale";
         $data['products'] = Product::orderBy("ProductName", "ASC")
-            ->when($type == 'Home', function ($query) {
-                return $query->where("item_form_id","!=",16);
-            })
-           ->get();
+             ->when(session('store_id'),function ($q){
+                 $q->where('store_id',session('store_id'));
+             })
+            ->get();
         foreach ($data['products'] as $key => $value){
             $value->avaliable_qty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');
 
         }
         //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
         $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1])
+            ->where("patient_type","!=","sehat_card")
+            ->orWhere("patient_type","!=","configuration")
             ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
             ->with(["patient"])->get();
 
         $data['invoiceNo'] = $this->returnInvoiceNumber();
-        return view("sale.new_sale", $data);
+
+        return view("sale.retial_sale", $data);
     }
 
     // public function ware_house_stock()
@@ -130,7 +208,7 @@ class SaleController extends Controller
             "data" => $request->all()
         ]);*/
         $patient_id = request()->patient_id;
-        $admission_id = request()->patient_admission_id;
+        $admission_id = request()->patient_admission_id ?? 0;
         $customer = Patient::where(["id"=>$patient_id])->first();
         //-------------------------------------------//
         $Invoice = $this->returnInvoiceNumber();
@@ -140,7 +218,7 @@ class SaleController extends Controller
         $Description = request()->BillDiscription;
         $medicine_type = request()->medicine_type;
         $bill_description = request()->BillDiscription;
-        $Discount = 0;
+        $Discount = request()->discount_amount ?? 0;
         $demage = 0;
         $ReceivedAmount = request()->ReceivedAmount;
         $userID = auth()->user()->id;
@@ -148,14 +226,21 @@ class SaleController extends Controller
         $TotalSale = request()->BillAmount;
         $SalemanID = 0;
         $Commesion = 0;
-        $CustomerName = $customer->name." - ".$customer->mr_no;
+        if($customer){
+            $CustomerName = $customer->name." - ".$customer->mr_no;
+        }else{
+            $CustomerName = "Walking Customer";
+            $patient_id = 0;
+        }
+
         /*foreach(request()->ProductList as $row){
             $totalTax = ($totalTax) + ($row['taxAmount']);
         }*/
         $total = ($TotalSale) + $totalTax;
 
         $SaleArray = array(
-            'SCID'     => 1,// sehat card user
+            'SCID'     => (session('store_id') == env('SEHAT_CARD_PHARMACY_STORE_ID')) ? 1 : 2,// 1 sehat card user,2 walking customer of retail store , table use sup_cus_details
+            'store_id'     => session('store_id'),// sehat card user
             'wr_id'     => request()->ward_request_id ?? 0,// sehat card user
             'patient_id'   => $patient_id,
             'admission_id'   => $admission_id,
@@ -165,7 +250,7 @@ class SaleController extends Controller
             'Description'   =>  $CustomerName,
             'TotalSale'     => $total,
             'received_amount'     => $ReceivedAmount,
-            'Discount'     =>  0,
+            'Discount'     =>  $Discount,
             'sale_descriptions' => $bill_description,
             'CreatedBy'     => $userID,
             'CreatedAt'     => date('Y-m-d')
@@ -194,11 +279,12 @@ class SaleController extends Controller
             ReceiveablesDetail::create($paymentArray);
         }*/
 
-
+        $is_free = session('is_free');
         foreach(request()->ProductList as $row){
             $soldQuantity=$row['Quantity'];
             $result = GrnDetails::where(["ProductID"=>$row['ProductID'],"ProductStatus"=>1])->get();
             $Detail_array = array(
+                'store_id'   => session('store_id'),
                 'SaleID'   => $last_id,
                 'patient_id'   => $patient_id,
                 'admission_id'   => $admission_id,
@@ -213,6 +299,10 @@ class SaleController extends Controller
                     //echo "yes";
                     $total = ($soldQuantity) * ($row['UnitePrice']);
                     $taxAmount = ($total) * $applyTax;
+
+                    if($is_free){  // if free then sale price will be same as purchase price
+                        $Detail_array['UnitePrice']=$value->UnitPrice;
+                    }
 
                     $Detail_array['PurchasePrice']=$value->UnitPrice;
                     $Detail_array['Quantity']=$soldQuantity;
@@ -231,6 +321,9 @@ class SaleController extends Controller
                         $total = ($value->RemainingQuantity) * ($row['UnitePrice']);
                         $taxAmount = ($total) * $applyTax;
 
+                        if($is_free){ // if free then sale price will be same as purchase price
+                            $Detail_array['UnitePrice']=$value->UnitPrice;
+                        }
 
                         $Detail_array['PurchasePrice']=$value->UnitPrice;
                         $Detail_array['Quantity']=$value->RemainingQuantity;
@@ -268,7 +361,10 @@ class SaleController extends Controller
             WardRequest::whereId(request()->ward_request_id)->update(["issued_by"=>auth()->user()->id,"issued_at"=>date("Y-m-d H:i:s"),"status"=>1]);
         }
 
-        (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
+        if(session('store_id') == 1){
+            (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
+        }
+
 
         return ["status"=>true,"message" => "Sale Completed Successfully","id"=>$last_id];
     }

@@ -19,7 +19,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>SMS - {{ $title ?? '' }}</title>
+    <title>HMIS</title>
 
     <meta name="description" content="" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -341,6 +341,8 @@
 
 
 
+
+
                     @foreach ($menu_r as $menu)
                         <li class="menu-item" id="men_item_{{ $menu->id }}">
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -433,11 +435,18 @@
                                         <i class="bx bx-bell bx-sm"></i>
                                         <span class="badge bg-danger rounded-pill badge-notifications" id="notification_count"></span>
                                     </a>--}}
-
+                                    <select class="form-control" id="my_store_id">
+                                        <option value="">Select Store...</option>
+                                        @foreach(app('stores') as $key => $value)
+                                            <option value="{{$value->id}}" {{(session('store_id') == $value->id) ? "selected" : ""}}>{{$value->store_name}}</option>
+                                        @endforeach
+                                    </select>
                                 </li>
 
 
                                 <!-- User -->
+
+
                                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
                                         data-bs-toggle="dropdown">
@@ -764,6 +773,17 @@
         }
         setInterval(update, 30000);
         update();
+
+        $("body").on("change","#store_id",function () {
+            var store_id = $(this).val();
+            var url =  "{{route('pos.set_user_store_id')}}/"+store_id;
+            window.location = url;
+        });
+        $("body").on("change","#my_store_id",function () {
+            var store_id = $(this).val();
+            var url =  "{{route('pos.set_user_store_id')}}/"+store_id;
+            window.location = url;
+        });
 
 
     </script>

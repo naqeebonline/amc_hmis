@@ -17,13 +17,25 @@
 
             <!-- Traffic sources -->
             <div class="card">
-                <div class="card-header header-elements-inline">
-                    <div class="btn btn-primary add_new_record">Add New Product</div>
 
-                </div>
+
+
 
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="btn btn-primary add_new_record">Add New Product</div>
+                        </div>
 
+                        <div class="col-md-4">
+                            <select class="form-control" name="store_id" id="store_id">
+                                <option value="">Please select Store....</option>
+                                @foreach($store as $key => $value)
+                                    <option  value="{{$value->id}}" {{session('store_id') == $value->id ? "selected" : ''}}>{{$value->store_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="row">
 

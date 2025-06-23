@@ -60,31 +60,33 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        $data['total_patients'] = PatientAdmission::where(["is_active"=>1])->where("patient_admissions.admission_status","!=",'Canceled')->count() - 1;
-        $data['admitted_patients'] = PatientAdmission::where(["admission_status"=>"Admit","is_active"=>1])->count();
-        $data['discharged_patients'] = PatientAdmission::where(["admission_status"=>"Discharged","is_active"=>1])->count();
-        $data['canceled_patients'] = PatientAdmission::where(["admission_status"=>"canceled","is_active"=>1])->count();
-        $data['reffered_patients'] = PatientAdmission::where(["admission_status"=>"Reffered","is_active"=>1])->count();
+        $data['total_patients'] = PatientAdmission::where(["is_active"=>1])->where("patient_admissions.admission_status","!=",'Canceled')->where("patient_type","sehat_card")->count();
+        $data['admitted_patients'] = PatientAdmission::where(["admission_status"=>"Admit","is_active"=>1])->where("patient_type","sehat_card")->count();
+        $data['discharged_patients'] = PatientAdmission::where(["admission_status"=>"Discharged","is_active"=>1])->where("patient_type","sehat_card")->count();
+        $data['canceled_patients'] = PatientAdmission::where(["admission_status"=>"canceled","is_active"=>1])->where("patient_type","sehat_card")->count();
+        $data['reffered_patients'] = PatientAdmission::where(["admission_status"=>"Reffered","is_active"=>1])->where("patient_type","sehat_card")->count();
         $data['surgery'] = PatientAdmission::selectRaw('procedure_type.type, COUNT(patient_admissions.id) as total_admissions')
             ->join('procedure_type', 'patient_admissions.procedure_type_id', '=', 'procedure_type.id')
             ->groupBy('procedure_type.type')
             ->where(["patient_admissions.is_active"=>1])
             ->where("patient_admissions.admission_status","!=",'Canceled')
+            ->where("patient_type","sehat_card")
             ->get();
 
         $data['daily_admissions'] = $this->getDailyAdmission();
         $data['total_procedures'] = $this->getCategoryWiseProcedures();
-        $data['yearly_admissions'] = $this->getYearlyPatientAdmission();
-        $data['total_nvd_cases'] = PatientAdmission::where(["procedure_type_id"=>6,"is_active"=>1])->where("admission_status","!=",'Canceled')->count();
-        $data['total_nvd_admitted'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Admit","is_active"=>1])->count();
-        $data['total_nvd_canceled'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Canceled","is_active"=>1])->count();
-        $data['total_nvd_discharged'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Canceled","is_active"=>1])->count();
-        $data['total_nvd_reffered'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Reffered","is_active"=>1])->count();
 
-        $data['total_procedure_amount'] = PatientAdmission::whereIsActive(1)->sum('procedure_rate');
+        $data['yearly_admissions'] = $this->getYearlyPatientAdmission();
+        $data['total_nvd_cases'] = PatientAdmission::where(["procedure_type_id"=>6,"is_active"=>1])->where("admission_status","!=",'Canceled')->where("patient_type","sehat_card")->count();
+        $data['total_nvd_admitted'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Admit","is_active"=>1])->where("patient_type","sehat_card")->count();
+        $data['total_nvd_canceled'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Canceled","is_active"=>1])->where("patient_type","sehat_card")->count();
+        $data['total_nvd_discharged'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Canceled","is_active"=>1])->where("patient_type","sehat_card")->count();
+        $data['total_nvd_reffered'] = PatientAdmission::where(["procedure_type_id"=>6,"admission_status"=>"Reffered","is_active"=>1])->where("patient_type","sehat_card")->count();
+
+        $data['total_procedure_amount'] = PatientAdmission::whereIsActive(1)->where("patient_type","sehat_card")->sum('procedure_rate');
         $data['total_investigation_amount'] = PatientInvestigation::whereIsActive(1)->sum('inv_amount');
         $totalPercentageSum = DB::select("SELECT SUM((consultant_share / 100) * procedure_rate) AS total_percentage_sum 
-                                                FROM patient_admissions");
+                                                FROM patient_admissions where patient_type = 'sehat_card'");
         $data['total_percentage_paid_to_consultant'] = $totalPercentageSum[0]->total_percentage_sum;
 
         $totalPatientMedicineAmount = DB::select("SELECT SUM((Quantity - ReturnQuantity) * UnitePrice) AS total_amount 
@@ -312,6 +314,7 @@ class HomeController extends Controller
         $totalCount = $dateRange->map(function ($date) {
             $count = DB::table('patient_admissions')
                 ->whereDate('admission_date', $date)
+                ->where("patient_type","sehat_card")
                 ->where(["is_active"=>1])
                 ->count();
 
@@ -337,6 +340,7 @@ class HomeController extends Controller
                 DB::raw('COUNT(patient_admissions.id) as total_count') // Count the procedures
             )
             ->where("patient_admissions.is_active",1)
+            ->where("patient_admissions.patient_type","sehat_card")
             ->groupBy('patient_admissions.procedure_type_id')                // Group by procedure type
             ->orderBy('total_count', 'desc')                // Optional: Order by count
             ->get();
@@ -363,6 +367,7 @@ class HomeController extends Controller
                 DB::raw("count(*) as total_amount") // Sum of TotalSale
             )
             ->where("patient_admissions.is_active",1)
+            ->where("patient_admissions.patient_type","sehat_card")
             ->whereYear('admission_date', date('Y'))
             ->groupBy('month')
             ->orderBy('month', 'ASC')

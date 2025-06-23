@@ -10,6 +10,7 @@ use App\Models\ItemMake;
 use App\Models\MainCategory;
 use App\Models\Product;
 use App\Models\ProductKit;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
@@ -23,12 +24,17 @@ class ProductController extends Controller
         $data["item_form"] = ItemForm::whereIsActive(1)->get();
         $data["make"] = ItemMake::whereIsActive(1)->get();
         $data["generic_name"] = GenericName::whereIsActive(1)->get();
+        $data["store"] = Store::get();
         return view("configuration.product",$data);
     }
 
     public function list_product()
     {
-        $res = Product::with(["main_categroy","sub_categroy","item_form","item_make","generic_name"])->where(["IsActive"=>1]);
+        $res = Product::with(["main_categroy","sub_categroy","item_form","item_make","generic_name"])
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->where(["IsActive"=>1]);
 
         return DataTables::of($res)
             ->addColumn('action', function($cert) {

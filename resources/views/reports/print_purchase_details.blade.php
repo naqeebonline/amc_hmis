@@ -51,6 +51,7 @@
 
 <div class="wrapper">
     <div class="row">
+        <h6 style="text-align: center">{{$grn->store->store_name ?? ''}} Bill</h6>
         <div class="col-12">
             <div class="card">
                 <div class="card-body" style="background-color: #836f76b3">
@@ -60,6 +61,7 @@
 
                             <div class="col-md-3 ">
                                 <input type="hidden" id="GRNID" name="GRNID" value="{{ $id }}">
+                                <input type="hidden" id="store_id" name="store_id" value="{{ $grn->store_id }}">
                                 <label>Product</label>
                                 @error('item_exist')
                                 <div style="color: red;">{{ $message }}</div>

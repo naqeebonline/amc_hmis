@@ -223,8 +223,8 @@
                 <th style="width: 5%;"></th>
                 <th style="width: 5%;">S.No</th>
                 <th style="width: 5%;">Referal No</th>
-                {{--<th style="width: 10%;">Patient Name</th>--}}
-                <th style="width: 10%;">Admission Date</th>
+                <th style="width: 10%;">Patient Name</th>
+                <th style="width: 10%;">Discharge Date</th>
                 <th style="width: 18%;">Procedure</th>
                 <th style="width: 16%;">Consultant</th>
 
@@ -258,8 +258,8 @@
                     <td><input type="checkbox" class="admission_payment" checked value="{{$admission->id}}"></td>
                     <td>{{$key + 1}}</td>
                     <td>{{$admission->sc_ref_no ?? ""}}</td>
-                    {{--<td>{{$admission->patient->name ?? ""}}</td>--}}
-                    <td>{{date("d-m-Y",strtotime($admission->admission_date)) ?? ""}}</td>
+                    <td>{{$admission->patient->name ?? ""}}</td>
+                    <td>{{date("d-m-Y",strtotime($admission->discharge_date)) ?? ""}}</td>
 
                     <td>{{--Type: {{$admission->procedure_type->type ?? ""}}
                         <br>--}}
@@ -285,6 +285,7 @@
 
             @endforeach
             <tr>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

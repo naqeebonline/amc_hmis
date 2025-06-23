@@ -32,7 +32,7 @@ Route::post('custom-authenticate', [\App\Http\Controllers\Auth\LoginController::
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-
+Route::get("sehatcard_patients_statistics", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatcard_patients_statistics"])->name("pos.sehatcard_patients_statistics");
 Route::prefix('no-auth')->group(function () {
 
     Route::post('districts-by-province-id', [\App\Http\Controllers\NoAuthActionsControllers::class, 'districtsByProvinceId'])->name('noauth.districts-by-province-id');
@@ -68,6 +68,7 @@ Route::get('/psw-generate', function () {
 })->name("create-meeting");*/
 
 Route::group(['middleware' => 'auth'], function () {
+    Route::get("sehatCardDashboard", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatCardDashboard"])->name("pos.sehatCardDashboard");
     Route::get('pharmacy_dashboard', [\App\Http\Controllers\HomeController::class, 'pharmacy_dashboard'])->name('user.pharmacy_dashboard');
     Route::get('user-dashboard', [\App\Http\Controllers\HomeController::class, 'userDashboard'])->name('user.dashboard');
     Route::get('view-history', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'index'])->name('view-history');
@@ -78,7 +79,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('delete-table-data', [\App\Http\Controllers\Admin\MarketController::class, 'delete_table_data'])->name('pos.delete-table-data');
     Route::post('delete_table_data_2', [\App\Http\Controllers\Admin\MarketController::class, 'delete_table_data_2'])->name('pos.delete_table_data_2');
 
-    Route::get('add_new_product', [\App\Http\Controllers\Admin\ProductController::class, 'add_new_product'])->name('pos.add_new_product');
+    Route::get('add_new_product', [\App\Http\Controllers\Admin\ProductController::class, 'add_new_product'])->name('pos.add_new_product')->middleware('store.selected');
+    Route::get('grn_request', [\App\Http\Controllers\Admin\StockController::class, 'grn_request'])->name('pos.grn_request')->middleware('store.selected');
+
+    Route::get('ware-house-stock', [\App\Http\Controllers\Admin\StockController::class, 'ware_house_stock'])->name('pos.ware_house_stock')->middleware('store.selected');
+    Route::get('sehat-card-pharmacy-sale', [\App\Http\Controllers\Admin\SaleController::class, 'sehat_card_pharmacy_sale'])->name('pos.add_new_sale')->middleware('store.selected');
+    Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale')->middleware('store.selected');
+
     Route::get('list_product', [\App\Http\Controllers\Admin\ProductController::class, 'list_product'])->name('pos.list_product');
     Route::post('save-product', [\App\Http\Controllers\Admin\ProductController::class, 'save_product'])->name('pos.save_product');
     Route::post('getProduct', [\App\Http\Controllers\Admin\ProductController::class, 'getProduct'])->name('pos.getProduct');
@@ -89,8 +96,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('list_customer', [\App\Http\Controllers\Admin\CustomerController::class, 'list_customer'])->name('pos.list_customer');
     Route::post('save-customer', [\App\Http\Controllers\Admin\CustomerController::class, 'save_customer'])->name('pos.save_customer');
 
+    Route::get('set_user_store_id/{store_id?}', [\App\Http\Controllers\Admin\StockController::class, 'set_user_store_id'])->name('pos.set_user_store_id');
+    Route::get('select_store', [\App\Http\Controllers\Admin\StockController::class, 'select_store'])->name('pos.select_store');
     Route::get('add-stock', [\App\Http\Controllers\Admin\StockController::class, 'add_new_stock'])->name('pos.add_new_add_new_stock');
-    Route::get('ware-house-stock', [\App\Http\Controllers\Admin\StockController::class, 'ware_house_stock'])->name('pos.ware_house_stock');
+
     Route::get('get-ware-house-stock', [\App\Http\Controllers\Admin\StockController::class, 'get_ware_house_stock'])->name('pos.get_ware_house_stock');
     Route::get('product_purchase_details/{id}', [\App\Http\Controllers\Admin\StockController::class, 'product_purchase_details'])->name('pos.product_purchase_details');
     Route::post("save-stock", [\App\Http\Controllers\Admin\StockController::class, 'save_stock'])->name('pos.save_stock');
@@ -107,10 +116,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('print_purchase/{SCID?}/{GRNID?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_purchase'])->name('pos.print_purchase');
     Route::get('print_purchase_request/{SCID?}/{GRNID?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_purchase_request'])->name('pos.print_purchase_request');
     Route::get('print_thermel_purchase_details/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_thermel_purchase_details'])->name('pos.print_thermel_purchase_details');
+    Route::get('print_retail_thermel_purchase_details/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_retail_thermel_purchase_details'])->name('pos.print_retail_thermel_purchase_details');
     Route::get('previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'previous_bills'])->name('pos.previous_bills');
-    
+    Route::get('retail_previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'retail_previous_bills'])->name('pos.retail_previous_bills');
 
-    Route::get('add-sale', [\App\Http\Controllers\Admin\SaleController::class, 'add_new_sale'])->name('pos.add_new_sale');
+
+
     Route::post('save_sale', [\App\Http\Controllers\Admin\SaleController::class, 'save_sale'])->name('pos.save_sale');
     Route::post('temp_save_sale', [\App\Http\Controllers\Admin\SaleController::class, 'temp_save_sale'])->name('pos.temp_save_sale');
     Route::get('print_temp_sale/{sale_id?}/{customer_id?}/{date?}/{received_amount?}', [\App\Http\Controllers\Admin\SaleController::class, 'print_temp_sale'])->name('pos.print_temp_sale');
@@ -183,6 +194,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 
 
+
     Route::get("patient-admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_admission"])->name("pos.patient_admission");
     Route::get("list-admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "list_admission"])->name("pos.list_admission");
     Route::post("ward-bed", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "ward_bed"])->name("pos.ward_bed");
@@ -193,7 +205,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("updatePatientData/{from_id}/{to_id}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "updatePatientData"])->name("pos.updatePatientData");
     Route::get("discharged_patient_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "discharged_patient_list"])->name("pos.discharged_patient_list");
     Route::post("cencel_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "cencel_patient_admission"])->name("pos.cencel_patient_admission");
-    Route::get("sehatcard_patients_statistics", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatcard_patients_statistics"])->name("pos.sehatcard_patients_statistics");
     Route::get("list-admission-statistics", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "list_admission_statistics"])->name("pos.list_admission_statistics");
     
     Route::get("patient-account/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_account"])->name("pos.patient_account");
@@ -301,7 +312,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('delete_item_from_bill/{id?}', [\App\Http\Controllers\Admin\StockController::class, 'delete_item_from_bill'])->name('pos.delete_item_from_bill');
 
-    Route::get('grn_request', [\App\Http\Controllers\Admin\StockController::class, 'grn_request'])->name('pos.grn_request');
+
     Route::get('list_grn_request/{id?}', [\App\Http\Controllers\Admin\StockController::class, 'list_grn_request'])->name('pos.list_grn_request');
     Route::post('approve_grn_bill', [\App\Http\Controllers\Admin\StockController::class, 'approve_grn_bill'])->name('pos.approve_grn_bill');
     Route::post('return_item', [\App\Http\Controllers\Admin\SaleController::class, 'return_item'])->name('pos.return_item');
@@ -325,6 +336,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("list_all_patients", [\App\Http\Controllers\PatientReports\PatientReportController::class, "list_all_patients"])->name("pos.list_all_patients");
     Route::get("patient-admission-report", [\App\Http\Controllers\PatientReports\PatientReportController::class, "patient_admission_report"])->name("pos.patient_admission_report");
     Route::get("print_patient_admission_report/{from_date?}/{to_date?}/{consultant_id?}/{procedure_type_id?}", [\App\Http\Controllers\PatientReports\PatientReportController::class, "print_patient_admission_report"])->name("pos.print_patient_admission_report");
+    Route::get("print_sehat_card_claim/{report_type?}", [\App\Http\Controllers\PatientReports\PatientReportController::class, "print_sehat_card_claim"])->name("pos.print_sehat_card_claim");
 
 
 
@@ -359,6 +371,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'showForm'])->name('pos.import_form');
     Route::post('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'import'])->name('pos.import');
     Route::post('/saveSehatCardPayment', [\App\Http\Controllers\CsvImportController::class, 'saveSehatCardPayment'])->name('pos.saveSehatCardPayment');
+    Route::get('/retail-dashboard', [App\Http\Controllers\Dashboard\DashboardController::class, 'retailPharmacyDashboard'])->name('pos.retailPharmacyDashboard');
 
 
 });

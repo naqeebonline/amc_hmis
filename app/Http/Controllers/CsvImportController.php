@@ -64,7 +64,7 @@ class CsvImportController extends Controller
 
 
         $system_ids = [];
-        $res = PatientAdmission::leftJoin('patients',"patients.id",'=',"patient_admissions.patient_id")->whereIn('patient_admissions.sc_ref_no',$ids)->groupBy("patient_admissions.sc_ref_no")->get('sc_ref_no');
+        $res = PatientAdmission::leftJoin('patients',"patients.id",'=',"patient_admissions.patient_id")->whereIn('patient_admissions.sc_ref_no',$ids)->where("patient_admissions.is_active",1)->groupBy("patient_admissions.sc_ref_no")->get('sc_ref_no');
         foreach ($res as $key => $value){
             array_push($system_ids,(int) $value->sc_ref_no);
         }

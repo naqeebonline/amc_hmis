@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PatientReports;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PatientController\PatientAdmissionController;
 use App\Models\Configuration\Consultants;
 use App\Models\Configuration\ProcedureType;
 use App\Models\Patient\PatientAdmission;
@@ -39,12 +40,21 @@ class PatientReportController extends Controller
         return DataTables::of($patients)
 
             ->addColumn("edit_admission_date", function ($patient) {
+              //  (new PatientAdmissionController())->updateAdmissionDetails($patient->id);
                 //dd(date("Y-m-d", strtotime($patient->admission_date)));
                 return  date("Y-m-d", strtotime($patient->admission_date));
             })
             ->addColumn("payment_received", function ($patient) {
                 //dd(date("Y-m-d", strtotime($patient->admission_date)));
                 if($patient->amount_received_from_sehat_card > 0){
+                    return true;
+                }else{
+                    return false;
+                }
+            })
+            ->addColumn("payment_to_doctor", function ($patient) {
+                //dd(date("Y-m-d", strtotime($patient->admission_date)));
+                if($patient->consultant_shares_payment_invoice_id > 0){
                     return true;
                 }else{
                     return false;
@@ -112,5 +122,30 @@ class PatientReportController extends Controller
             ->get();
 
         return view("PatientReports.PrintPatientAdmissionsReport",$data);
+    }
+
+    public function print_sehat_card_claim($report_type)
+    {
+        if($report_type == "pending"){
+            $data['title'] = "Pending Claims";
+        }else if($report_type == "received"){
+            $data['title'] = "Received Claims";
+        }else{
+            $data['title'] = "Total Claims";
+        }
+        $data['patients'] = PatientAdmission::where(["is_active" => 1])
+            ->with("patient", "ward", "bed", 'procedure_type', 'consultant')
+            ->whereIn("admission_status",["Admit","Discharged"])
+            ->whereNotIn("patient_id",[11,116])
+            ->when($report_type == "pending", function ($query) use ($report_type) {
+                $query->whereNull('amount_received_from_sehat_card');
+            })
+            ->when($report_type == "received", function ($query) use ($report_type) {
+                $query->whereNotNull('amount_received_from_sehat_card');
+            })
+            ->orderBy("admission_date","asc")
+            ->get();
+        $data['report_type'] = $report_type;
+        return view("dashboard.sc_claims_report",$data);
     }
 }

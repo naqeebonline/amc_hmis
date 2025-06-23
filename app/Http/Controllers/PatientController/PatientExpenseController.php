@@ -29,12 +29,15 @@ class PatientExpenseController extends Controller
             ->when($procedure_type_id, function ($query) use ($procedure_type_id) {
                 $query->where('procedure_type_id',$procedure_type_id);
             })
-            ->when($consultant_id, function ($query) use ($consultant_id) {
+            /*->when($consultant_id, function ($query) use ($consultant_id) {
                 $query->where(function ($query) use($consultant_id) {
                     $query->where('consultant_id', $consultant_id)
                         ->orWhere('sub_consultant_id', $consultant_id);
                 });
                 //$query->where('consultant_id',$consultant_id);//->orWhere(['sub_consultant_id'=>$consultant_id]);
+            })*/
+            ->when($consultant_id, function ($query) use ($consultant_id)  {
+                $query->where(['consultant_id'=> $consultant_id]);//->orWhere(['sub_consultant_id'=> request()->consultant_id]);
             })
            // ->limit(5)
             ->get();

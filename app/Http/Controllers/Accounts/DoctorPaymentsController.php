@@ -112,15 +112,15 @@ class DoctorPaymentsController extends Controller
         }else{
 
             $admission = PatientAdmission::where(["is_active" => 1,"consultant_shares_payment_invoice_id"=>0])
+                ->where("admission_status","Discharged")
                 ->with("patient", "ward", "bed", 'procedure_type', 'consultant','sub_consultant')
-
                 ->when(request()->from_date, function ($query) {
                     $fromDate = Carbon::parse(request()->from_date)->endOfDay();
-                    $query->where('admission_date','>=',date("Y-m-d",strtotime($fromDate)));
+                    $query->whereDate('discharge_date','>=',date("Y-m-d",strtotime($fromDate)));
                 })
                 ->when(request()->to_date, function ($query) {
                     $toDate = Carbon::parse(request()->to_date)->endOfDay();
-                    $query->where('admission_date','<=',date("Y-m-d",strtotime($toDate)));
+                    $query->whereDate('discharge_date','<=',date("Y-m-d",strtotime($toDate)));
                 })
                 ->when(request()->procedure_type_id, function ($query) {
                     //  dd("here");
@@ -136,6 +136,7 @@ class DoctorPaymentsController extends Controller
                 ->when(request()->consultant_id, function ($query) {
                     $query->where(['consultant_id'=> request()->consultant_id]);//->orWhere(['sub_consultant_id'=> request()->consultant_id]);
                 })
+                ->orderBy("discharge_date","asc")
                 ->get();
 
 

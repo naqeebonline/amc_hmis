@@ -166,8 +166,12 @@ class SupplierPayments extends Controller
     
 
     public function add_bill_items($id){
-        $data["products"]= Product::with('generic_name')->where("IsActive", 1)->where("pack_size","!=",0)->where("pack_price","!=",0)->get();
-        $data['grn'] = GrnRequest::where('GRNID', $id)->with("products")->first();
+        $data["products"]= Product::with('generic_name')
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->where("IsActive", 1)->where("pack_size","!=",0)->where("pack_price","!=",0)->get();
+        $data['grn'] = GrnRequest::where('GRNID', $id)->with("products")->with('store')->first();
         $data['purchase'] = GrnRequestDetails::where('GRNID', $id)->with("products")->orderBy("GDID","DESC")->where(["ProductStatus" => 1])->get();
         $data['id'] = $id;
 
@@ -240,13 +244,95 @@ class SupplierPayments extends Controller
         return view('reports/print_sale_invoice', $data);
     }
 
+    public function print_retail_thermel_purchase_details($SaleID)
+    {
+
+
+        $date = date("Y-m-d");
+
+        $data['record'] = Sale::where(['SaleID' => $SaleID])->first();
+        $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
+        $customer_id = $data['record']->SCID;
+        $billDate = date("d-m-Y", strtotime($data['record']->Date));
+
+        //$data['PreviousBalance']=(new CustomerPayments())->customer_previous_balance($customer_id,$date);
+
+        $data['data'] = SaleDetails::with('product')->where(['SaleID' => $SaleID])->get();
+        $data['title'] = 'Sale Details Report';
+        $return = "No";
+        $totalAmount = 0;
+        $data['prev_balance'] = (new CustomerPayments())->customer_previous_balance($customer_id, '');
+
+        foreach ($data['data'] as $rec) {
+            $rec->AvaliableQuantity = ($rec->Quantity) - ($rec->ReturnQuantity);
+            $rec->totalAmount = ($rec->AvaliableQuantity) * ($rec->UnitePrice);
+            $totalAmount = ($totalAmount) + ($rec->totalAmount);
+            if ($rec->ReturnQuantity > 0) {
+                $return = "Yes";
+            }
+        }
+
+        $result = [];
+
+        // Iterate through the array remove duplicate items . sum the quantity ,totalamount, taxamount and remove duplication for bill print only...//
+        foreach ($data['data'] as $item) {
+            $productId = $item->ProductID;
+
+            // If ProductID already exists in the result, sum up the Quantity and UnitePrice
+            if (isset($result[$productId])) {
+                $result[$productId]->Quantity += $item->Quantity;
+                $result[$productId]->totalAmount += $item->totalAmount;
+                $result[$productId]->taxAmount += $item->taxAmount;
+            } else {
+                // Add new ProductID to result
+                $result[$productId] = clone $item;
+            }
+        }
+
+        $result = array_values($result);
+        $data['data'] = $result;
+
+
+        if ($return == "Yes") {
+            $data['return'] = "Yes";
+        } else {
+            $data['return'] = "No";
+        }
+
+
+        $data['TotalAmount'] = $totalAmount;
+        $data['show_customer_contact'] = "true";
+
+        $data['customer'] = Customer::where("SCID", $customer_id)->get();
+
+        return view('reports/print_retail_sale_invoice', $data);
+    }
+
     public function previous_bills(){
-        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")->limit(50);
+        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
+            ->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'))
+            ->limit(50);
 
         return DataTables::of($bills)
             
             ->addColumn('action', function ($data) {
                 return '<a target="_blank" href="' . route("pos.print_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Thermal</a>';
+            })
+            ->rawColumns(["action"])
+            ->make(true);
+    }
+
+    public function retail_previous_bills(){
+        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->limit(50);
+
+        return DataTables::of($bills)
+
+            ->addColumn('action', function ($data) {
+                return '<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
             })
             ->rawColumns(["action"])
             ->make(true);

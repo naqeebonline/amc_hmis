@@ -74,5 +74,6 @@ class Kernel extends HttpKernel
         'role' => VerifyRole::class,
         'permission' => VerifyPermission::class,
         'level' => VerifyLevel::class,
+        'store.selected' => \App\Http\Middleware\EnsureStoreIsSelected::class,
     ];
 }

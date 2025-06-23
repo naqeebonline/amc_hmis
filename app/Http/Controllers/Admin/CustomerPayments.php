@@ -81,16 +81,49 @@ class CustomerPayments extends Controller
     }
 
     function customer_previous_balance($customer_id,$date=''){
-        $customer = Customer::where(["sup_cus_details.SCID"=>$customer_id])->first();
-        $openingBalance=$customer->OpeningBalance;
+       // $customer = Customer::where(["sup_cus_details.SCID"=>$customer_id])->first();
+        $openingBalance= 0;
         if(!$openingBalance){
             $openingBalance=0;
         }
-        $where=array('SCID'=>$customer_id);
-        if($date!=''){
-            $where['Date <']=$date;
 
+        $TotalSale = Sale::where(["patient_id"=>$customer_id])
+            ->when($date, function ($query) use ($date) {
+                return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));
+            })->sum('TotalSale');
+
+        $TotalReceived = Sale::where(["patient_id"=>$customer_id])
+            ->when($date, function ($query) use ($date) {
+                return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));
+            })->sum('received_amount');
+
+        $TotalDiscount = Sale::where(["patient_id"=>$customer_id])
+            ->when($date, function ($query) use ($date) {
+                return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));
+            })->sum('Discount');
+        /*$TotalPaid = ReceiveablesDetail::where(["SCID"=>$customer_id])
+            ->when($date, function ($query) use ($date) {
+                return $query->where('Date', '<', date("Y-m-d",strtotime($date)));
+            })->sum('Amount');*/
+
+
+        $TotalAmount = ($openingBalance + $TotalSale - $TotalDiscount) - $TotalReceived;
+
+        if($TotalAmount){
+            return $TotalAmount;
+        }else{
+            return 0;
         }
+
+    }
+
+    function customer_previous_balance_backup($customer_id,$date=''){
+        $customer = Customer::where(["sup_cus_details.SCID"=>$customer_id])->first();
+        $openingBalance=$customer->OpeningBalance ?? 0;
+        if(!$openingBalance){
+            $openingBalance=0;
+        }
+
         $TotalSale = Sale::where(["SCID"=>$customer_id])
             ->when($date, function ($query) use ($date) {
                 return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));

@@ -50,6 +50,7 @@ class WardController extends Controller
         $invoice_no = $this->generateInvoiceNumber();
         $data = [
             "invoice_no"=>$invoice_no,
+            "store_id"=> env('SEHAT_CARD_PHARMACY_STORE_ID'),
             "patient_id" => $patient_id,
             "admission_id" => request()->admission_id,
             "requested_by" => auth()->user()->id,
@@ -73,6 +74,7 @@ class WardController extends Controller
         foreach ($list_products as $key => $value){
             $data = [
                 "wr_id" => $wr_id,
+                "store_id"=> env('SEHAT_CARD_PHARMACY_STORE_ID'),
                 "product_id"    => $value->product_id,
                 "quantity"    => $value->quanity,
 
@@ -201,8 +203,9 @@ class WardController extends Controller
     {
         $patients = WardRequest::with('patient')->with('user')
             ->where("is_active", 1)
+            ->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'))
             ->where("status", 0)
-
+            ->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'))
            /* ->when(request()->from_date, function ($query) {
                 $query->whereDate('requested_at','>=',date("Y-m-d",strtotime(request()->from_date)));
             })

@@ -22,6 +22,10 @@ class GrnRequest extends Model
         return $this->belongsTo(Customer::class,"SCID","SCID");
     }
 
+    public function store(){
+        return $this->belongsTo(Store::class,"store_id","id");
+    }
+
   
     
 }

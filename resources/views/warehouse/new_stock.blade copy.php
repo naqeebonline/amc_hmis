@@ -198,20 +198,10 @@
         <!-- Header Section -->
         <div class="row header-section">
 
-            {{--<div class="col-md-2">
+            <div class="col-md-2">
                 <label for="invoice_number">Barcode</label>
                 <input type="text" id="barcode" class="form-control" placeholder="Barcode">
-            </div>--}}
-            <div class="col-md-2">
-                <label for="invoice_number">Store Name</label>
-                <select id="store_id" name="store_id" class="form-control">
-                    <option value="">Please Store...</option>
-                    <?php foreach($store as $key => $value){ ?>
-                    <option value="<?php echo $value->id; ?>" {{ (session('store_id') == $value->id) ? "selected" : ''}}><?php echo $value->store_name; ?> </option>
-                    <?php } ?>
-                </select>
             </div>
-
             <div class="col-md-2">
                 <label for="invoice_number">Invoice Number</label>
                 <input type="text" id="invoice_number" required="required" class="form-control" value="">
@@ -236,13 +226,6 @@
                     class="form-control" value="-">
             </div>
 
-
-
-            <div class="col-md-2">
-                <label for="date">Discount On Bill</label>
-                <input type="number" id="bill_discount" class="form-control" value="0">
-            </div>
-
             <div class="col-md-2">
                 <label for="date">Date</label>
                 <input type="date" id="bill_date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
@@ -253,14 +236,154 @@
         <!-- Item Input Section -->
         <div class="row mt-2">
             <div class="col-md-10">
+                <div class="row">
+                    <!--<div class="col-md-3">
+                    <input type="text" class="form-control" placeholder="Item/Bar Code">
+                </div>-->
+
+                    <div class="col-md-2 mt-1">
+                        <label>Item Name</label>
+                        {{-- <select class="form-control" id="product_id">
+                        <option value="">Select Product...</option>
+                        <?php foreach ($products as $key => $value): ?>
+                            <option value="{{$value->ProductID}}" data-packsize="{{$value->pack_size}}" data-pack_price={{$value->pack_price}} data-purchasePrice={{$value->PurchasePrice}} data-taxPercentage="{{$value->taxPercentage}}">{{$value->ProductName}}</option>
+                        <?php endforeach; ?>
+                    </select> --}}
+                        <select class="form-control" id="product_id">
+                            <option value="">Select Product...</option>
+                            <?php foreach ($products as $key => $value): ?>
+                            <option value="{{ $value->ProductID }}" data-packsize="{{ $value->pack_size }}"
+                                data-pack_price={{ $value->pack_price }} data-purchasePrice={{ $value->PurchasePrice }}
+                                data-taxPercentage="{{ $value->taxPercentage }}">{{ $value->ProductName }}</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-1 mt-1">
+                        <label>Qty</label>
+                        <input type="number" class="form-control" id="sale_quantity" placeholder="Quantity"
+                            value="1">
+                    </div>
+
+                    <div class="col-md-1 mt-1">
+                        <label>Purchase</label>
+                        <input type="number" id="SalePrice" class="form-control" placeholder="Unit Price">
+                    </div>
+
+                    <div class="col-md-1 mt-1">
+                        <label>Batch#</label>
+                        <input type="number" id="batch_no" class="form-control" placeholder="Batch#">
+                    </div>
+
+                    <div class="col-md-2 mt-1">
+                        <label>Expiry</label>
+                        <input type="date" id="expiry_date" value="{{ date('Y-m-d') }}" class="form-control"
+                            placeholder="expiry_date">
+                    </div>
+                    <div class="col-md-1 mt-1">
+                        <label>Adv.Tax</label>
+                        <input type="number" value="1" style="" id="advance_tax" class="form-control"
+                            placeholder="advance_tax %">
+                    </div>
+
+                    <div class="col-md-1 mt-1">
+                        <label>GST</label>
+                        <input type="number" value="0" id="gst_tax" class="form-control" placeholder="GST %">
+                    </div>
+
+                    <div class="col-md-2 mt-4">
+
+                        <a class="btn btn-custom add_stock" href="javascript:void(0)">Add Stock</a>
+                    </div>
 
 
 
+
+
+
+
+
+
+                    <div class="col-md-2 mt-1" style="display: none">
+                        <input type="text" disabled class="form-control" id="avaliable_qty"
+                            placeholder="Avaliable Quantity" readonly>
+                    </div>
+                </div>
+
+                <!-- Items List Section -->
+
+                <table class="table table-bordered mt-2 tableHead">
+                    <thead class="table-header">
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th style="width: 20%">Product Name</th>
+                            <th style="width: 10%">Quantity</th>
+                            <th style="width: 10%">Rate</th>
+                            <th style="width: 10%">GST</th>
+                            <th style="width: 10%">AdvanceTax</th>
+                            <th style="width: 10%">Amount</th>
+                            <th style="display: none">Adv.Tax</th>
+                            <th style="display: none">GST</th>
+                            <th style="width: 10%">Net Amount</th>
+
+
+                            <th style="width: 10%">Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div class="table_scroll">
+                    <table class="table table-bordered table-striped">
+                        <tbody id="product_table">
+
+
+
+
+
+
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Section -->
+                <div class="footer-section">
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            <label for="remarks">Received Amount</label>
+                            <input type="number" id="ReceivedAmount" value="0" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="remarks">Bill Description</label>
+                            <input type="text" name="BillDiscription" id="BillDiscription" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="remarks">Total GST</label>
+                            <input type="number" readonly style="font-weight: bold; font-size: 14px;" id="total_gst"
+                                class="form-control">
+                        </div>
+                        <div class="col-md-1">
+                            <label for="remarks">Adv.Tax</label>
+                            <input type="number" readonly style="font-weight: bold; font-size: 14px;"
+                                id="total_advance_tax" class="form-control">
+                        </div>
+
+
+                        <div class="col-md-1">
+                            <label for="remarks">Bill Amount</label>
+                            <input type="number" readonly style="font-weight: bold; font-size: 14px;"
+                                id="BillAmount" class="form-control">
+                        </div>
+                    </div>
+                </div>
 
                 <div class="row mt-3">
                     <div class="col-md-12">
-                        <button class="btn btn-custom me-2" id="save_bill">Generate Bill</button>
-                        <a class="btn btn-custom me-2" href="{{route('pos.grn_request')}}" >Cancel Bill</a>
+                        <button class="btn btn-custom me-2" id="save_bill">Save Bill</button>
+                        <a class="btn btn-custom me-2" target="_blank">New Bill</a>
                         <a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red"
                             href="javascript:void(0)">Logout</a>
 
@@ -269,7 +392,56 @@
 
             </div>
 
+            <!-- Sidebar Section -->
+            <div class="col-md-2 sidebar">
+                <!--<div class="no-photo">
+                <h5><?php /*echo Company_Name; */?></h5>
+            </div>-->
+                <table class="table table-bordered">
+                    <tr>
+                        <td width="50%">Previous Balance</td>
+                        <td><span id="prv_balance" style="font-weight: bold; font-size: 14px"></span></td>
+                    </tr>
+                    <tr>
+                        <td>Current Bill</td>
+                        <td><span id="current_bill" style="font-weight: bold; font-size: 14px"></span></td>
+                    </tr>
 
+                    <tr>
+                        <td>GST</td>
+                        <td><span id="current_bill_gst" style="font-weight: bold; font-size: 14px"></span></td>
+                    </tr>
+
+                    <tr>
+                        <td>Advance Tax</td>
+                        <td><span id="current_bill_advtax" style="font-weight: bold; font-size: 14px"></span></td>
+                    </tr>
+
+                    <tr>
+                        <td>Total</td>
+                        <td><span id="total_bill" style="font-weight: bold; font-size: 14px"></span></td>
+                    </tr>
+                </table>
+                <button class="btn btn-secondary btn-danger print_bill">Print Bill</button>
+                {{-- <a target="_blank" href="home"><button class="btn btn-secondary btn-custom" style="background-color: #008000">Dashboard</button></a>
+            <a target="_blank" href="Reportcontroller/load_invoices_view"><button class="btn btn-secondary btn-custom" style="background-color: #355E3B">Today Sale</button></a>
+            <a target="_blank" href="menu_supp_cust"><button class="btn btn-secondary btn-custom" style="background-color: #00A36C;">Customer Registration</button></a>
+            <a target="_blank" href="markets"><button class="btn btn-secondary btn-custom" style="background-color: #00A36C;">Add New Market</button></a>
+            <a target="_blank" href="receivables"><button class="btn btn-secondary btn-primary" style="background-color: #9B7EBD">Customer Receivable</button></a>
+            <a target="_blank" href="menu_customer_ledger"><button class="btn btn-secondary btn-warning2" style="background-color: coral">Customer Ledger</button></a> --}}
+
+                {{-- <label style="font-weight: bold">Bill Address</label>
+            <textarea class="form-control ckeditor-full-height"  name="bill_address" id="bill_address" ></textarea> --}}
+                <!--<button class="btn btn-secondary btn-custom">F8: Salesman</button>
+            <button class="btn btn-secondary btn-custom">F9: Cash in Drawer</button>
+            <button class="btn btn-secondary btn-custom">F6: Cash Receipt</button>
+            <button class="btn btn-secondary btn-custom">F7: Cash Payment</button>
+            <button class="btn btn-secondary btn-custom">F3: Customer Card</button>
+            <button class="btn btn-secondary btn-custom">Points Claim</button>
+            <button class="btn btn-secondary btn-custom">F11: Post Data</button>
+            <button class="btn btn-secondary btn-custom">Counters Sale</button>
+            <button class="btn btn-danger btn-custom">Password Change</button>-->
+            </div>
         </div>
 
         <!-- Action Buttons Section -->
@@ -278,7 +450,6 @@
 
     {{-- data-packsize="{{$value->pack_size}}" data-pack_price={{$value->pack_price}} data-purchasePrice={{$value->PurchasePrice}} data-taxPercentage="{{$value->taxPercentage}}" --}}
     <script>
-        let validLengths = [1,3, 7,11,13];
         $('#product_id').select2({
             placeholder: 'Search for an item',
             minimumInputLength: 2, // Start searching after typing 2 characters
@@ -287,7 +458,6 @@
                 dataType: 'json',
                 delay: 250, // Delay for debounce
                 data: function(params) {
-                     
                     return {
                         q: params.term, // Search term
                         page: params.page || 1, // Pagination
@@ -312,8 +482,6 @@
                 cache: true,
             },
         });
-
-        $("#store_id").select2();
     </script>
     <script type="text/javascript">
         var preValue = '';
@@ -517,11 +685,6 @@
                 pack_price = $('#product_id option:selected').attr('data-pack_price');
                 taxPercentage = $('#product_id option:selected').attr('data-taxPercentage');
                 pack_size = $('#product_id option:selected').attr('data-packsize');
-                if(pack_size == 0 || pack_price == 0){
-                    alert("Please define pack price and pack size from product configuration");
-                    $("#product_id").val('').trigger("change");
-                    return false;
-                }
 
 
                 $("#SalePrice").val(pack_price);
@@ -546,7 +709,6 @@
                 invoice_number = $("#invoice_number").val();
                 currency_type = $("#currency_type").val();
                 bill_date = $("#bill_date").val();
-                bill_discount = $("#bill_discount").val();
                 customer_name = $("#customer_name").val();
                 previous_balance = $("#previous_balance").val();
                 ReceivedAmount = $("#ReceivedAmount").val();
@@ -575,9 +737,6 @@
                     $("#currency_type").trigger('click');
                     return false;
                 }
-                if (bill_discount == '') {
-                    bill_discount = 0;
-                }
                 if (bill_date == '') {
                     popupMsg("Enter Bill Date", "error");
                     $("#bill_date").focus();
@@ -599,7 +758,6 @@
                         invoice_number,
                         currency_type,
                         bill_date,
-                        bill_discount,
                         customer_name,
                         previous_balance,
                         bill_address,
@@ -635,10 +793,8 @@
                 SID = $("#SID").val();
                 company_name = $("#company_name").val();
                 invoice_number = $("#invoice_number").val();
-                store_id = $("#store_id").val();
                 currency_type = $("#currency_type").val();
                 bill_date = $("#bill_date").val();
-                bill_discount = $("#bill_discount").val();
                 customer_name = $("#customer_name").val();
                 previous_balance = $("#previous_balance").val();
                 ReceivedAmount = $("#ReceivedAmount").val();
@@ -647,17 +803,8 @@
                 total_gst = $("#total_gst").val();
                 total_advance_tax = $("#total_advance_tax").val();
                 bill_address = '';
-                if(bill_discount == ''){
-                    bill_discount = 0;
-                }
                 $("#save_bill").hide();
-                if (store_id == '') {
-                    popupMsg("Please Select Store", "error");
-                    $("#store_id").focus();
-                    $("#store_id").select2('open');
-                    $("#save_bill").show();
-                    return false;
-                } if (SID == '') {
+                if (SID == '') {
                     popupMsg("Please Select Customer", "error");
                     $("#SID").focus();
                     $("#SID").select2('open');
@@ -690,11 +837,11 @@
                     return false;
                 }
 
-              /*  if (ProductList.length <= 0) {
+                if (ProductList.length <= 0) {
                     popupMsg("Please Add Items to Bill", "error");
                     $("#save_bill").show();
                     return false;
-                }*/
+                }
 
 
 
@@ -706,10 +853,8 @@
                         SID,
                         company_name,
                         invoice_number,
-                        store_id,
                         currency_type,
                         bill_date,
-                        bill_discount,
                         customer_name,
                         previous_balance,
                         bill_address,
@@ -725,8 +870,16 @@
                     url: "{{ route('pos.save_stock') }}",
                     success: function(response) {
                         $("#save_bill").show();
-                        bill_id = response.id;
-                        window.location="{{route('pos.add_bill_items')}}/"+bill_id;
+                        sale_id_for_print = response.id;
+
+                        window.location.reload();
+                        return false;
+                        url = "";
+                        window.open(url, 'Sale Details',
+                            'width=1200,height=600,scrollbars=yes');
+                        // window.location.reload()
+                        $("#save_bill").show();
+
 
                     }
                 });

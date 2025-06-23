@@ -75,12 +75,13 @@
                                     <th>Guardian Name</th>
                                     <th>Consultant</th>
                                     <th>Procedure Type</th>
-                                    <th>Ward Name</th>
-                                    <th>Bed no.</th>
+                                    {{--<th>Ward Name</th>
+                                    <th>Bed no.</th>--}}
 
                                     <th>Admission Date</th>
                                     <th>Discharge Date</th>
                                     <th>Status</th>
+                                    <th>Doctor Payment</th>
                                     <th>Payment Received</th>
                                     <th>Action</th>
                                 </tr>
@@ -300,7 +301,7 @@
                     name: 'procedure_type.name',
                     searchable: true
                 },
-                {
+                /*{
                     data: 'ward.name',
                     name: 'ward.name',
                     searchable: true
@@ -309,7 +310,7 @@
                     data: 'bed.name',
                     name: 'bed.name',
                     searchable: true
-                },
+                },*/
 
 
 
@@ -335,6 +336,18 @@
                     render: function(data, type, row) {
                         if (data.payment_received == true) { // Change condition as needed
                             return "<b style='color:green'>Payment Received</b>"
+                        }else{
+                            return '';
+                        }
+                    }
+                },
+                {
+                    data: null, // Use `null` because we will combine two fields
+                    name: 'payment_to_doctor', // Use one field for search or sorting
+                    searchable: true,
+                    render: function(data, type, row) {
+                        if (data.payment_to_doctor == true) { // Change condition as needed
+                            return "<b style='color:green'>Paid</b>"
                         }else{
                             return '';
                         }

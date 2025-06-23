@@ -47,6 +47,7 @@ class PatientAdmissionController extends Controller
 
     public function sehatcard_patients_statistics()
     {
+       // $this->sehatCardPaymentReport();
         $data["title"] = "Sehat Card Patients Statistics";
 
         $res = PatientAdmission::where('is_active', 1)
@@ -314,7 +315,7 @@ class PatientAdmissionController extends Controller
     public function save_patient_investigation()
     {
         $data = request()->except(['_token', "id"]);
-        dd($data);
+
         $data['inv_date'] = request()->inv_date . " " . date("h:i:s");
         $investigation = InvestigationSubCategory::where(["id"=>request()->investigation_sub_category_id])->first();
         $data['inv_amount'] = $investigation->price ?? 0;
@@ -1067,6 +1068,38 @@ class PatientAdmissionController extends Controller
         return $data;
 
 
+    }
+
+    public function sehatCardDashboard()
+    {
+       $data = $this->sehatCardDashboardData();
+       return view("sehat_card_dashboard",$data);
+
+    }
+
+    public function sehatCardDashboardData()
+    {
+ 
+        $data['received_from_sc'] = PatientAdmission::whereNotNull('amount_received_from_sehat_card')
+                                    ->where("is_active",1)
+                                    ->select('sc_ref_no', \DB::raw('MAX(amount_received_from_sehat_card) as amount'))
+                                    ->groupBy('sc_ref_no')
+                                
+                                    ->get()
+                                    ->sum('amount');
+
+        $data['total_payment_to_doctor'] = PatientAdmission::where("consultant_shares_payment_invoice_id",">",'procedure_rate')->sum('consultant_share_amount');
+
+
+        $data['total_claims'] = PatientAdmission::where("is_active",1)
+            ->whereIn("admission_status",["Admit","Discharged"])
+            ->count() - 2;
+
+        $data['sc_paid_claims'] = PatientAdmission::whereNotNull('amount_received_from_sehat_card')
+            ->count();
+        $data['sc_pending_claims'] = $data['total_claims'] - $data['sc_paid_claims'];
+
+        return $data;
     }
 
 

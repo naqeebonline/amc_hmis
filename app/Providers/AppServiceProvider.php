@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Store;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View;
 use Validator;
 use Illuminate\Support\Facades\Schema;
 
@@ -17,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        $this->app->singleton('stores', function () {
+            return Store::all();
+        });
     }
 
     /**
@@ -35,5 +40,6 @@ class AppServiceProvider extends ServiceProvider
             // If you want to accept hyphens use: /^[\pL\s-]+$/u.
             return preg_match('/^[\pL\s]+$/u', $value);
         });
+
     }
 }

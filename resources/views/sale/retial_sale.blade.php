@@ -229,7 +229,7 @@
                 <option value="">Select Medicine Type...</option>
                 <option value="Ward" {{($type == "Ward") ? "selected" : ""}}>Ward Medicine</option>
                 <option value="OT" {{($type == "OT") ? "selected" : ""}}>OT Medicine</option>
-                <option value="Home" {{($type == "Home") ? "selected" : ""}}>Home Medicine</option>
+                <option value="Home" selected="selected">Home Medicine</option>
             </select>
         </div>
 
@@ -237,8 +237,9 @@
             <label for="received">Select Patient</label>
             <select id="SID" name="SID" class="form-control">
                 <option value="">Please Select Patient...</option>
+               {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
                 <?php foreach($admitted_patients as $key => $value){ ?>
-                <option data-admission_id="{{$value->id}}" value="<?php echo $value->patient_id; ?>"><?php echo $value->patient->name." - ".$value->patient->mr_no; ?> Status:({{$value->admission_status}}) </option>
+                <option data-admission_id="{{$value->id}}" value="<?php echo $value->patient_id; ?>" {{($value->patient_type == "walking_customer") ? "selected" : ""}}><?php echo $value->patient->name." - ".$value->patient->mr_no; ?> Status:({{$value->admission_status}}) </option>
                 <?php } ?>
             </select>
         </div>
@@ -253,7 +254,7 @@
 
         <div class="col-md-2">
             <label for="balance">Description</label>
-            <input type="text" id="previous_balance" class="form-control" value="" style="font-weight: bold; pointer-events: none" >
+            <input type="text" id="previous_balance" class="form-control" value="" style="font-weight: bold;" >
         </div>
 
     </div>
@@ -265,7 +266,7 @@
                 <!--<div class="col-md-3">
                     <input type="text" class="form-control" placeholder="Item/Bar Code">
                 </div>-->
-               @if($type !='')
+               @if($type !='' || $type == '')
                         <div class="col-md-5 mt-1">
                             <select class="form-control" id="product_id">
                                 <option value="">Select Product...</option>
@@ -354,21 +355,42 @@
             <div class="footer-section">
                 <div class="row">
 
-                    <div class="col-md-2">
-                        <label for="remarks">Received Amount</label>
-                        <input type="number" id="ReceivedAmount" value="0" class="form-control">
-                    </div>
-
-                    <div class="col-md-8">
-                        <label for="remarks">Bill Description</label>
-                        <input type="text" name="BillDiscription" id="BillDiscription" class="form-control">
-                    </div>
-
 
                     <div class="col-md-2">
                         <label for="remarks">Bill Amount</label>
                         <input type="number" readonly style="font-weight: bold; font-size: 14px;" id="BillAmount" class="form-control">
                     </div>
+
+
+
+                    <div class="col-md-2">
+                        <label for="remarks">Discount</label>
+                        <select class="form-control" id="discount_id">
+                            <option value="0">Select Discount...</option>
+                            <option value="2">2%</option>
+                            <option value="4">4%</option>
+                            <option value="6">6%</option>
+                            <option value="8">8%</option>
+                            <option value="10">10%</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="remarks">Discount Amount</label>
+                        <input type="number" readonly style="font-weight: bold; color:'green'; font-size: 14px;" id="discount_amount" value="0" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="remarks">Bill Description</label>
+                        <input type="text" name="BillDiscription" id="BillDiscription" class="form-control">
+                    </div>
+
+                    <div class="col-md-2" style="pointer-events: none">
+                        <label for="remarks">Received Amount</label>
+                        <input type="number" disabled id="ReceivedAmount" style="color:red;font-weight: bold; font-size: 12px;" value="0" class="form-control">
+                    </div>
+
+
+
                 </div>
             </div>
 
@@ -403,31 +425,12 @@
                     <td><span id="total_bill" style="font-weight: bold; font-size: 14px"></span></td>
                 </tr>
             </table>--}}
+
+
+
+
                 <h5 style="text-align: center; color:green">{{session('store_name')}}</h5>
                 <hr>
-
-                <h5 style="text-align: center; color:red">Ward Request</h5>
-            <div class="ward_request_table_class">
-
-                <table class="table table-bordered" style="width: 100%" id="ward_request_table">
-                    <thead>
-                    <tr>
-                        <th style="display: none">Patient</th>
-                        <th>Inv.No</th>
-                        <th>Patient</th>
-                        <th>Req By</th>
-
-                        <th style="width: 10%">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-
-                    
-                </table>
-
-            </div>
                 <h5 style="text-align: center; color:red">Previous Bills</h5>
             <div class="previous-bills">
 
@@ -477,7 +480,7 @@
                 ],
                 pageLength: 50,
                 ajax: {
-                    url: `{{ route('pos.previous_bills') }}`,
+                    url: `{{ route('pos.retail_previous_bills') }}`,
                     
                 },
 
@@ -512,83 +515,8 @@
                 ]
             });
 
-     ward_request_table = $('#ward_request_table').DataTable({
-         processing: true,
-         serverSide: true,
-
-         pageLength: 20,
-         ajax: {
-             url: "{{ route('pos.get_list_ward_request_in_pharmacy') }}",
-             data: function (d) {
-                 d.from_date = $('#filter_from_date').val();
-                 d.to_date = $('#filter_to_date').val();
-                 d.opd_type_id = $('#filter_opd_type_id').val();
-                 d.consultant_id = $('#filter_consultant_id').val();
-
-             }
-         },
-
-         columns: [
-             {
-                 data: 'patient.name',
-                 visible: false
-             },
-             {
-                 data: 'invoice_no',
-                 name: 'invoice_no',
-                 searchable: true
-             },
-             {
-                 data: null, // Use null because you're creating a custom render
-                 name: 'patient',
-                 searchable: false, // If you want it searchable, additional backend support is required
-                 render: function (data, type, row) {
-                     // Combine first_name and last_name to display full_name
-                     return '<b style="font-size:12px;color:green;">'+row.patient.name+'</b>';
-                 }
-             },
 
 
-             {
-                 data: 'user.name',
-                 name: 'user.name',
-                 searchable: true
-             },
-             /*{
-                 data: 'requested_at',
-                 name: 'requested_at',
-                 searchable: true
-             },*/
-
-
-
-
-
-             {
-                 data: 'actions',
-                 name: 'actions',
-                 orderable: false,
-                 searchable: false
-             }
-         ],
-
-
-         responsive: true,
-         processing: true,
-         serverSide: true,
-         searching: true,
-         sorting: true,
-         paging: true,
-         dom: 'Bfrtip',
-         // buttons: [
-         //     'copy', 'csv', 'excel', 'pdf', 'print'
-         // ]
-     });
-
-    setInterval(() => {
-        ward_request_table.ajax.reload();
-        //alert();
-    }, 30000);
 </script>
 <script type="text/javascript">
     var preValue = '';
@@ -636,7 +564,11 @@
 
         $("body").on("change","#medicine_type",function () {
             var value = $(this).val();
-            window.location = "{{route('pos.add_new_sale')}}?type="+value;
+            window.location = "{{route('pos.retail_pharmacy_sale')}}?type="+value;
+        });
+
+        $("body").on("change","#discount_id",function () {
+            reload_table();
         });
         $("body").on("change","#SID",function () {
             patient_admission_id= $('#SID option:selected').attr('data-admission_id');
@@ -765,9 +697,11 @@
                 return false;
             }
 
+
             SID = $("#SID").val();
             company_name = $("#company_name").val();
             invoice_number = $("#invoice_number").val();
+            discount_amount = $("#discount_amount").val();
             medicine_type = $("#medicine_type").val();
             currency_type = $("#currency_type").val();
             bill_date = $("#bill_date").val();
@@ -778,6 +712,10 @@
             BillAmount = $("#BillAmount").val();
             bill_address = '';
             $("#save_bill").hide();
+
+            net_Billamount = parseInt(BillAmount) - parseInt(discount_amount);
+
+
             if(SID == ''){
                 popupMsg("Please Select Customer","error");
                 $("#SID").focus();
@@ -785,6 +723,14 @@
                 $("#save_bill").show();
                 return false;
             }
+
+            /*if(ReceivedAmount < net_Billamount){
+                alert("Please collect full amount from customer.");
+                $("#ReceivedAmount").focus();
+                $("#save_bill").show();
+                return false;
+            }*/
+
 
             if(medicine_type == ''){
                 popupMsg("Please Select Medicine Type","error");
@@ -839,6 +785,7 @@
                     company_name,
                     invoice_number,
                     medicine_type,
+                    discount_amount,
                     currency_type,
                     bill_date,
                     customer_name,
@@ -859,10 +806,10 @@
 
 
 
-                    url="{{route('pos.print_thermel_purchase_details')}}/"+sale_id_for_print;
+                    url="{{route('pos.print_retail_thermel_purchase_details')}}/"+sale_id_for_print;
                     window.open(url, '_blank');
 
-                    window.location="{{route('pos.add_new_sale')}}";
+                    window.location="{{route('pos.retail_pharmacy_sale')}}";
 
 
                 }
@@ -1192,7 +1139,15 @@
             },1000);
 
         });
+        var bill_discount_percent = $("#discount_id").val();
+        var discount_amount = (total_amount * bill_discount_percent) / 100;
+
+
+        $("#discount_amount").val(discount_amount);
         $("#BillAmount").val(total_amount);
+        $("#ReceivedAmount").val(parseFloat(total_amount) - parseFloat(discount_amount));
+
+
         if(ProductList.length < 15){
             var length = (15)-(ProductList.length);
             var i=1;
