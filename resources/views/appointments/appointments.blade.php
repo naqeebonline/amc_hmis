@@ -163,7 +163,7 @@
                             <div class="col-md-2">
                                 <label>OPD Type</label>
                                 <select class="form-select" id="filter_opd_type_id">
-                                    <option value="">Please select option...</option>
+                                    <option value="">View--All</option>
                                     @foreach($opd_type as $key => $value)
                                         <option value="{{$value->id}}">{{$value->name}}</option>
                                     @endforeach
@@ -173,7 +173,7 @@
                             <div class="col-md-2">
                                 <label>Consultant</label>
                                 <select class="form-select" id="filter_consultant_id">
-                                    <option value="">Please select option...</option>
+                                    <option value="">View--All</option>
                                     @foreach($consultants as $key => $value)
                                         <option value="{{$value->id}}">{{$value->name}}</option>
                                     @endforeach

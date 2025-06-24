@@ -87,7 +87,7 @@
                                         </div>
                                         <div class="card-info">
                                             <h5 class="card-title mb-0 me-2">{{ $data->TotalSale ?? 0 }}</h5>
-                                            <small class="text-muted"><a href="{{route('pos.print_sehat_card_claim',['total'])}}">Total Sale</a></small>
+                                            <small class="text-muted">Total Pharmacy Sale</small>
                                         </div>
                                     </div>
                                     <div id="conversationChart"></div>
@@ -105,7 +105,7 @@
                                         </div>
                                         <div class="card-info">
                                             <h5 class="card-title mb-0 me-2">{{ $data->Discount ?? 0 }}</h5>
-                                            <small class="text-muted"><a href="{{route('pos.print_sehat_card_claim',['received'])}}">Discount</a></small>
+                                            <small class="text-muted">Pharmacy Discount</small>
                                         </div>
                                     </div>
                                     <div id="conversationChart"></div>
@@ -125,7 +125,7 @@
                                         </div>
                                         <div class="card-info">
                                             <h5 class="card-title mb-0 me-2">{{round($data->received_amount)}}</h5>
-                                            <small class="text-muted">Cash in Hand</small>
+                                            <small class="text-muted">Pharmacy Cash in Hand</small>
                                         </div>
                                     </div>
 
@@ -134,9 +134,128 @@
                         </div>
                     </div>
             </div>
-            <!-- Activity -->
 
-            <!--/ Activity -->
+
+
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                            <span class="avatar-initial bg-label-primary rounded-circle"><i class="bx bx-user fs-4"></i></span>
+                                        </div>
+                                        <div class="card-info">
+                                            <h5 class="card-title mb-0 me-2">{{ $appointments->total_fees ?? 0 }}</h5>
+                                            <small class="text-muted">Total Appointments Fees</small>
+                                        </div>
+                                    </div>
+                                    <div id="conversationChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                            <span class="avatar-initial bg-label-primary rounded-circle"><i class="bx bx-user fs-4"></i></span>
+                                        </div>
+                                        <div class="card-info">
+                                            <h5 class="card-title mb-0 me-2">{{ $appointments->total_hospital_share ?? 0 }}</h5>
+                                            <small class="text-muted">Hospital Share</small>
+                                        </div>
+                                    </div>
+                                    <div id="conversationChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                        <span class="avatar-initial bg-label-warning rounded-circle"><i
+                                                    class="bx bx-user fs-4"></i></span>
+                                        </div>
+                                        <div class="card-info">
+                                            <h5 class="card-title mb-0 me-2">{{round($appointments->total_consultant_share)}}</h5>
+                                            <small class="text-muted">Consultant Share</small>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                            <span class="avatar-initial bg-label-primary rounded-circle"><i class="bx bx-user fs-4"></i></span>
+                                        </div>
+                                        <div class="card-info">
+                                            <h5 class="card-title mb-0 me-2">{{ $investigations->total_inv_amount ?? 0 }}</h5>
+                                            <small class="text-muted">Total Investigation Amount</small>
+                                        </div>
+                                    </div>
+                                    <div id="conversationChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                            <span class="avatar-initial bg-label-primary rounded-circle"><i class="bx bx-user fs-4"></i></span>
+                                        </div>
+                                        <div class="card-info">
+                                            <h5 class="card-title mb-0 me-2">{{ $investigations->total_discount_amount ?? 0 }}</h5>
+                                            <small class="text-muted">Total Discount</small>
+                                        </div>
+                                    </div>
+                                    <div id="conversationChart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                        <span class="avatar-initial bg-label-warning rounded-circle"><i
+                                                    class="bx bx-user fs-4"></i></span>
+                                        </div>
+                                        <div class="card-info">
+                                            <h5 class="card-title mb-0 me-2">{{round($investigations->total_inv_amount - $investigations->total_discount_amount)}}</h5>
+                                            <small class="text-muted">Investigations Cash in Hand</small>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
 
         </div>

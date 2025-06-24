@@ -171,7 +171,7 @@
 
         <header class="header text-center">
             <div class="text-center">
-                <h1>Akakhel Medical Complex</h1>
+                <h1>{{env('COMPANY_NAME')}}</h1>
                 <h4>Registration No: {{ $patient->patient->mr_no }}</h4>
             </div>
             <div class="d-flex justify-content-between mt-4">

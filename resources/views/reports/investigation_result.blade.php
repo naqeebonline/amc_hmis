@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}" />
     {{-- <link rel="stylesheet" href="style.css">
      --}}
     <script>
@@ -230,7 +230,8 @@
     <header class="header">
         <div class="logo ">
             <img style="height: 50px"
-                 src="https://amch.org.pk/front/assets/amchcdns/sites/default/files/amc_logo.png" alt="">
+                 src="{{asset('logo.png')}}" alt="">
+            <span style="font-weight: bold;font-size: 22px; text-decoration: underline; margin-left: 80px">{{env('COMPANY_NAME')}}</span>
         </div>
     </header>
     <main>

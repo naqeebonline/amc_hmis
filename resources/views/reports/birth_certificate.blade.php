@@ -61,7 +61,7 @@
 <body>
    @foreach($baby as $key => $value)
 
-       <div id="circular-text">AKAKHEL MEDICAL COMPLEX</div>
+       <div id="circular-text">{{env('COMPANY_NAME')}}</div>
 
        <div class="logo">
            <img src="{{ asset('logo.png') }}" alt="">

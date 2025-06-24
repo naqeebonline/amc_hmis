@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointments\Appointment;
+use App\Models\Patient\PatientInvestigation;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 
@@ -12,20 +14,51 @@ class DashboardController extends Controller
     {
         $from_date = $_GET['from_date'] ?? date("Y-m-d");
         $to_date = $_GET['to_date'] ?? date("Y-m-d");
-        $query = Sale::where('store_id', session('store_id'))
-            ->when($from_date, function ($query) use ($from_date) {
-                return $query->where('Date', '>=', date("Y-m-d", strtotime($from_date)));
-            })
-            ->when($to_date, function ($query) use ($to_date) {
-                return $query->where('Date', '<=', date("Y-m-d", strtotime($to_date)));
-            });
-
-        $totals = $query->selectRaw('SUM(TotalSale) as TotalSale, SUM(Discount) as Discount, SUM(received_amount) as received_amount')
-            ->first();
-        $data['data'] = $totals;
         $data['from_date'] = $from_date;
         $data['to_date'] = $to_date;
+        $query = Sale::where('store_id', session('store_id'))
+            ->when($from_date, function ($query) use ($from_date) {
+                return $query->whereDate('Date', '>=', date("Y-m-d", strtotime($from_date)));
+            })
+            ->when($to_date, function ($query) use ($to_date) {
+                return $query->whereDate('Date', '<=', date("Y-m-d", strtotime($to_date)));
+            });
+
+        $totals = $query->selectRaw('SUM(TotalSale) as TotalSale, SUM(Discount) as Discount, SUM(received_amount) as received_amount')->first();
+        $data['data'] = $totals;
+
+        $data['appointments'] = $this->appointmentsPayment($from_date,$to_date);
+        $data['investigations'] = $this->investigationPayment($from_date,$to_date);
+       // dd($data['appointments']);
+
         return view("retail_dashboard",$data);
 
+    }
+
+
+    public function appointmentsPayment($from_date='',$to_date='')
+    {
+        $query = Appointment::when($from_date, function ($query) use ($from_date) {
+                return $query->whereDate('appointment_date', '>=', date("Y-m-d", strtotime($from_date)));
+            })
+            ->when($to_date, function ($query) use ($to_date) {
+                return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($to_date)));
+            });
+
+        $totals = $query->selectRaw('SUM(fee) as total_fees, SUM(hospital_share) as total_hospital_share, SUM(consultant_share) as total_consultant_share')->first();
+        return $totals;
+    }
+
+    public function investigationPayment($from_date='',$to_date='')
+    {
+        $query = PatientInvestigation::when($from_date, function ($query) use ($from_date) {
+            return $query->whereDate('inv_date', '>=', date("Y-m-d", strtotime($from_date)));
+        })
+            ->when($to_date, function ($query) use ($to_date) {
+                return $query->whereDate('inv_date', '<=', date("Y-m-d", strtotime($to_date)));
+            });
+
+        $totals = $query->selectRaw('SUM(sale_price) as total_inv_amount, SUM(discount_amount) as total_discount_amount, SUM(inv_amount) as total_cost')->first();
+        return $totals;
     }
 }

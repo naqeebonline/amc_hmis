@@ -218,6 +218,7 @@ class SaleController extends Controller
         $Description = request()->BillDiscription;
         $medicine_type = request()->medicine_type;
         $bill_description = request()->BillDiscription;
+        $discount_percentage = request()->discount_percentage ?? 0;
         $Discount = request()->discount_amount ?? 0;
         $demage = 0;
         $ReceivedAmount = request()->ReceivedAmount;
@@ -251,6 +252,7 @@ class SaleController extends Controller
             'TotalSale'     => $total,
             'received_amount'     => $ReceivedAmount,
             'Discount'     =>  $Discount,
+            'discount_percentage'     =>  $discount_percentage,
             'sale_descriptions' => $bill_description,
             'CreatedBy'     => $userID,
             'CreatedAt'     => date('Y-m-d')
@@ -580,10 +582,11 @@ class SaleController extends Controller
         $total_return_qty = ($sale_details->ReturnQuantity) + ($retrun_qty);
 
         $total_sale_amount = ($sale->TotalSale)-($total_return_price);
+        $received_amount = ($total_sale_amount)-($sale->Discount);
 
 
         //------- sale related operations  ------------//
-            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount]);
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"received_amount"=>$received_amount]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
 
         //---------- end of sale related operations   ---------//
@@ -603,6 +606,81 @@ class SaleController extends Controller
         (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
         return response()->json(["status"=>true,"message"=>"done"]);
         //$this->Zk_Common_Model->update_records('grn_details',$grn_detailDate,array('GDID'=>$GDID));
+    }
+
+    public function return_pharmacy_item()
+    {
+        $sale_details = SaleDetails::where(["SDID"=>request()->SDID])->first();
+        $sale = Sale::where(["SaleID"=>$sale_details->SaleID])->first();
+        $discount_percentage =  $sale->discount_percentage;
+        $admission_id = $sale->admission_id;
+
+
+        $retrun_qty = request()->ReturnQuantity;
+        $total_return_price = ($sale_details->UnitePrice) * ($retrun_qty);
+        $total_return_qty = ($sale_details->ReturnQuantity) + ($retrun_qty);
+
+        $total_sale_amount = ($sale->TotalSale)-($total_return_price);
+        $received_amount = ($total_sale_amount)-($sale->Discount);
+
+
+        //------- sale related operations  ------------//
+        Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"received_amount"=>$received_amount]);
+        SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+
+        //---------- end of sale related operations   ---------//
+
+        //------------- now grn detals .........//
+        $result = GrnDetails::where(["GDID"=>$sale_details->GDID])->first();
+        $remainingQuanity=($result->RemainingQuantity)+($retrun_qty);
+        $soldQuantity=($result->SoldQuantity)-($retrun_qty);
+        $TotalReturn=($result->TotalReturn)+($retrun_qty);
+        $grn_detailDate=array(
+            "SoldQuantity" =>$soldQuantity,
+            "TotalReturn"  =>$TotalReturn,
+            "RemainingQuantity" =>$remainingQuanity,
+            "ProductStatus"     =>1
+        );
+        GrnDetails::where(['GDID'=>$sale_details->GDID])->update($grn_detailDate);
+
+        return response()->json(["status"=>true,"message"=>"done"]);
+        //$this->Zk_Common_Model->update_records('grn_details',$grn_detailDate,array('GDID'=>$GDID));
+    }
+
+
+
+    public function get_bill_details($sale_id)
+    {
+        $patients = SaleDetails::with("product", "sale")
+            ->when($sale_id, function ($query) use ($sale_id) {
+                $query->where('SaleID', $sale_id);
+            })
+            ->when(request()->medicine_type, function ($query) {
+                $query->whereHas('sale', function ($q) {
+
+                    $q->where('medicine_type', request()->medicine_type);
+                });
+            });
+        return DataTables::of($patients)
+            ->addColumn("actions", function ($patient) {
+                if($patient->ReturnQuantity == $patient->Quantity){
+                    return "";
+                }else{
+                    return '<a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-primary return_product">Return</a>';
+                }
+
+            })
+            ->addColumn("total_amount", function ($value) {
+                $total = ($value->UnitePrice) * ($value->Quantity);
+                return number_format($total, 2);
+            })
+            ->addColumn("total_consumed", function ($value) {
+                $total = ($value->Quantity) - ($value->ReturnQuantity);
+                return $total;
+            })
+
+            ->rawColumns(["actions", "total_amount","total_consumed"])
+            ->make(true);
     }
 
 }

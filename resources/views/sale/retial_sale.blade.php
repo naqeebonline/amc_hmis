@@ -261,7 +261,7 @@
 
     <!-- Item Input Section -->
     <div class="row mt-2">
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="row">
                 <!--<div class="col-md-3">
                     <input type="text" class="form-control" placeholder="Item/Bar Code">
@@ -406,7 +406,7 @@
         </div>
 
         <!-- Sidebar Section -->
-        <div class="col-md-3 sidebar">
+        <div class="col-md-4 sidebar">
             <!--<div class="no-photo">
                 <h5><?php /*echo Company_Name; */?></h5>
             </div>-->
@@ -439,7 +439,8 @@
                         <tr>
                             <th>Invioce #</th>
                             <th>Patient</th>
-                            <th>Actions</th>
+                            <th>Amount</th>
+                            <th style="width: 30%">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -491,9 +492,15 @@
                         name: 'InvoiceNo',
                         searchable: true
                     },
+
                     {
                         data: 'patient.name',
                         name: 'patient.name',
+                        searchable: true
+                    },
+                    {
+                        data: 'received_amount',
+                        name: 'received_amount',
                         searchable: true
                     },
                     {
@@ -711,6 +718,7 @@
             BillDiscription = $("#BillDiscription").val();
             BillAmount = $("#BillAmount").val();
             bill_address = '';
+            discount_percentage = $("#discount_id").val();
             $("#save_bill").hide();
 
             net_Billamount = parseInt(BillAmount) - parseInt(discount_amount);
@@ -782,6 +790,7 @@
                     patient_id,
                     ward_request_id,
                     patient_admission_id,
+                    discount_percentage,
                     company_name,
                     invoice_number,
                     medicine_type,

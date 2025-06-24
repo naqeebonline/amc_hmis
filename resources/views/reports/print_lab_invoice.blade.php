@@ -7,11 +7,11 @@
 <body>
 
 	<div class="wrap">
-		
+
 		<div class="logo">
-			<h2 style="font-size: 22px">Akakhel Medical Complex</h2>
+			<h2 style="font-size: 22px">{{env('COMPANY_NAME')}}</h2>
 			<small style="font-size: 13px">{{date("d-m-Y h:i A")}} </small>
-		</div>	
+		</div>
 
 	<div class="customer">
 		<table>
@@ -53,7 +53,7 @@
 			</tfoot>
 		</table>
 	</div>
-				
+
 	</div>
 
 </body>

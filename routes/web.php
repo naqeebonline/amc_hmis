@@ -283,6 +283,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     Route::get("print_lab_invoice/{invoice_no?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_lab_invoice"])->name("pos.print_lab_invoice");
+    Route::get("print_hospital_lab_invoice/{invoice_no?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_hospital_lab_invoice"])->name("pos.print_hospital_lab_invoice");
     Route::post("get-ward-investigations/{ward_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_ward_investigations"])->name("pos.get_ward_investigations");
 
 
@@ -293,6 +294,8 @@ Route::group(['middleware' => 'auth'], function () {
     
 
     Route::get("return_product", [\App\Http\Controllers\ProductConfiguration\ReturnProductController::class, "return_product"])->name("pos.return_product");
+    Route::get("return_pharmacy_product/{sale_id?}", [\App\Http\Controllers\ProductConfiguration\ReturnProductController::class, "return_pharmacy_product"])->name("pos.return_pharmacy_product");
+    Route::get("get_bill_details/{sale_id?}", [\App\Http\Controllers\Admin\SaleController::class, "get_bill_details"])->name("pos.get_bill_details");
 
 
 
@@ -316,6 +319,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('list_grn_request/{id?}', [\App\Http\Controllers\Admin\StockController::class, 'list_grn_request'])->name('pos.list_grn_request');
     Route::post('approve_grn_bill', [\App\Http\Controllers\Admin\StockController::class, 'approve_grn_bill'])->name('pos.approve_grn_bill');
     Route::post('return_item', [\App\Http\Controllers\Admin\SaleController::class, 'return_item'])->name('pos.return_item');
+    Route::post('return_pharmacy_item', [\App\Http\Controllers\Admin\SaleController::class, 'return_pharmacy_item'])->name('pos.return_pharmacy_item');
 
     Route::get("print_admitted_patient_treatment_report/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_admitted_patient_treatment_report"])->name("pos.print_admitted_patient_treatment_report");
     Route::get("patient_treatment_chart_report/{patient_id?}/{admission_id?}/{medicine_type_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_treatment_chart_report"])->name("pos.patient_treatment_chart_report");

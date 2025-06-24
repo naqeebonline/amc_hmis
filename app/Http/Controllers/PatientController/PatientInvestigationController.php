@@ -73,7 +73,7 @@ class PatientInvestigationController extends Controller
                 "inv_date"    => date("Y-m-d H:i:s"),
                 "created_by"    => auth()->user()->id,
                 "created_at"    => date("Y-m-d H:i:s"),
-                "patient_type"    => 'general_patient',
+                "patient_type"    => 'hospital_patient',
 
             ];
             PatientInvestigation::create($data);
@@ -96,7 +96,7 @@ class PatientInvestigationController extends Controller
             ->when(request()->to_date, function ($query) {
                 $query->whereDate('inv_date','<=',date("Y-m-d",strtotime(request()->to_date)));
             })
-            ->where(["patient_type"=>"general_patient"])
+            ->where(["patient_type"=>"hospital_patient"])
             ->orderBy("id", "desc");
         return DataTables::of($patients)
             ->addColumn("actions", function ($patient) {
@@ -115,7 +115,7 @@ class PatientInvestigationController extends Controller
 
             })
             ->addColumn("print_invoice_number", function ($patient) {
-                return '<a target="_blank" href="' . route('pos.print_lab_invoice', [$patient->invoice_no]) . '">' . $patient->invoice_no . '</a>';
+                return '<a target="_blank" href="' . route('pos.print_hospital_lab_invoice', [$patient->invoice_no]) . '">' . $patient->invoice_no . '</a>';
             })
             ->rawColumns(["print_invoice_number","received_amount", "actions"])
             ->make(true);

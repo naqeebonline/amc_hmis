@@ -226,12 +226,12 @@
         </div>
         <div class="row align-items-center">
             <div class="col-8  ">
-                <h4 class="my-0">اکاخیل میڈیکل کمپلیکس نزد ولید فلنگ سٹیشن گاڑمنارہ ضلع وتحصیل صوابی</h4>
+                <h4 class="my-0">{{env('COMPANY_ADDRESS')}}</h4>
             </div>
             <div class="col-4">
-                <p class="my-0"><strong>Website: <a href="#">www.amch.org.pk</a></strong></p>
-                <p class="my-0"><strong>Mob: 0938-481111 , 0316-8481111</strong></p>
-                <p class="my-0"><strong>Email: Info@amch.org.pk</strong></p>
+                <p class="my-0"><strong>Website: <a href="#">{{env('COMPANY_WEBSITE')}}</a></strong></p>
+                <p class="my-0"><strong>Mob: {{env('COMPANY_PHONE')}} , {{env('COMPANY_MOBILE')}}</strong></p>
+                <p class="my-0"><strong>Email: {{env('COMPANY_EMAIL')}}</strong></p>
             </div>
         </div>
     </footer>

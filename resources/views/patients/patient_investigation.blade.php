@@ -262,7 +262,7 @@
             $("#patient_detail").html("");
             let html = `
                 <table class="table table-responsive table-bordered" >
-                    <tr>    
+                    <tr>
                         <td style="font-weight: bold">MRNO</td>
                         <td>${data.patient.mr_no}</td>
                         <td style="font-weight: bold">Name</td>
@@ -314,8 +314,8 @@
 
 
         });
-        
-        
+
+
         $("#add_patient_investgiation").on("submit", function(e) {
             e.preventDefault();
             let isValid = true;

@@ -121,17 +121,17 @@
                                 <label for="nameBasic" class="form-label">Discount<span class="asterisk">*</span></label>
 
                                 <select name="discount_percentage" id="discount_percentage" required class="form-select">
-                                    <option value="">Select Discount</option>
-                                    <option value="5">2</option>
-                                    <option value="5">5</option>
-                                    <option value="7">7</option>
-                                    <option value="10">10</option>
-                                    <option value="15">15</option>
-                                    <option value="20">20</option>
-                                    <option value="25">25</option>
-                                    <option value="30">30</option>
-                                    <option value="40">40</option>
-                                    <option value="50">50</option>
+                                    <option value="0">0%</option>
+                                    <option value="2">2%</option>
+                                    <option value="5">5%</option>
+                                    <option value="7">7%</option>
+                                    <option value="10">10%</option>
+                                    <option value="15">15%</option>
+                                    <option value="20">20%</option>
+                                    <option value="25">25%</option>
+                                    <option value="30">30%</option>
+                                    <option value="40">40%</option>
+                                    <option value="50">50%</option>
 
                                 </select>
 

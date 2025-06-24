@@ -665,6 +665,23 @@ class PatientAdmissionController extends Controller
         return view("reports.print_lab_invoice", $data);
     }
 
+    public function print_hospital_lab_invoice($invoice)
+    {
+        $data['data'] = PatientInvestigation::with(["investigation", "patient"])->where(["invoice_no" => $invoice])->whereIsActive(1)->get();
+        $total = 0;
+        $discount_percentage = 0;
+        $discount_amount = 0;
+        foreach ($data['data'] as $key => $value){
+            $total = $total + ($value->sale_price);
+            $discount_percentage = $value->discount_percentage;
+            $discount_amount = $discount_amount + ($value->discount_amount);
+        }
+        $data['total'] = $total;
+        $data['discount_percentage'] = $discount_percentage;
+        $data['discount_amount'] = $discount_amount;
+        return view("reports.print_hospital_lab_invoice", $data);
+    }
+
     public function get_ward_investigations($admission_id)
     {
         $admission = PatientAdmission::whereId($admission_id)->first();

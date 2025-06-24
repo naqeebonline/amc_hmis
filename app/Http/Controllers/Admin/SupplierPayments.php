@@ -332,7 +332,8 @@ class SupplierPayments extends Controller
         return DataTables::of($bills)
 
             ->addColumn('action', function ($data) {
-                return '<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                return '<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>
+                    <a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
             })
             ->rawColumns(["action"])
             ->make(true);

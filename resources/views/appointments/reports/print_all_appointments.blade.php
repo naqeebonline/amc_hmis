@@ -198,7 +198,7 @@
 <div class="invoice-container">
     <header>
         <div class="company-details">
-            <h1 style="text-align: center;margin-left: 50%;width: 100%;">Akakhel Medical Complex</h1>
+            <h1 style="text-align: center;margin-left: 50%;width: 100%;">{{env('COMPANY_NAME')}}</h1>
             <h1 style="text-align: center;margin-left: 50%;width: 100%;">List Appointments</h1>
 
         </div>

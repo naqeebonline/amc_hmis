@@ -40,7 +40,8 @@
                                             <th>Main Category</th>
                                             <th>Name</th>
                                             <th>Is ICT</th>
-                                            <th>Price</th>
+                                            <th>Purchase Price</th>
+                                            <th>Sale Price</th>
                                             <th>Test Type</th>
                                             <th style="width: 10%">Action</th>
                                         </tr>
@@ -91,9 +92,15 @@
 
 
                         <div class="col-md-12 mb-3">
-                            <label for="nameBasic" class="form-label">Rate<span class="asterisk">*</span></label>
+                            <label for="nameBasic" class="form-label">Purchase Rate<span class="asterisk">*</span></label>
                             <input type="text" required id="price" name="price" class="form-control" placeholder=""
                                 autocomplete="off">
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Sale Price<span class="asterisk">*</span></label>
+                            <input type="text" required id="sale_price" name="sale_price" class="form-control" placeholder=""
+                                   autocomplete="off">
                         </div>
 
                         <div class="col-md-12 mb-3">
@@ -157,6 +164,7 @@
             $("#investigation_category_id").val('');
             $("#is_parameter").val('');
             $("#price").val('');
+            $("#sale_price").val('');
             $("#result_text").val('');
             $("#is_ict").prop('checked', false);
 
@@ -174,6 +182,7 @@
             $("#investigation_category_id").val(details.investigation_category_id);
             $("#is_parameter").val(details.is_parameter);
             $("#price").val(details.price);
+            $("#sale_price").val(details.sale_price);
             $("#result_text").val(details.result_text);
             details.is_ict == 1 ? $("#is_ict").prop('checked', true) : $("#is_ict").prop('checked', false);
             $("#add_new_record_model").modal("show");
@@ -196,6 +205,7 @@
                     $("#investigation_category_id").val("").trigger('change');
                     $("#is_parameter").val("").trigger('change');
                     $("#price").val("");
+                    $("#sale_price").val("");
 
                     $("#is_ict").prop('checked', false);
                     $("#add_new_record_model").modal("hide");
@@ -256,6 +266,11 @@
                     {
                         data: 'price',
                         name: 'price',
+                        searchable: true
+                    },
+                    {
+                        data: 'sale_price',
+                        name: 'sale_price',
                         searchable: true
                     },
                     {

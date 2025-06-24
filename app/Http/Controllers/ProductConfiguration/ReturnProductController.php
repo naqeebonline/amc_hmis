@@ -22,4 +22,16 @@ class ReturnProductController extends Controller
 
         return view("sale.return_product", $data);
     }
+
+    public function return_pharmacy_product($sale_id)
+    {
+        $data["patients"] = PatientAdmission::where("admission_status", "Admit")->with("patient", "ward", "bed")
+            ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
+            ->get();
+        $data['investigation'] = InvestigationSubCategory::whereIsActive(1)->get();
+        $data['service_type'] = ServiceType::whereIsActive(1)->get();
+
+        $data['sale_id'] = $sale_id;
+        return view("sale.return_pharamacy_product", $data);
+    }
 }
