@@ -36,7 +36,11 @@
                             <input type="hidden" value="{{ $investigation->id }}" required id="inv_id" name="inv_id" value="0" class="form-control" />
                             <input type="hidden" value="{{ $is_textual }}" required id="is_textual" name="is_textual"  class="form-control" />
                         @if($is_textual != true)
-                                @foreach ($paramenters as $key => $parameter)
+                            @foreach($all_data as $key => $value2)
+                                @if(strtolower($value2->name) != "no heading")
+                                    <h3>{{$value2->name ?? ''}}</h3>
+                                @endif
+                                    @foreach ($value2->parameters as $key => $parameter)
                                     @php
                                         $range_max_value = 0;
                                       $range_min_value = 0;
@@ -93,6 +97,7 @@
 
                                     </div>
                                 @endforeach
+                            @endforeach
 
                         @else
 

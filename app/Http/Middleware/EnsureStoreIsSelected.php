@@ -9,7 +9,7 @@ class EnsureStoreIsSelected
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!session()->has('store_id')) {
+        if (!session()->has('store_id') || session('store_id') == '') {
             return redirect()->route('pos.select_store');
         }
 

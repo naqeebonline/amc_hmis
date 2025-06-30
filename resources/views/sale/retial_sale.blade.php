@@ -171,7 +171,7 @@
         }
         .previous-bills{
             background: #fff;
-            height: 150px;
+            height: 450px;
             overflow: auto
         }
         .previous-bills table tr th,
@@ -229,7 +229,7 @@
                 <option value="">Select Medicine Type...</option>
                 <option value="Ward" {{($type == "Ward") ? "selected" : ""}}>Ward Medicine</option>
                 <option value="OT" {{($type == "OT") ? "selected" : ""}}>OT Medicine</option>
-                <option value="Home" selected="selected">Home Medicine</option>
+                <option value="Home" {{($type == "Home") ? "selected" : ""}}>Home Medicine</option>
             </select>
         </div>
 
@@ -268,6 +268,7 @@
                 </div>-->
                @if($type !='' || $type == '')
                         <div class="col-md-5 mt-1">
+                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Product Name</p>
                             <select class="form-control" id="product_id">
                                 <option value="">Select Product...</option>
                                 <?php foreach ($products as $key => $value): ?>
@@ -282,10 +283,10 @@
 
                         @if($type == "Home" || $type == "Ward")
                             <div class="col-md-3 mt-1">
-
+                                <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Dose Type</p>
                                 <select class="form-select" id="dose_type" >
                                     <option value="">Select Dose Type...</option>
-                                    <option value="-">-</option>
+                                    <option value="-" selected>-</option>
                                     <option value="TDS">TDS (صبح ,دوپہر ,شام )</option>
                                     <option value="BD">BD  (صبح ,شام )</option>
                                     <option value="OD">OD  (صبح )</option>
@@ -298,10 +299,12 @@
 
 
                         <div class="col-md-2 mt-1">
+                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Unit Price</p>
                             <input type="number"  id="SalePrice" class="form-control" placeholder="Unit Price">
                         </div>
 
                         <div class="col-md-2 mt-1">
+                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Quantity</p>
                             <input type="number" class="form-control" id="sale_quantity" placeholder="Quantity" value="1">
                         </div>
 
@@ -312,6 +315,7 @@
 
 
                         <div class="col-md-2 mt-1" style="display: none">
+                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Avaliable Qty</p>
                             <input type="text" disabled class="form-control" id="avaliable_qty" placeholder="Avaliable Quantity" readonly>
                         </div>
                @endif

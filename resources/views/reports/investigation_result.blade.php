@@ -263,7 +263,7 @@
             <div class="right-side col-5 ms-auto">
                 <div class="d-flex justify-content-between">
                     <p class="w-50 fw-bold">Refered By:</p>
-                    <p class="w-50">{{ $result->admission->consultant->name }}</p>
+                    <p class="w-50">{{ $result->admission->consultant->name ?? "" }}</p>
                 </div>
 
                 <div class="d-flex justify-content-between">
@@ -302,8 +302,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                @if($inv_sub_category->is_parameter != 0){
-                @foreach ($result->investigationResult as $item)
+                @if($inv_sub_category->is_parameter != 0)
+                <?php $default_heading = ($result->investigationResult)[0]->parameter_heading;
+                     $default_heading = strtolower($default_heading);
+                ?>
+                @foreach ($result->investigationResult as $key => $item)
 
                     @php
 
@@ -322,6 +325,11 @@
                         }
 
                     @endphp
+                    <?php if(($default_heading != strtolower($item->parameter_heading) || $key == 0) && $default_heading != 'no heading'){ $default_heading =strtolower($item->parameter_heading); ?>
+                    <tr>
+                        <td colspan="4" style="font-weight: bold; font-size: 12px">{{strtoupper($default_heading)}}</td>
+                    </tr>
+                    <?php } ?>
                     <tr>
                         <td>{{ $item->parameter->name ?? '' }}</td>
                         @if ($item->result_text_value != '')

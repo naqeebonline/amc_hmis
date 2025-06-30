@@ -19,7 +19,7 @@
             <div class="card">
                 <div class="card-header header-elements-inline">
                     <div class="btn btn-primary add_new_record">Investigation Parameter</div>
-                    <div class="btn btn-primary add_is_parent">Is Parent</div>
+                   {{-- <div class="btn btn-primary add_is_parent">Is Parent</div>--}}
 
                 </div>
 
@@ -37,6 +37,7 @@
                                     <thead>
                                     <tr>
                                         <th >Index Number</th>
+                                        <th >Paramet Header</th>
                                         <th >Parameter Name</th>
                                         <th >Parameter Unit</th>
                                         <th >Male Min</th>
@@ -74,6 +75,14 @@
                 <div class="modal-body">
                     <div class="row">
 
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Heading Name</label>
+                            <select class="form-control" name="parameter_heading_id" id="parameter_heading_id">
+                                @foreach($parameter_heading as $key => $value)
+                                <option value="{{$value->id}}">{{$value->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-md-6 mb-3">
                             <label for="nameBasic" class="form-label">Parameter Name<span class="asterisk">*</span></label>
                             <input type="text" required id="name" name="name" class="form-control" placeholder="" autocomplete="off">
@@ -250,6 +259,7 @@
             var details = JSON.parse($(this).attr("data-details"));
 
             $("#id").val(record_id);
+            $("#parameter_heading_id").val(details.parameter_heading_id);
             $("#name").val(details.name);
             $("#investigation_sub_category_id").val("{{$id}}");
             $("#index_number").val(details.index_number);
@@ -315,6 +325,7 @@
                 columns: [
 
                     {data: 'index_number', name: 'index_number',searchable: true},
+                    {data: 'parameter_heading.name', name: 'parameter_heading.name',searchable: true},
                     {data: 'name', name: 'name',searchable: true},
                     {data: 'unit', name: 'unit',searchable: true},
                     {data: 'male_min', name: 'male_min',searchable: true},

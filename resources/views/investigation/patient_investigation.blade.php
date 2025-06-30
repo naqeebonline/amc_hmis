@@ -62,13 +62,13 @@
                                 <label style="text-align: center; width: 100%; font-weight: bold; color:red">Age</label>
                                 <div class="d-flex align-items-center">
                                     <label for="years" class="me-2">Years:</label>
-                                    <input type="text" id="age" name="age" class="form-control" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
+                                    <input type="text" id="age" name="age" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
 
                                     <label for="months" class="me-2">Months:</label>
-                                    <input type="text" id="months" value="0" name="months" class="form-control" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
+                                    <input type="text" id="months" value="0" name="months" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
 
                                     <label for="days" class="me-2">Days:</label>
-                                    <input type="text" id="days" value="0" name="days" class="form-control" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
+                                    <input type="text" id="days" value="0" name="days" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
                                 </div>
                             </div>
 
@@ -111,13 +111,26 @@
 
                             </div>
 
-                            <div class="col-md-3 col-sm-4 mb-3" >
+                            <div class="col-md-2 col-sm-4 mb-3">
+                                <label for="nameBasic" class="form-label">Consultant<span class="asterisk">*</span></label>
+
+                                <select name="consultant_id"  id="consultant_id" class="form-select">
+                                    <option value="0">Select Locations</option>
+                                    @foreach ($consultants as $value)
+                                        <option value="{{ $value->id }}">{{ $value->name }}</option>
+                                    @endforeach
+                                </select>
+
+
+                            </div>
+
+                            <div class="col-md-2 col-sm-4 mb-3" >
                                 <label for="nameBasic" class="form-label">Dob<span class="asterisk">*</span></label>
                                 <input  type="date" required id="dob" name="dob" class="form-control"
                                         placeholder="" autocomplete="off">
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-1 col-sm-4 mb-3">
                                 <label for="nameBasic" class="form-label">Discount<span class="asterisk">*</span></label>
 
                                 <select name="discount_percentage" id="discount_percentage" required class="form-select">
@@ -337,6 +350,7 @@
             $("#district_id").select2();
             $("#investigation_id").select2();
             $("#location_id").select2();
+            $("#consultant_id").select2();
 
             $("#edit_consultant_id").select2({dropdownParent: $('.my_modal')});
             $("#edit_opd_type_id").select2({dropdownParent: $('.my_modal')});
@@ -857,7 +871,7 @@
                     url: "{{ route('pos.deactivate_record') }}",
                     data: {
                         id: id,
-                        table: "appointments",
+                        table: "patient_investigations",
                         _token: '{{ csrf_token() }}'
 
                     },
@@ -874,7 +888,7 @@
         function reset_fields() {
             $("#id").val(0);
             $("#contact_no").val('');
-            $("#consultant_id").val('').trigger("change");
+
             $("#district_id").val('').trigger("change");
             $("#dob").val('');
             $("#father_husband_name").val('');
@@ -885,6 +899,7 @@
             $("#gender").val('');
             $("#id").val('');
             $("#location_id").val('').trigger("change");
+            $("#consultant_id").val(0).trigger("change");
             $("#cnic").val('');
             $("#cnic").val('');
             $("#name").val('');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Investigation;
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\InvestigationParameter;
 use App\Models\Configuration\InvestigationSubCategory;
+use App\Models\ParameterHeading;
 use App\Models\Patient\InvestigationResult as PatientInvestigationResult;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientInvestigation;
@@ -69,23 +70,7 @@ class InvestigationResult extends Controller
             ->make(true);
     }
 
-    public function investigation_add_result($inv_id, $cat_id)
-    {
-        $data["investigation"] = PatientInvestigation::find($inv_id);
-        $data['patient'] = Patient::where("id",$data["investigation"]->patient_id)->first();
-        $sub_category = InvestigationSubCategory::find($cat_id);
 
-        $data['sub_category'] = $sub_category;
-        $data['is_textual'] = ($sub_category->is_parameter == 0) ? 1: 0;
-
-        $data["is_ict"] = ($sub_category->is_ict == 1) ? true : false;
-        $data["paramenters"] = InvestigationParameter::where("investigation_sub_category_id", $cat_id)->get();
-
-        // return $paramenters;
-        $data["result"] = PatientInvestigationResult::where("patient_investigation_id", $inv_id)->get();
-
-        return view("laboratory.add_investigation_result", $data);
-    }
 
     public function store_inv_result()
     {
@@ -136,7 +121,38 @@ class InvestigationResult extends Controller
     {
         $data["result"] = PatientInvestigation::where("id", $inv_id)->where("status", 1)->with("patient", "subCategory.main_category", "investigationResult.parameter", "admission.consultant")->first();
         $data['inv_sub_category'] = InvestigationSubCategory::where(['id'=>$data["result"]->investigation_sub_category_id])->first();
+        foreach ($data["result"]->investigationResult as $key => $value){
+            $value->parameter_heading = $value->parameter->parameter_heading->name ?? '';
+        }
 
+       // $res = collect($data["result"]->investigationResult)->groupBy('parameter_heading')->toArray();
+        //dd($data["result"]->investigationResult);
         return view("reports.investigation_result", $data);
+    }
+
+    public function investigation_add_result($inv_id, $cat_id)
+    {
+        $data["investigation"] = PatientInvestigation::find($inv_id);
+        $data['patient'] = Patient::where("id",$data["investigation"]->patient_id)->first();
+        $sub_category = InvestigationSubCategory::find($cat_id);
+
+        $data['sub_category'] = $sub_category;
+        $data['is_textual'] = ($sub_category->is_parameter == 0) ? 1: 0;
+
+        $data["is_ict"] = ($sub_category->is_ict == 1) ? true : false;
+        $heading = ParameterHeading::where(["investigation_sub_category_id"=>$cat_id])->orWhere("id",1)->orderBy("id","asc")->get();
+        foreach ($heading as $key => $value){
+            $value->parameters = InvestigationParameter::where("is_active",1)
+                ->where("parameter_heading_id",$value->id)
+                ->where("investigation_sub_category_id", $cat_id)->orderBy("index_number","asc")->get();
+        }
+
+        $data['all_data'] = $heading;
+        $data["parameters"] = InvestigationParameter::where("is_active",1)->where("investigation_sub_category_id", $cat_id)->orderBy("index_number","asc")->get();
+
+        // return $paramenters;
+        $data["result"] = PatientInvestigationResult::where("patient_investigation_id", $inv_id)->get();
+
+        return view("laboratory.add_investigation_result", $data);
     }
 }

@@ -989,22 +989,22 @@ class PatientAdmissionController extends Controller
     public function updateAdmissionDetails($admission_id)
     {
         $admission = PatientAdmission::with('patient','procedure_type','consultant')->where(["id"=>$admission_id])->first();
-        $data['procedure_amount1'] = $admission->procedure_rate ?? '';
-        $data['procedure_amount'] = $admission->procedure_rate ?? '';
+        $data['procedure_amount1'] = $admission->procedure_rate ?? 0;
+        $data['procedure_amount'] = $admission->procedure_rate ?? 0;
         $data["is_medical_case"] = false;
         $data["daysDifference"] = 0;
 
-        $data['consultant_share'] = $admission->consultant_share;
+        $data['consultant_share'] = $admission->consultant_share ?? 0;
        // if($admission->procedure_rate == 0){
-            $data['procedure_amount1'] = $admission->procedure_rate;
-            $data['procedure_amount'] = $admission->procedure_rate;
+            $data['procedure_amount1'] = $admission->procedure_rate ?? 0;
+            $data['procedure_amount'] = $admission->procedure_rate ?? 0;
         //}
         /*if($admission->consultant_share == 0){
             $data['consultant_share'] = $admission->consultant->share_percentage;
         }*/
 
-        if($admission->procedure_type->type == "Medical"){
-            //    dd($admission);
+        if(($admission) && $admission->procedure_type->type == "Medical"){
+
             $data["is_medical_case"] = true;
             $admissionDate = Carbon::parse($admission->admission_date);
             $dischargeDate = Carbon::parse($admission->discharge_date);
@@ -1040,7 +1040,7 @@ class PatientAdmissionController extends Controller
 
         $data['investigation_amount'] = $investigationAmount;
         $data['service_charges'] = PatientServiceCharges::where(["admission_id"=>$admission_id,"is_active"=>1])->sum('service_rate');
-        $patient_id = $admission->patient_id;
+        $patient_id = $admission->patient_id ?? 0;
         $sale_details = SaleDetails::with("product", "sale")
             ->when($patient_id, function ($query) use ($patient_id) {
                 $query->where('patient_id', $patient_id);

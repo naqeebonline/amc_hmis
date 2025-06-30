@@ -1,0 +1,200 @@
+<?php
+
+namespace App\Http\Controllers\Finance;
+
+use App\Http\Controllers\Controller;
+use App\Models\Appointments\Appointment;
+use App\Models\Finance\DailyUserClosing;
+use App\Models\Finance\FinanceHead;
+use App\Models\Finance\FinanceTransaction;
+use App\Models\Patient\PatientInvestigation;
+use App\Models\Sale;
+use App\Models\Users;
+use Illuminate\Http\Request;
+
+class FinanceController extends Controller
+{
+    public function daily_closing()
+    {
+        $closing_date = $_GET['closing_date'] ?? date("Y-m-d");
+        $user_id = $_GET['user_id'] ?? 0;
+        $data['user_id'] = $user_id;
+        $data['closing_date'] = $closing_date;
+        $data['users'] = Users::where("status",1)->get();
+        $data['finance_heads'] = FinanceHead::get();
+
+        $query = Sale::where('store_id', session('store_id'))
+            ->where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('Date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('CreatedBy',$user_id);
+            });
+
+        $totals = $query->selectRaw('SUM(TotalSale) as TotalSale, SUM(Discount) as Discount, SUM(received_amount) as received_amount')->first();
+        $data['data'] = $totals;
+
+        $data['appointments'] = $this->appointmentsPayment($closing_date,$user_id);
+        $data['investigations'] = $this->investigationPayment($closing_date,$user_id);
+
+       return view("Finance.daily_closing",$data);
+    }
+
+    public function post_daily_closing()
+    {
+        $user_id = request()->user_id;
+        $closing_date = request()->closing_date;
+        if(request()->finance_head_id == ''){
+            echo "Please select account head to post amount";
+            exit;
+        }
+        $query = Sale::where('store_id', session('store_id'))
+            ->where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('Date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('CreatedBy',$user_id);
+            });
+
+        $sale_totals = $query->selectRaw('SUM(TotalSale) as TotalSale, SUM(Discount) as Discount, SUM(received_amount) as received_amount')->first();
+        $appointments = $this->appointmentsPayment($closing_date,$user_id);
+        $investigations = $this->investigationPayment($closing_date,$user_id);
+
+        $sale = $sale_totals->received_amount ?? 0;
+        $appointments = $appointments->total_fees ?? 0;
+        $investigations = $investigations->cash_in_hand ?? 0;
+        $total_amount = ($sale) + ($appointments) + ($investigations);
+
+        $record = [];
+        if($sale > 0){
+            array_push($record,[
+                'transaction_date' => today(),
+                'amount' => $sale,
+                'debit_head_id' => request()->finance_head_id,  //cash at office
+                'credit_head_id' => 3, // pharmacy income
+                'reference_type' => 'sale',
+                'reference_id' => NULL,
+                'user_id' => auth()->id(),
+                'remarks' => 'Full pharmacy sale posted to cash at office by '.auth()->user()->name,
+                'created_at' => now()
+            ]);
+        }
+        if($appointments > 0){
+            array_push($record,[
+                'transaction_date' => today(),
+                'amount' => $appointments,
+                'debit_head_id' => request()->finance_head_id,  //cash at office
+                'credit_head_id' => 4, // Appointments income
+                'reference_type' => 'appointments',
+                'reference_id' => NULL,
+                'user_id' => auth()->id(),
+                'remarks' => 'Full appointment fee posted to cash at office by '.auth()->user()->name,
+                'created_at' => now()
+            ]);
+
+            $all_appointments = Appointment::with(['consultant'])->where("is_posted",0)
+                ->when($closing_date, function ($query) use ($closing_date) {
+                    return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($closing_date)));
+                })
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('created_by',$user_id);
+                })->get();
+            foreach ($all_appointments as $key => $value){
+                    $rec = [
+                        'transaction_date' => today(),
+                        'amount' => $value->consultant_share,
+                        'debit_head_id' => NULL,  //cash at office
+                        'credit_head_id' => $value->consultant->finance_head_id, // doctor chart of account head id
+                        'reference_type' => 'appointments',
+                        'reference_id' => $value->id,
+                        'user_id' => auth()->id(),
+                        'remarks' => 'Consultant share posted to doctor account by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
+            }
+
+        }
+
+        if($investigations > 0){
+            array_push($record,[
+                'transaction_date' => today(),
+                'amount' => $investigations,
+                'debit_head_id' => request()->finance_head_id,  //cash at office
+                'credit_head_id' => 5, // Appointments income
+                'reference_type' => 'patient_investigations',
+                'reference_id' => NULL,
+                'user_id' => auth()->id(),
+                'remarks' => 'Full investigation fee posted to cash at office by '.auth()->user()->name,
+                'created_at' => now()
+            ]);
+        }
+
+        FinanceTransaction::insert($record);
+        $remarks = "Closing done by ".auth()->user()->name." on ".date("Y-m-d H:i:s");
+        DailyUserClosing::create(["user_id"=>auth()->user()->id,"closing_date"=>$closing_date,"investigation_amount"=>$investigations,"sale_amount"=>$sale,"appointment_amount"=>$appointments,"total_amount"=>$total_amount,"remarks"=>$remarks]);
+        $this->update_post_status($closing_date,$user_id);
+        return redirect()->back();
+    }
+
+    public function appointmentsPayment($closing_date='',$user_id='')
+    {
+        $query = Appointment::where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            });
+
+        $totals = $query->selectRaw('SUM(fee) as total_fees, SUM(hospital_share) as total_hospital_share, SUM(consultant_share) as total_consultant_share')->first();
+        return $totals;
+    }
+
+    public function investigationPayment($closing_date='',$user_id='')
+    {
+        $query = PatientInvestigation::where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('inv_date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            });
+
+        $totals = $query->selectRaw('SUM(sale_price) as total_inv_amount, SUM(discount_amount) as total_discount_amount, SUM(inv_amount) as total_cost,SUM(sale_price) - SUM(discount_amount) as cash_in_hand')->first();
+        return $totals;
+    }
+
+    public function update_post_status($closing_date,$user_id)
+    {
+         Sale::where('store_id', session('store_id'))
+            ->where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('Date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('CreatedBy',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+
+
+        Appointment::where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+
+        PatientInvestigation::where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('inv_date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+
+        return true;
+    }
+}

@@ -68,8 +68,9 @@ Route::get('/psw-generate', function () {
 })->name("create-meeting");*/
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::get("sehatCardDashboard", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatCardDashboard"])->name("pos.sehatCardDashboard");
-    Route::get('pharmacy_dashboard', [\App\Http\Controllers\HomeController::class, 'pharmacy_dashboard'])->name('user.pharmacy_dashboard');
+    Route::get("sehatCardDashboard", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatCardDashboard"])->name("pos.sehatCardDashboard")->middleware('store.selected');
+    Route::get('pharmacy_dashboard', [\App\Http\Controllers\HomeController::class, 'pharmacy_dashboard'])->name('user.pharmacy_dashboard')->middleware('store.selected');
+    Route::get('/retail-dashboard', [App\Http\Controllers\Dashboard\DashboardController::class, 'retailPharmacyDashboard'])->name('pos.retailPharmacyDashboard')->middleware('store.selected');
     Route::get('user-dashboard', [\App\Http\Controllers\HomeController::class, 'userDashboard'])->name('user.dashboard');
     Route::get('view-history', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'index'])->name('view-history');
     Route::get('list-sms', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'listSms'])->name('list-sms');
@@ -226,6 +227,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('investigation_sub_category', [\App\Http\Controllers\GeneralConfigration\InvestigationController::class, 'add_investigation_sub_category'])->name('pos.add_investigation_sub_category');
     Route::get('list_investigation_sub_category', [\App\Http\Controllers\GeneralConfigration\InvestigationController::class, 'list_investigation_sub_category'])->name('pos.list_investigation_sub_category');
     Route::post('save_investigation_sub_category', [\App\Http\Controllers\GeneralConfigration\InvestigationController::class, 'save_investigation_sub_category'])->name('pos.save_investigation_sub_category');
+    Route::post('save_report_heading', [\App\Http\Controllers\GeneralConfigration\InvestigationController::class, 'save_report_heading'])->name('pos.save_report_heading');
 
     Route::get('investigation_parameter/{id?}', [\App\Http\Controllers\GeneralConfigration\InvestigationController::class, 'add_investigation_parameter'])->name('pos.add_investigation_parameter');
     Route::get('list_investigation_parameter/{id?}', [\App\Http\Controllers\GeneralConfigration\InvestigationController::class, 'list_investigation_parameter'])->name('pos.list_investigation_parameter');
@@ -372,10 +374,16 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("get_sc_payments_to_doctors/{id?}", [\App\Http\Controllers\Accounts\DoctorPaymentsController::class,  "get_sc_payments_to_doctors"])->name("pos.get_sc_payments_to_doctors");
     Route::get("print_doctor_invoice/{id?}", [\App\Http\Controllers\Accounts\DoctorPaymentsController::class,  "print_doctor_invoice"])->name("pos.print_doctor_invoice");
 
+
     Route::get('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'showForm'])->name('pos.import_form');
     Route::post('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'import'])->name('pos.import');
     Route::post('/saveSehatCardPayment', [\App\Http\Controllers\CsvImportController::class, 'saveSehatCardPayment'])->name('pos.saveSehatCardPayment');
-    Route::get('/retail-dashboard', [App\Http\Controllers\Dashboard\DashboardController::class, 'retailPharmacyDashboard'])->name('pos.retailPharmacyDashboard');
+
+
+    Route::get('/daily-closing', [\App\Http\Controllers\Finance\FinanceController::class, 'daily_closing'])->name('pos.daily_closing');
+    Route::post('/post_daily_closing', [\App\Http\Controllers\Finance\FinanceController::class, 'post_daily_closing'])->name('pos.post_daily_closing');
+    Route::get('/balanceReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'balanceReport'])->name('pos.balanceReport');
+    Route::get('/profitAndLossReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'profitAndLossReport'])->name('pos.profitAndLossReport');
 
 
 });

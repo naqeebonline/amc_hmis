@@ -43,6 +43,7 @@
                                             <th>Purchase Price</th>
                                             <th>Sale Price</th>
                                             <th>Test Type</th>
+                                            <th>Report Headings</th>
                                             <th style="width: 10%">Action</th>
                                         </tr>
                                     </thead>
@@ -135,6 +136,46 @@
                     <button type="submit" id="submit_btn" class="btn btn-primary">Save</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="add_report_heading_model" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form class="modal-content form-submit-event">
+                <input type="hidden" id="investigation_sub_category_id" name="investigation_sub_category_id" value="0">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Add Report Heading</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Index Number<span class="asterisk">*</span></label>
+                            <input type="number" required id="index_number" name="index_number" class="form-control" placeholder=""
+                                   autocomplete="off">
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Heading Name<span class="asterisk">*</span></label>
+                            <input type="text" required id="heading_name" name="heading_name" class="form-control" placeholder=""
+                                   autocomplete="off">
+                        </div>
+
+
+
+
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close </button>
+                    <a type="submit" id="save_report_heading" class="btn btn-primary">Save</a>
+                </div>
+        </from>
         </div>
     </div>
 @endsection
@@ -279,6 +320,11 @@
                         searchable: true
                     },
                     {
+                        data: 'report_heading',
+                        name: 'report_heading',
+                        searchable: true
+                    },
+                    {
                         data: 'action',
                         name: 'action',
                         orderable: false,
@@ -301,6 +347,45 @@
             $('#attendance_user_filter, #attendance_date_from, #attendance_date_to').on('change', function(e) {
                 e.preventDefault();
                 user_table.ajax.reload();
+            });
+
+            $("body").on("click", ".add_report_heading", function(e) {
+                var investigation_sub_category_id = $(this).attr("data-id");
+
+
+                var index_number = $("#index_number").val('');
+                var heading_name = $("#heading_name").val('');
+                var investigation_sub_category_id = $("#investigation_sub_category_id").val(investigation_sub_category_id);
+               $("#add_report_heading_model").modal('show');
+            });
+
+
+            $("body").on("click", "#save_report_heading", function(e) {
+               var index_number = $("#index_number").val();
+               var heading_name = $("#heading_name").val();
+               var investigation_sub_category_id = $("#investigation_sub_category_id").val();
+               if(index_number == '' || heading_name == ''){
+                   alert("Please fill all fields");
+                   return false;
+               }
+
+                $.ajax({
+                    type: 'post',
+                    url: "{{ route('pos.save_report_heading') }}",
+                    data: {
+                        id: 0,
+                        index_number:index_number,
+                        name:heading_name,
+                        investigation_sub_category_id:investigation_sub_category_id,
+                        _token: '{{ csrf_token() }}'
+
+                    },
+                    success: function(res) {
+                        user_table.ajax.reload();
+                        $("#add_report_heading_model").modal('hide');
+                       alert("Record Added Successfully");
+                    }
+                })
             });
 
             $("body").on("click", ".delete_record", function(e) {

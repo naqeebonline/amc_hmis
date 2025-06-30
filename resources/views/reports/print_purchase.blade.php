@@ -76,7 +76,7 @@
                     </div>
                     <div class="col-6">
                         <p class="m-0">Address: {{ $supplier->Address }}</p>
-                        <p class="m-0">Market: {{ $supplier->market->name }}</p>
+                        <p class="m-0">Market: {{ $supplier->market->name ?? '' }}</p>
                     </div>
                 </div>
             </div>

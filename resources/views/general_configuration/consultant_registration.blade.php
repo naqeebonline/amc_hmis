@@ -43,9 +43,11 @@
                                         <th >Type</th>
                                         <th >General OPD</th>
                                         <th >Consultant OPD</th>
-                                        <th >Hospital Share</th>
-                                        <th >Consultant Share</th>
+                                        <th >Hospital Share Rs</th>
+                                        <th >Consultant Share Rs</th>
                                         <th >Share (%age)</th>
+                                        <th >Lab Share (%age)</th>
+
                                         <th  style="width: 10%">Action</th>
                                     </tr>
                                     </thead>
@@ -135,30 +137,36 @@
                         <div class="col-md-6 mb-3">
                             <label for="nameBasic" class="form-label">Sehat Card Share (%age)<span
                                         class="asterisk">*</span></label>
-                            <input type="number" class="form-control" name="share_percentage" id="share_percentage">
+                            <input type="number" class="form-control" value="0" name="share_percentage" id="share_percentage">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="nameBasic" class="form-label">General OPD Fee<span
                                         class="asterisk">*</span></label>
-                            <input type="number" class="form-control" name="general_opd_fee" id="general_opd_fee">
+                            <input type="number" class="form-control" value="0" name="general_opd_fee" id="general_opd_fee">
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="nameBasic" class="form-label">Consultant OPD Fee<span
                                         class="asterisk">*</span></label>
-                            <input type="number" class="form-control" name="consultant_opd_fee" id="consultant_opd_fee">
+                            <input type="number" class="form-control" value="0" name="consultant_opd_fee" id="consultant_opd_fee">
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label for="nameBasic" class="form-label">Hospital Share<span
+                            <label for="nameBasic" class="form-label">Hospital Share Rs.<span
                                         class="asterisk">*</span></label>
-                            <input type="number" class="form-control" name="hospital_share" id="hospital_share">
+                            <input type="number" class="form-control" value="0" name="hospital_share" id="hospital_share">
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label for="nameBasic" class="form-label">Consultant Share<span
+                            <label for="nameBasic" class="form-label">Consultant Share Rs.<span
                                         class="asterisk">*</span></label>
-                            <input type="number" class="form-control" name="consultant_share" id="consultant_share">
+                            <input type="number" class="form-control" value="0" name="consultant_share" id="consultant_share">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="nameBasic" class="form-label">Lab Percentage<span
+                                        class="asterisk">*</span></label>
+                            <input type="number" class="form-control" value="0" name="lab_percentage" id="lab_percentage">
                         </div>
 
 
@@ -205,6 +213,7 @@
             $("#consultant_opd_fee").val(0);
             $("#hospital_share").val(0);
             $("#consultant_share").val(0);
+            $("#lab_percentage").val(0);
             $("#add_new_record_model").modal("show");
 
         });
@@ -225,6 +234,7 @@
             $("#consultant_opd_fee").val(details.consultant_opd_fee);
             $("#hospital_share").val(details.hospital_share);
             $("#consultant_share").val(details.consultant_share);
+            $("#lab_percentage").val(details.lab_percentage);
             $("#add_new_record_model").modal("show");
         });
 
@@ -290,6 +300,7 @@
                     {data: 'hospital_share', name: 'hospital_share',searchable: true},
                     {data: 'consultant_share', name: 'consultant_share',searchable: true},
                     {data: 'share_percentage', name: 'share_percentage',searchable: true},
+                    {data: 'lab_percentage', name: 'lab_percentage',searchable: true},
                     {data: 'action', name: 'action', orderable: false, searchable: false}
                 ],
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Finance\FinanceTransaction;
 use App\Models\Grn;
 use App\Models\GrnAudit;
 use App\Models\GrnAuditDetails;
@@ -402,14 +403,25 @@ class StockController extends Controller
 
 
             $qty = $pack_qty;
-            $total_amount = $qty * $value->pack_price;
+            //$total_amount = $qty * $value->pack_price;
+            $total_amount = $value->Quantity * $value->UnitPrice;
+           // echo ($value->Quantity). "*". $value->UnitPrice ." ==".$value->Quantity * $value->UnitPrice."<br>";
             $totalAmount += $total_amount;
             $totalAdvanceTax += $advance_tax_amount;
             $totalGst += $gst_tax_amount;
             $total_per_item_discount += $per_item_discount;
         }
+
+         $final_total = ($totalAmount) + ($totalAdvanceTax) + ($totalGst) - ($total_per_item_discount);
+        //dd($final_total);
+
+
+
+
+
+
         //dd(["ModifiedBy"=>auth()->user()->id,"TotalPurchase" => ($totalAmount + $totalAdvanceTax + $totalGst), "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
-        GrnRequest::where(["GRNID" => $grnID])->update(["ModifiedBy"=>auth()->user()->id,"per_item_discount"=>$total_per_item_discount,"TotalPurchase" => ($totalAmount + $totalAdvanceTax + $totalGst), "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
+        GrnRequest::where(["GRNID" => $grnID])->update(["ModifiedBy"=>auth()->user()->id,"per_item_discount"=>$total_per_item_discount,"TotalPurchase" => ($totalAmount + $totalAdvanceTax + $totalGst - $per_item_discount), "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
         
         return true;
 
@@ -478,6 +490,19 @@ class StockController extends Controller
         }
 
         GrnRequest::where(["GRNID"=>request()->id])->update(["bill_status"=>1]);
+
+        FinanceTransaction::insert([
+            'transaction_date' => today(),
+            'amount' => $grn['TotalPurchase'],
+            'debit_head_id' => NULL,  //because cash will be paid from cash at office
+            'credit_head_id' => 9, // Supplier chart of account head
+            'reference_type' => 'grn',
+            'reference_id' => $grn->GRNID,
+            'user_id' => auth()->id(),
+            'remarks' => 'Pharmacy product purchased from supplier. grn_request approved by '.auth()->user()->name,
+            'created_at' => now()
+        ]);
+
         return response()->json(["status"=>true,"message"=>"done"]);
     }
 
@@ -736,6 +761,7 @@ class StockController extends Controller
                 $q->where('store_id',$store_id);
             })
             ->sum('RemainingQuantity');
+
         $consumed = ProductConsumption::where(["product_id"=> $productID])
             ->when($store_id,function ($q) use($store_id){
                 $q->where('store_id',$store_id);

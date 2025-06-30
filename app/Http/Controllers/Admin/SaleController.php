@@ -100,7 +100,7 @@ class SaleController extends Controller
             session(['is_free' => $store->use_purchase_price_as_sale_price]);
         }
 
-        $type = $_GET['type'] ?? "";
+        $type = $_GET['type'] ?? "Home";
         $data['type'] = $type;
         $data["ward_request"] = $_GET["ward_request"] ?? "";
         $data['patient_id'] = "";
@@ -143,7 +143,7 @@ class SaleController extends Controller
         //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
         $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1])
             ->where("patient_type","!=","sehat_card")
-            ->orWhere("patient_type","!=","configuration")
+            ->where("patient_type","!=","configuration")
             ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
             ->with(["patient"])->get();
 
@@ -619,9 +619,13 @@ class SaleController extends Controller
         $retrun_qty = request()->ReturnQuantity;
         $total_return_price = ($sale_details->UnitePrice) * ($retrun_qty);
         $total_return_qty = ($sale_details->ReturnQuantity) + ($retrun_qty);
+        $discount_percentage_amount = round(($total_return_price * $discount_percentage)/100);
+
 
         $total_sale_amount = ($sale->TotalSale)-($total_return_price);
-        $received_amount = ($total_sale_amount)-($sale->Discount);
+        //----- collect discount percentage from coustomer on return -----//
+        $total_return_price = round($total_return_price - $discount_percentage_amount);
+        $received_amount = ($sale->received_amount) - ($total_return_price);
 
 
         //------- sale related operations  ------------//
@@ -666,7 +670,7 @@ class SaleController extends Controller
                 if($patient->ReturnQuantity == $patient->Quantity){
                     return "";
                 }else{
-                    return '<a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-primary return_product">Return</a>';
+                    return '<a href="javascript:void(0)"  data-details=\'' . $patient . '\' sale-price=\'' . $patient->UnitePrice . '\' data-discount-percentage=\'' . $patient->sale->discount_percentage . '\'  class="btn btn-sm btn-primary return_product">Return</a>';
                 }
 
             })

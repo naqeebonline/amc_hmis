@@ -138,6 +138,7 @@
                             <input type="number" min="0" required id="ReturnQuantity" name="ReturnQuantity" class="form-control"
                                 placeholder="" autocomplete="off">
                         </div>
+                        <p id="return_details" class="mt-2"></p>
                         {{-- <div class="col-md-12 mb-3">
                             <label for="nameBasic" class="form-label">Quantity<span class="asterisk">*</span></label>
                             <input type="number" readonly required id="quantity" name="quantity" class="form-control"
@@ -171,6 +172,8 @@
     <script src="{{ asset('assets/js/jquery.form.min.js') }}"></script>
 
     <script>
+        discount_percentage = 0;
+        sale_price = 0;
         setTimeout(function() {
 
             $('#admit_patient').select2();
@@ -200,7 +203,7 @@
                     [100, 250, 500, 1000],
                     ['100', '250', '500', '1000']
                 ],
-                pageLength: 50,
+                pageLength: 500,
                 ajax: {
                     url: `{{ route('pos.get_bill_details') }}/${sale_id}`,
                     data: function(d) {
@@ -279,7 +282,9 @@
 
         $("body").on("click", ".return_product", function(e) {
             let data = $(this).attr("data-details");
-            let details = JSON.parse(data); 
+            discount_percentage = $(this).attr("data-discount-percentage");
+            sale_price = $(this).attr("sale-price");
+            let details = JSON.parse(data);
 
 
             $("#return_product_modal").modal("show");
@@ -297,10 +302,17 @@
             "use strict";
             let returnQuantity = parseInt($(this).val()) || 0;
             let Quantity = parseInt($("#Quantity").val()) || 0;
+            $("#return_details").html('');
             if (returnQuantity > Quantity) {
                 alert("Return Quantity cannot be greater than Quantity");
                 $(this).val(Quantity);
+                return false;
             }
+
+            var total_amount = parseInt(sale_price * returnQuantity) || 0;
+            var percentage_amount = parseInt((total_amount * discount_percentage)/100);
+            var return_amount = total_amount - percentage_amount;
+            $("#return_details").append(`<b>Total Amount:${total_amount} <br> Discount Rs:${percentage_amount} (${discount_percentage}%) <br> <span style='color:red'>Return Amount: ${return_amount}</span></b>`);
         });
 
         $("body").on("click", "#return_item_to_stock", function(e) {

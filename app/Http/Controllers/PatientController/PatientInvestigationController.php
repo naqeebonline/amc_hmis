@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PatientController;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuration\Consultants;
 use App\Models\Configuration\District;
 use App\Models\Configuration\InvestigationMainCategory;
 use App\Models\Configuration\InvestigationParameter;
@@ -28,13 +29,13 @@ class PatientInvestigationController extends Controller
         $data["relations"] = Relation::get();
         $data["district"] = District::get();
         $data["locations"] = PatientLocation::get();
+        $data["consultants"] = Consultants::where(["is_active"=>1])->get();
         return view("investigation.patient_investigation",$data);
     }
 
     public function save_general_patient_investigation()
     {
-        $data = request()->except(['_token', "id","list_investigations","invoice_no","discount_percentage"]);
-
+        $data = request()->except(['_token', "id","list_investigations","invoice_no","discount_percentage","consultant_id"]);
 
 
         if(request()->id == 0){
@@ -58,16 +59,30 @@ class PatientInvestigationController extends Controller
             ]);
         }
 
+
+
+        $consultant_share_percentage = 0;
+        $consultant_id = 0;
+        if(request()->has('consultant_id')){
+            $consultant_id = request()->consultant_id;
+            $con = Consultants::where(["id"=>$consultant_id])->first();
+            $consultant_share_percentage = $con->lab_percentage ?? 0;
+
+        }
+
         foreach ($list_investigations as $key => $value){
             $investigation = InvestigationSubCategory::where("id",$value->investigation_id)->first();
-
+            $investigation_rate_after_discount = ($investigation->sale_price) - ($value->discount_amount);
             $data = [
-                "invoice_no"    => request()->invoice_no,
-                "patient_id"    => $patient_id,
+                "invoice_no"        => request()->invoice_no,
+                "patient_id"        => $patient_id,
                 "investigation_sub_category_id"    => $value->investigation_id,
-                "inv_amount"    => $investigation->price,
-                "sale_price"    => $investigation->sale_price,
-                "frequency"    => $value->frequency,
+                "consultant_id"    => $consultant_id,
+                "consultant_share_percentage"    => $consultant_share_percentage,
+                "consultant_share_amount"    => ($investigation_rate_after_discount * $consultant_share_percentage)/100,
+                "inv_amount"        => $investigation->price,
+                "sale_price"        => $investigation->sale_price,
+                "frequency"         => $value->frequency,
                 "discount_percentage"    => $value->discount_percentage,
                 "discount_amount"    => $value->discount_amount,
                 "inv_date"    => date("Y-m-d H:i:s"),

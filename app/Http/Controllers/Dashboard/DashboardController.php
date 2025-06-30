@@ -5,13 +5,25 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Appointments\Appointment;
 use App\Models\Patient\PatientInvestigation;
+use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function retailPharmacyDashboard()
     {
+
+   /*     DB::table('products')
+            ->where('store_id', 2)
+            ->update([
+                'total_amount_of_avaliable_stock' => 0,
+                'total_amount_of_purchase_stock' => 0,
+                'avaliable_quantity' => 0,
+                'phy_avaliable_quantity' => 0,
+            ]);*/
+
         $from_date = $_GET['from_date'] ?? date("Y-m-d");
         $to_date = $_GET['to_date'] ?? date("Y-m-d");
         $data['from_date'] = $from_date;

@@ -70,6 +70,10 @@ class PatientController extends Controller
           $patient = Patient::where("mr_no", request()->mr_number)->get();
       }
 
+      if(request()->cnic){
+          $patient = Patient::where("cnic", request()->cnic)->get();
+      }
+
 
       if(count($patient) > 0){
          return response()->json([

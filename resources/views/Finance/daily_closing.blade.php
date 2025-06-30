@@ -1,0 +1,173 @@
+@extends('layouts.' . config('settings.active_layout'))
+@php $app_id = config('settings.app_id') @endphp
+
+@push('stylesheets')
+    <style>
+        .table> :not(caption)>*>* {
+            padding: 5px;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+@endpush
+
+@section('content')
+    <div class="row">
+        <div class="col-12">
+
+            <!-- Traffic sources -->
+            <div class="card">
+                <div class="card-body">
+                    <form class=" form-submit-event" id="patient_register">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-4 mb-3">
+                                <label for="nameBasic" class="form-label">location<span class="asterisk">*</span></label>
+
+                                <select name="user_id" required id="user_id" class="form-select">
+                                    <option value="">Select User ---</option>
+                                    @foreach ($users as $key => $value)
+                                        <option value="{{ $value->id }}" {{ ($value->id == $user_id) ? "selected" : ""}}>{{ $value->name }}</option>
+                                    @endforeach
+                                </select>
+
+
+                            </div>
+
+                            <div class="col-md-3 col-sm-4 mb-3" >
+                                <label for="nameBasic" class="form-label">Closing Date<span class="asterisk">*</span></label>
+                                <input  type="date" required id="closing_date" value="{{date("Y-m-d")}}" name="closing_date" class="form-control"
+                                        placeholder="" autocomplete="off">
+                            </div>
+
+
+                            <div class="col-md-3 col-sm-4 mt-4">
+                                <button class="btn btn-success" id="show_button">Show</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+
+            <!-- Traffic sources -->
+            <div class="card">
+                <div class="card-body">
+                    <form class=" form-submit-event" method="post" action="{{route('pos.post_daily_closing')}}" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="user_id" value="{{$user_id}}">
+                        <input type="hidden" name="closing_date" value="{{$closing_date}}">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-4 mb-3">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td style="width: 60%">Investigation</td>
+                                        <td style="width: 40%">{{$investigations->cash_in_hand ?? 0}}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Appointments</td>
+                                        <td>{{$appointments->total_fees ?? 0}}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Pharmacy Sale</td>
+                                        <td>{{$data->received_amount ?? 0}}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand)}}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Cash Closing</td>
+                                        <td>
+                                            <select class="form-control" required id="finance_head_id" name="finance_head_id">
+                                                <option value="">Select Head...</option>
+                                                @foreach($finance_heads as $key => $value)
+                                                    <option value="{{$value->id}}">{{$value->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td></td>
+                                        <td><button class="form-control btn btn-primary" type="submit">Post</button></td>
+                                    </tr>
+                                </table>
+
+
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="add_new_record_model" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form class="modal-content form-submit-event" id="from_submit">
+                <input type="hidden" id="id" name="id" value="0">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Patients</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Serial</th>
+                                <th>Name</th>
+                                <th>Father Name</th>
+                                <th></th>
+                            </tr>
+                            <tbody id="prev_patients">
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+
+
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/vendor/libs/datatables/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-responsive/datatables.responsive.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/select2/select2.css') }}" />
+    <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.form.min.js') }}"></script>
+
+    <script type="text/javascript">
+        setTimeout(function () {
+            $("#user_id").select2();
+            $("#finance_head_id").select2();
+        },1000);
+    </script>
+@endpush

@@ -91,6 +91,7 @@ class ProductController extends Controller
     function get_items_by_product_id(){
         $p_id=request()->p_id;
         $resultSet = Product::where(["ProductID"=>$p_id])->get();
+
         $is_product_kit = ProductKit::with(["product"])->where(["product_main_id"=>$p_id,"is_active"=>1])->get(["product_id","product_id as ProductID","qty"]);
 
         $is_kit = count($is_product_kit);
@@ -108,6 +109,7 @@ class ProductController extends Controller
             }
 
             foreach($resultSet as $value){
+
                 //$newAvaliableQty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');
                 $newAvaliableQty = (new StockController())->avaliableQuantity($value->ProductID);
 
