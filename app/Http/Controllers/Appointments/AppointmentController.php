@@ -79,8 +79,6 @@ class AppointmentController extends Controller
     {
         $data = request()->except(['_token', "id"]);
 
-
-
         if(request()->id == 0){
             $number = (new PatientController())->generateMrNumber();
             $data['mr_no'] = $number;

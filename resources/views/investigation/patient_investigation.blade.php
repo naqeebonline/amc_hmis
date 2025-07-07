@@ -868,10 +868,9 @@
             if (confirm('Are you sure to delete this record ?')) {
                 $.ajax({
                     type: 'post',
-                    url: "{{ route('pos.deactivate_record') }}",
+                    url: "{{ route('pos.delete_patient_investigation') }}",
                     data: {
                         id: id,
-                        table: "patient_investigations",
                         _token: '{{ csrf_token() }}'
 
                     },

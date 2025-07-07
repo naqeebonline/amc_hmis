@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Finance\FinanceHead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,6 +26,8 @@ class GrnRequest extends Model
     public function store(){
         return $this->belongsTo(Store::class,"store_id","id");
     }
+
+
 
   
     

@@ -14,6 +14,7 @@ use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientInvestigation;
+use App\Models\Patient\PatientInvestigationPayment;
 use App\Models\Patient\PatientLocation;
 use App\Models\Patient\Relation;
 use Illuminate\Http\Request;
@@ -69,10 +70,11 @@ class PatientInvestigationController extends Controller
             $consultant_share_percentage = $con->lab_percentage ?? 0;
 
         }
-
+        $total_inv_amount = 0;
         foreach ($list_investigations as $key => $value){
             $investigation = InvestigationSubCategory::where("id",$value->investigation_id)->first();
             $investigation_rate_after_discount = ($investigation->sale_price) - ($value->discount_amount);
+            $total_inv_amount = ($total_inv_amount) + ($investigation_rate_after_discount);
             $data = [
                 "invoice_no"        => request()->invoice_no,
                 "patient_id"        => $patient_id,
@@ -93,6 +95,8 @@ class PatientInvestigationController extends Controller
             ];
             PatientInvestigation::create($data);
         }
+
+        PatientInvestigationPayment::create(["invoice_no"=>request()->invoice_no,"patient_id"=>$patient_id,"amount"=>$total_inv_amount,"created_by"=>auth()->user()->id,"created_at"=>date("Y-m-d H:i:s")]);
 
         return response()->json([
             "status" => true,
@@ -157,6 +161,30 @@ class PatientInvestigationController extends Controller
             "status" => true,
             "message" => "Record save successfully."
         ]);
+    }
+
+
+    public function delete_patient_investigation()
+    {
+
+
+        PatientInvestigation::whereId(request()->id)->update(["is_active"=>0]);
+        $list_investigations = PatientInvestigation::whereId(request()->id)->first();
+        $invoice_no = $list_investigations->invoice_no ?? "";
+        $list_investigations = PatientInvestigation::with("subCategory")->where("invoice_no",$invoice_no)->where(["is_active"=>1])->get();
+        $total_inv_amount = 0;
+
+
+        foreach ($list_investigations as $key => $value){
+
+            //$investigation = InvestigationSubCategory::where("id",$value->investigation_id)->first();
+
+            $investigation_rate_after_discount = ($value->sale_price) - ($value->discount_amount);
+            $total_inv_amount = ($total_inv_amount) + ($investigation_rate_after_discount);
+        }
+
+        PatientInvestigationPayment::where("invoice_no",$invoice_no)->update(["amount"=>$total_inv_amount]);
+        return ["status"=>true,"message"=>"Record saved successfully"];
     }
 
 

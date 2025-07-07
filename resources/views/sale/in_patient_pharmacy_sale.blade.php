@@ -239,7 +239,7 @@
                 <option value="">Please Select Patient...</option>
                {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
                 <?php foreach($admitted_patients as $key => $value){ ?>
-                <option data-admission_id="0" value="<?php echo $value->id; ?>" {{($value->patient_type == "walking_customer") ? "selected" : ""}}><?php echo $value->name; ?></option>
+                <option data-admission_id="{{$value->id}}" value="<?php echo $value->patient_id; ?>" {{($value->patient_type == "walking_customer") ? "selected" : ""}}><?php echo $value->patient->name." - ".$value->patient->mr_no; ?> Status:({{$value->admission_status}}) </option>
                 <?php } ?>
             </select>
         </div>
@@ -389,8 +389,8 @@
                     </div>
 
                     <div class="col-md-2">
-                        <label for="remarks">Received Amount</label>
-                        <input type="number"  id="ReceivedAmount" style="color:red;font-weight: bold; font-size: 12px;" value="0" class="form-control">
+                        <label for="remarks">Balance</label>
+                        <input type="text" disabled="disabled"  id="PatientBalance" style="pointer-events:none;color:red;font-weight: bold; font-size: 12px;" value="0" class="form-control">
                     </div>
 
 
@@ -441,9 +441,11 @@
                 <table class="table table-bordered" style="width: 100%" id="previous-bill-table">
                     <thead>
                         <tr>
-                            <th>Invioce #</th>
+                            <th width="5%">Invoice #</th>
                             <th>Patient</th>
-                            <th>Amount</th>
+                            <th>Total</th>
+
+                            <th>Received</th>
                             <th style="width: 30%">Actions</th>
                         </tr>
                     </thead>
@@ -502,11 +504,26 @@
                         name: 'patient.name',
                         searchable: true
                     },
+
+                    {
+                        data: null,
+                        name: 'TotalSale',
+                        searchable: true,
+                        render: function(data, type, row) {
+
+                                return ((row.TotalSale) - (row.Discount)).toFixed(2);
+
+
+
+                        }
+                    },
+
                     {
                         data: 'received_amount',
                         name: 'received_amount',
                         searchable: true
                     },
+
                     {
                         data: 'action',
                         name: 'action',
@@ -575,7 +592,7 @@
 
         $("body").on("change","#medicine_type",function () {
             var value = $(this).val();
-            window.location = "{{route('pos.retail_pharmacy_sale')}}?type="+value;
+            window.location = "{{route('pos.in_patient_pharmacy_sale')}}?type="+value;
         });
 
         $("body").on("change","#discount_id",function () {
@@ -718,7 +735,7 @@
             bill_date = $("#bill_date").val();
             customer_name = $("#customer_name").val();
             previous_balance = $("#previous_balance").val();
-            ReceivedAmount = $("#ReceivedAmount").val();
+            ReceivedAmount = 0;
             BillDiscription = $("#BillDiscription").val();
             BillAmount = $("#BillAmount").val();
             bill_address = '';
@@ -810,7 +827,7 @@
                     ProductList,
                     "_token": "{{ csrf_token() }}"
                 },
-                url: "{{ route("pos.save_retail_sale") }}",
+                url: "{{ route('pos.save_retail_sale') }}",
                 success:function(response){
                     $("#save_bill").show();
                     sale_id_for_print=response.id;
@@ -822,7 +839,7 @@
                     url="{{route('pos.print_retail_thermel_purchase_details')}}/"+sale_id_for_print;
                     window.open(url, '_blank');
 
-                    window.location="{{route('pos.retail_pharmacy_sale')}}";
+                    window.location="{{route('pos.in_patient_pharmacy_sale')}}";
 
 
                 }
@@ -842,7 +859,7 @@
             bill_date = $("#bill_date").val();
             customer_name = $("#customer_name").val();
             previous_balance = $("#previous_balance").val();
-            ReceivedAmount = $("#ReceivedAmount").val();
+            ReceivedAmount = 0;//$("#ReceivedAmount").val();
             BillDiscription = $("#BillDiscription").val();
             BillAmount = $("#BillAmount").val();
             bill_address = '';
@@ -1158,7 +1175,9 @@
 
         $("#discount_amount").val(discount_amount);
         $("#BillAmount").val(Math.ceil(total_amount));
-        $("#ReceivedAmount").val(Math.ceil(total_amount - discount_amount));
+        $("#ReceivedAmount").val(0);
+        $("#PatientBalance").val(Math.ceil(total_amount - discount_amount));
+        //$("#ReceivedAmount").val(0);
 
 
         if(ProductList.length < 15){

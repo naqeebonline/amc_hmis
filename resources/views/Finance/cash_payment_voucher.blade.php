@@ -1,0 +1,209 @@
+@extends('layouts.' . config('settings.active_layout'))
+@php $app_id = config('settings.app_id') @endphp
+
+@push('stylesheets')
+    <style>
+        .table> :not(caption)>*>* {
+            padding: 5px;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+@endpush
+
+@section('content')
+
+    <div class="row mt-2">
+        <div class="col-12">
+
+            <!-- Traffic sources -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 >Cash Payment Voucher</h5>
+                    <form class=" form-submit-event" method="post" action="{{route('pos.save_cash_payment_voucher')}}" enctype="multipart/form-data">
+                        @csrf
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-4 mb-3">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td style="width: 30%">CR:</td>
+                                        <td style="width: 70%">
+                                            <select name="credit_head_id" required id="credit_head_id" class="form-select">
+                                                <option value="">Select Head ----</option>
+                                                @foreach ($finance_heads as $key => $value)
+                                                    <option value="{{ $value->id }}">{{ strtoupper($value->name) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Head</td>
+                                        <td>
+                                            <select name="debit_head_id" required id="debit_head_id" class="form-select">
+                                                <option value="">Select Head ----</option>
+                                                @foreach ($sub_heads as $key => $value)
+                                                    <option value="{{ $value->id }}">{{ strtoupper($value->name) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Amount</td>
+                                        <td>
+                                            <input type="number" class="form-control" id="amount" name="amount">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Remarks</td>
+                                        <td>
+                                            <textarea name="remarks" id="remarks" class="form-control"></textarea>
+                                        </td>
+                                    </tr>
+
+
+
+
+
+
+                                    <tr>
+                                        <td style="font-weight: bold">Balance: Cr <span id="cr_amount_display">0</span></td>
+                                        <td><button class="form-control btn btn-primary" type="submit">Post</button></td>
+                                    </tr>
+                                </table>
+
+
+                            </div>
+
+
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+
+            <!-- Traffic sources -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 mb-3">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Date</th>
+                                    <th>Credit Head</th>
+                                    <th>Debit Head</th>
+                                    <th>Amount</th>
+                                    <th>Remarks</th>
+                                </tr>
+
+                                @foreach($voucher as $key => $value)
+                                    <tr>
+                                        <td>{{$key + 1}}</td>
+                                        <td>{{date("d-m-Y",strtotime($value->transaction_date))}}</td>
+                                        <td>{{$value->credit_head_name}}</td>
+                                        <td>{{$value->debit_head_name}}</td>
+                                        <td>{{$value->amount}}</td>
+                                        <td>{{$value->remarks}}</td>
+                                    </tr>
+
+                                @endforeach
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div class="modal fade" id="add_new_record_model" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form class="modal-content form-submit-event" id="from_submit">
+                <input type="hidden" id="id" name="id" value="0">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Patients</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Serial</th>
+                                <th>Name</th>
+                                <th>Father Name</th>
+                                <th></th>
+                            </tr>
+                            <tbody id="prev_patients">
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+
+
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/vendor/libs/datatables/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-responsive/datatables.responsive.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/select2/select2.css') }}" />
+    <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.form.min.js') }}"></script>
+
+    <script type="text/javascript">
+        setTimeout(function () {
+            $("#credit_head_id").select2();
+            $("#debit_head_id").select2();
+        },1000);
+
+        $("body").on("change","#debit_head_id",function () {
+           var value = $(this).val();
+            $.ajax({
+                type: 'post',
+                url: "{{ route('pos.getBalance') }}",
+                data: {
+                    id: value,
+                    _token: '{{ csrf_token() }}'
+
+                },
+                success: function(res) {
+                    $("#cr_amount_display").text(res);
+                }
+            })
+        });
+    </script>
+@endpush

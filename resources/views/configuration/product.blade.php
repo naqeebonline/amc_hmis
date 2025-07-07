@@ -389,9 +389,50 @@
                 columns: [
 
                     {data: 'ProductName', name: 'ProductName',searchable: true},
-                    {data: 'generic_name.name', name: 'generic_name.name',searchable: true},
-                    {data: 'item_form.name', name: 'item_form.name',searchable: true},
-                    {data: 'item_make.name', name: 'item_make.name',searchable: true},
+
+                    {
+                        data: null,
+                        name: 'generic_name.name',
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (row.generic_name) {
+                                return row.generic_name.name;
+                            }else{
+                                return ''
+                            }
+
+
+                        }
+                    },
+
+                        {
+                        data: null,
+                        name: 'item_form.name',
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (row.item_form) {
+                                return row.item_form.name;
+                            }else{
+                                return ''
+                            }
+
+
+                        }
+                    },
+                    {
+                        data: null,
+                        name: 'item_make.name',
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (row.item_make) {
+                                return row.item_make.name;
+                            }else{
+                                return ''
+                            }
+
+
+                        }
+                    },
 
                     {data: 'pack_price', name: 'pack_price',searchable: true},
                     {data: 'pack_size', name: 'pack_size',searchable: true},

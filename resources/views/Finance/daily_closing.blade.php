@@ -23,7 +23,7 @@
                     <form class=" form-submit-event" id="patient_register">
                         <div class="row">
                             <div class="col-md-2 col-sm-4 mb-3">
-                                <label for="nameBasic" class="form-label">location<span class="asterisk">*</span></label>
+                                <label for="nameBasic" class="form-label">User<span class="asterisk">*</span></label>
 
                                 <select name="user_id" required id="user_id" class="form-select">
                                     <option value="">Select User ---</option>
@@ -84,8 +84,13 @@
                                     </tr>
 
                                     <tr>
+                                        <td>Service Charges</td>
+                                        <td>{{$service_charges ?? 0}}</td>
+                                    </tr>
+
+                                    <tr>
                                         <td><strong>Total</strong></td>
-                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand)}}</strong></td>
+                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand) + ($service_charges)}}</strong></td>
                                     </tr>
                                     <tr>
                                         <td>Cash Closing</td>

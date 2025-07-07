@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Finance\FinanceHead;
 use App\Models\Market;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -51,10 +52,34 @@ class CustomerController extends Controller
     public function save_customer()
     {
 
+        if(request()->Name == '' || request()->ContactNo == ''){
+            echo "invalid";
+            exit;
+        }
+        $finance_head = FinanceHead::where("description",request()->ContactNo)->first();
+        $finance_head_id = "";
+
+        $type = "liability";
+
+        if($finance_head){
+            $finance_head_id = $finance_head->id;
+            $code = $finance_head->description;
+
+        }else{
+            $create_head = [
+                "name" => "Supplier- ".request()->Name,
+                "type"  => $type,
+                "description" => request()->ContactNo
+            ];
+            $finance_head = FinanceHead::create($create_head);
+            $finance_head_id = $finance_head->id;
+        }
+        $data = request()->except(["id","_token"]);
+        $data['finance_head_id'] = $finance_head_id;
 
         Customer::updateOrCreate(
             ["SCID"=>request()->id],
-            request()->except(["id","_token"])
+            $data
         );
         return ["status"=>true,"message"=>"Record saved successfully"];
     }

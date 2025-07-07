@@ -472,6 +472,7 @@ class StockController extends Controller
     public function approve_grn_bill()
     {
 
+
         $grn = GrnRequest::where(["GRNID"=>request()->id])->first()->toArray();
 
          unset($grn['GRNID']);
@@ -490,12 +491,13 @@ class StockController extends Controller
         }
 
         GrnRequest::where(["GRNID"=>request()->id])->update(["bill_status"=>1]);
+        $grn = GrnRequest::with('supplier')->where(["GRNID"=>request()->id])->first();
 
         FinanceTransaction::insert([
             'transaction_date' => today(),
             'amount' => $grn['TotalPurchase'],
-            'debit_head_id' => NULL,  //because cash will be paid from cash at office
-            'credit_head_id' => 9, // Supplier chart of account head
+            'debit_head_id' => financeHeadId('pharmacy_purchase'),  //because cash will be paid from cash at office
+            'credit_head_id' => $grn->supplier->finance_head_id, //
             'reference_type' => 'grn',
             'reference_id' => $grn->GRNID,
             'user_id' => auth()->id(),

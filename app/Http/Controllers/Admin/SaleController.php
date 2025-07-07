@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\ReceiveablesDetail;
 use App\Models\Sale;
 use App\Models\SaleDetails;
+use App\Models\SalePayment;
 use App\Models\Store;
 use App\Models\TempSale;
 use App\Models\TempSaleDetails;
@@ -105,32 +106,8 @@ class SaleController extends Controller
         $data["ward_request"] = $_GET["ward_request"] ?? "";
         $data['patient_id'] = "";
         $data['list_products'] = [];
-        if($data['ward_request']){
-            $ward_request = WardRequest::whereId($data['ward_request'])->first();
-            $data['patient_id'] = $ward_request->patient_id;
-            $ward_request_details = WardRequestDetails::with(['products'])->where(["wr_id"=>$ward_request->id])->get();
-            $list_products = [];
-            foreach ($ward_request_details as $key => $value){
-                $avliable_qty = (new StockController())->avaliableQuantity($value->product_id);
-                $res = [
-                    "ProductID" => $value->product_id,
-                    "Product" => $value->products->ProductName,
-                    "Name" => $value->products->ProductName,
-                    "UnitePrice" => $value->products->PurchasePrice,
-                    "Quantity" => $value->quantity,
-                    "Total" => ($value->quantity) * ($value->products->PurchasePrice),
-                    "AvailableQuantity" => $avliable_qty,
-                    "taxAmount" => 0,
-                    "taxPercentage" => 0,
-                    "currentAvailableQuantity" => $avliable_qty,
-                    "dose_type" => '-',
-                ];
-                array_push($list_products,$res);
-            }
-            $data['list_products'] = $list_products;
 
-        }
-        $data["title"] = "Add New Sale";
+        $data["title"] = "Retail Sale";
         $data['products'] = Product::orderBy("ProductName", "ASC")
              ->when(session('store_id'),function ($q){
                  $q->where('store_id',session('store_id'));
@@ -141,15 +118,48 @@ class SaleController extends Controller
 
         }
         //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
-        $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1])
-            ->where("patient_type","!=","sehat_card")
-            ->where("patient_type","!=","configuration")
-            ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
-            ->with(["patient"])->get();
+        $data['admitted_patients'] = Patient::where("patient_type","walking_customer")->get();
 
         $data['invoiceNo'] = $this->returnInvoiceNumber();
 
         return view("sale.retial_sale", $data);
+    }
+
+    public function in_patient_pharmacy_sale()
+    {
+        $store = Store::where("id","!=",env('SEHAT_CARD_PHARMACY_STORE_ID'))->first();
+        if($store){
+            session(['store_id' => $store->id]);
+            session(['store_name' => $store->store_name]);
+            session(['is_free' => $store->use_purchase_price_as_sale_price]);
+        }
+
+        $type = $_GET['type'] ?? "Home";
+        $data['type'] = $type;
+        $data["ward_request"] = $_GET["ward_request"] ?? "";
+        $data['patient_id'] = "";
+        $data['list_products'] = [];
+
+        $data["title"] = "Add New Sale";
+        $data['products'] = Product::orderBy("ProductName", "ASC")
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->get();
+        foreach ($data['products'] as $key => $value){
+            $value->avaliable_qty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');
+
+        }
+        //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
+        $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1])
+            ->where("patient_type","!=","sehat_card")
+            ->where("patient_type","!=","configuration")
+           // ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
+            ->with(["patient"])->get();
+
+        $data['invoiceNo'] = $this->returnInvoiceNumber();
+
+        return view("sale.in_patient_pharmacy_sale", $data);
     }
 
     // public function ware_house_stock()
@@ -266,20 +276,9 @@ class SaleController extends Controller
         $sale = Sale::create($SaleArray);
         $last_id = $sale->SaleID;
 
-        /*if($ReceivedAmount!=0 && $ReceivedAmount!=''){
-            $paymentArray = array(
-                'InvoiceNo'=>$this->returnInvoiceNumber(),
-                'SCID'     => $SupplierID,
-                'Amount'=>$ReceivedAmount,
-                'TransectionNo'=>$this->getTransectionNo(),
-                'Payment_type_ID'=>1,
-                'BankID'=>0,
-                'Date'=> date("Y-m-d"),
-                'CreatedBy'     => $userID,
-                'CreatedAt'     => date('Y-m-d')
-            );
-            ReceiveablesDetail::create($paymentArray);
-        }*/
+
+
+
 
         $is_free = session('is_free');
         foreach(request()->ProductList as $row){
@@ -356,6 +355,167 @@ class SaleController extends Controller
                             SaleDetails::create($Detail_array);
                             GrnDetails::where(['GDID'=>$value->GDID])->update(['RemainingQuantity'=>$remainingQuantity]);
                         }*/
+            //--------- end if stock is zero   ----------//
+        }//------------ end of main foreach   -----------//
+
+        if(request()->ward_request_id){
+            WardRequest::whereId(request()->ward_request_id)->update(["issued_by"=>auth()->user()->id,"issued_at"=>date("Y-m-d H:i:s"),"status"=>1]);
+        }
+
+        if(session('store_id') == 1){
+            (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
+        }
+
+
+        return ["status"=>true,"message" => "Sale Completed Successfully","id"=>$last_id];
+    }
+
+    public function save_retail_sale()
+    {
+
+        /*return response()->json([
+            "data" => $request->all()
+        ]);*/
+        $patient_id = request()->patient_id;
+        $admission_id = request()->patient_admission_id ?? 0;
+        $customer = Patient::where(["id"=>$patient_id])->first();
+        //-------------------------------------------//
+        $Invoice = $this->returnInvoiceNumber();
+        $SupplierID = $patient_id;
+        $Freight = 0;
+        $PDate = date("Y-m-d",strtotime(request()->bill_date));
+        $Description = request()->BillDiscription;
+        $medicine_type = request()->medicine_type;
+        $bill_description = request()->BillDiscription;
+        $discount_percentage = request()->discount_percentage ?? 0;
+        $Discount = request()->discount_amount ?? 0;
+        $demage = 0;
+        $ReceivedAmount = request()->ReceivedAmount;
+        $userID = auth()->user()->id;
+        $totalTax = 0;
+        $TotalSale = request()->BillAmount;
+        $SalemanID = 0;
+        $Commesion = 0;
+        if($customer){
+            $CustomerName = $customer->name." - ".$customer->mr_no;
+        }else{
+            $CustomerName = "Walking Customer";
+            $patient_id = 0;
+        }
+
+        /*foreach(request()->ProductList as $row){
+            $totalTax = ($totalTax) + ($row['taxAmount']);
+        }*/
+        $total = ($TotalSale) + $totalTax;
+
+        $SaleArray = array(
+            'SCID'     => (session('store_id') == env('SEHAT_CARD_PHARMACY_STORE_ID')) ? 1 : 2,// 1 sehat card user,2 walking customer of retail store , table use sup_cus_details
+            'store_id'     => session('store_id'),// sehat card user
+            'wr_id'     => request()->ward_request_id ?? 0,// sehat card user
+            'patient_id'   => $patient_id,
+            'admission_id'   => $admission_id,
+            'InvoiceNo' => $Invoice,
+            'medicine_type' => $medicine_type,
+            'Date'  =>$PDate ,
+            'Description'   =>  $CustomerName,
+            'TotalSale'     => $total,
+            'received_amount'     => $ReceivedAmount,
+            'Discount'     =>  $Discount,
+            'discount_percentage'     =>  $discount_percentage,
+            'sale_descriptions' => $bill_description,
+            'CreatedBy'     => $userID,
+            'CreatedAt'     => date('Y-m-d')
+        );
+        if($SalemanID!=''){
+            $SaleArray['SalemanCommesion']=$Commesion;
+            $SaleArray['SalemanID']=$SalemanID;
+        }
+
+        $SaleArray['bill_details']=json_encode(request()->ProductList);
+        $sale = Sale::create($SaleArray);
+        $last_id = $sale->SaleID;
+
+        if($ReceivedAmount >= 1){
+            SalePayment::create(["sale_id"=>$last_id,"patient_id"=>$patient_id,"admission_id"=>$admission_id,"amount"=>$ReceivedAmount,"created_by"=>auth()->user()->id,"created_at"=>date("Y-m-d H:i:s")]);
+        }
+
+
+
+        $is_free = session('is_free');
+        foreach(request()->ProductList as $row){
+            $soldQuantity=$row['Quantity'];
+            $result = GrnDetails::where(["ProductID"=>$row['ProductID'],"ProductStatus"=>1])->get();
+            $Detail_array = array(
+                'store_id'   => session('store_id'),
+                'SaleID'   => $last_id,
+                'patient_id'   => $patient_id,
+                'admission_id'   => $admission_id,
+                'ProductID' => $row['ProductID'],
+                'UnitePrice'  => $row['UnitePrice'],
+                'taxPercentage'  => $row['taxPercentage'],
+                'dose_type'  => $row['dose_type'],
+            );
+            $applyTax = $row['taxPercentage'] / 100;
+            foreach($result as $key=>$value){
+                if($soldQuantity <= $value->RemainingQuantity && $soldQuantity!=0){
+                    //echo "yes";
+                    $total = ($soldQuantity) * ($row['UnitePrice']);
+                    $taxAmount = ($total) * $applyTax;
+
+                    if($is_free){  // if free then sale price will be same as purchase price
+                        $Detail_array['UnitePrice']=$value->UnitPrice;
+                    }
+
+                    $Detail_array['PurchasePrice']=$value->UnitPrice;
+                    $Detail_array['Quantity']=$soldQuantity;
+                    $Detail_array['GDID']=$value->GDID;
+                    $Detail_array['taxAmount']=$taxAmount;
+                    $remainingQuantity=$value->RemainingQuantity - $soldQuantity;
+                    SaleDetails::create($Detail_array);
+                    GrnDetails::where(["GDID"=>$value->GDID])->update(['RemainingQuantity'=>$remainingQuantity,'SoldQuantity'=>($value->SoldQuantity + $soldQuantity)]);
+                    if($remainingQuantity==0){
+                        GrnDetails::where(['GDID'=>$value->GDID])->update(['ProductStatus'=>0]);
+                    }
+                    $soldQuantity=0;
+                }
+                else{
+                    if($soldQuantity > $value->RemainingQuantity && $soldQuantity!=0){
+                        $total = ($value->RemainingQuantity) * ($row['UnitePrice']);
+                        $taxAmount = ($total) * $applyTax;
+
+                        if($is_free){ // if free then sale price will be same as purchase price
+                            $Detail_array['UnitePrice']=$value->UnitPrice;
+                        }
+
+                        $Detail_array['PurchasePrice']=$value->UnitPrice;
+                        $Detail_array['Quantity']=$value->RemainingQuantity;
+                        $Detail_array['GDID']=$value->GDID;
+                        $Detail_array['taxAmount']=$taxAmount;
+                        $soldQuantity=($soldQuantity)-($value->RemainingQuantity);
+                        //echo $soldQuantity;
+                        SaleDetails::create($Detail_array);
+                        GrnDetails::where(['GDID'=>$value->GDID])->update(['RemainingQuantity'=>0,'SoldQuantity'=>($value->SoldQuantity + $value->RemainingQuantity),'ProductStatus'=>0]);
+                    }
+                }
+
+            }//.... end of foreach
+            //---- if stock is zero then also enter products in sale   -----//
+            /*if($soldQuantity > 0){
+                $product = GrnDetails::where("UnitPrice",">",0)->where(["ProductID"=>$row['ProductID']])->orderBy("GDID","DESC")->first();
+
+                // dd($product,$row['ProductID']);
+                $total = ($soldQuantity) * ($row['UnitePrice']);
+                $taxAmount = ($total) * $applyTax;
+
+                $Detail_array['PurchasePrice']= $product->UnitPrice;
+                $Detail_array['Quantity']=$soldQuantity;
+                $Detail_array['GDID']=$product->GDID;
+                $Detail_array['taxAmount']=$taxAmount;
+                $remainingQuantity = ($product->RemainingQuantity) - ($soldQuantity);
+
+                SaleDetails::create($Detail_array);
+                GrnDetails::where(['GDID'=>$value->GDID])->update(['RemainingQuantity'=>$remainingQuantity]);
+            }*/
             //--------- end if stock is zero   ----------//
         }//------------ end of main foreach   -----------//
 

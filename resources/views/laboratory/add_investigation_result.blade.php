@@ -38,7 +38,7 @@
                         @if($is_textual != true)
                             @foreach($all_data as $key => $value2)
                                 @if(strtolower($value2->name) != "no heading")
-                                    <h3>{{$value2->name ?? ''}}</h3>
+                                    <h5 style="text-decoration: underline">{{$value2->name ?? ''}}</h5>
                                 @endif
                                     @foreach ($value2->parameters as $key => $parameter)
                                     @php

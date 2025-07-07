@@ -7,6 +7,7 @@ use App\Models\Configuration\ProcedureType;
 use App\Models\Configuration\ServiceType;
 use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
+use App\Models\Finance\FinanceHead;
 use App\Models\Patient\PatientLocation;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -110,9 +111,30 @@ class GeneralConfigController extends Controller
 
     public function save_service_type()
     {
+        $code = str_replace(' ', '_', request()->name);
+        $finance_head = FinanceHead::where("description",$code)->first();
+        $finance_head_id = "";
+
+        $type = "income";
+        if($finance_head){
+            $finance_head_id = $finance_head->id;
+            $code = $finance_head->description;
+
+        }else{
+            $create_head = [
+                "name" => request()->name,
+                "type"  => $type,
+                "description" => $code
+            ];
+            $finance_head = FinanceHead::create($create_head);
+            $finance_head_id = $finance_head->id;
+        }
+
+        $data = request()->except(["id","_token"]);
+        $data['finance_head_id'] = $finance_head_id;
         ServiceType::updateOrCreate(
             ["id"=>request()->id],
-            request()->except(["id","_token"])
+            $data
         );
         return ["status"=>true,"message"=>"Record saved successfully"];
     }

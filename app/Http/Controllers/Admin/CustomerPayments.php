@@ -11,6 +11,7 @@ use App\Models\PaymentType;
 use App\Models\Product;
 use App\Models\ReceiveablesDetail;
 use App\Models\Sale;
+use App\Models\SalePayment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,6 +82,7 @@ class CustomerPayments extends Controller
     }
 
     function customer_previous_balance($customer_id,$date=''){
+
        // $customer = Customer::where(["sup_cus_details.SCID"=>$customer_id])->first();
         $openingBalance= 0;
         if(!$openingBalance){
@@ -92,10 +94,10 @@ class CustomerPayments extends Controller
                 return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));
             })->sum('TotalSale');
 
-        $TotalReceived = Sale::where(["patient_id"=>$customer_id])
+        $TotalReceived = SalePayment::where(["patient_id"=>$customer_id])
             ->when($date, function ($query) use ($date) {
-                return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));
-            })->sum('received_amount');
+                return $query->where('created_at', '>=', date("Y-m-d",strtotime($date)));
+            })->sum('amount');
 
         $TotalDiscount = Sale::where(["patient_id"=>$customer_id])
             ->when($date, function ($query) use ($date) {

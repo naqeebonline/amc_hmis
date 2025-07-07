@@ -517,3 +517,11 @@ function getFMCUserNotifictions()
 function getUserRole(){
     return auth()->user()->roles->pluck('name')[0];
 }
+
+function financeHeadId($code){
+    return \App\Models\Finance\FinanceHead::where('description', $code)->value('id');
+}
+
+function financeHeadCode($id){
+    return \App\Models\Finance\FinanceHead::whereId($id)->value('description');
+}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Finance\Reports;
 
 use App\Http\Controllers\Controller;
 use App\Models\Finance\FinanceHead;
+use App\Models\Finance\FinanceTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -45,16 +46,22 @@ class FinanceReportController extends Controller
 
     public function profitAndLossReport(Request $request)
     {
+        //$investigation_income = FinanceTransaction::where()
+
+
+
         // Get total income from credit side (income is credited)
         $totalIncome = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.credit_head_id', '=', 'fh.id')
             ->where('fh.type', 'income')
+            ->where("fh.id",5)
             ->sum('ft.amount');
 
         // Get total expenses from debit side (expenses are debited)
         $totalExpense = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.debit_head_id', '=', 'fh.id')
             ->where('fh.type', 'expense')
+            ->where("fh.id",11)
             ->sum('ft.amount');
 
         // Calculate net profit/loss

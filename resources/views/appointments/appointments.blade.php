@@ -192,6 +192,7 @@
                                 <th width="15%">S.N</th>
                                 <th width="15%">Name</th>
                                 <th width="15%">Opd Type</th>
+                                <th width="15%">Opd Fees</th>
                                 <th width="15%">Consultant</th>
                                 <th width="15%">Appointment Date</th>
                                 <th>Created By</th>
@@ -544,6 +545,10 @@
                 {
                     data: 'opd_type.name',
                     name: 'opd_type.name',
+                    searchable: true
+                },{
+                    data: 'fee',
+                    name: 'fee',
                     searchable: true
                 },
                 {

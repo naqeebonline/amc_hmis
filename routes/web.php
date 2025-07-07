@@ -87,6 +87,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('sehat-card-pharmacy-sale', [\App\Http\Controllers\Admin\SaleController::class, 'sehat_card_pharmacy_sale'])->name('pos.add_new_sale')->middleware('store.selected');
     Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale')->middleware('store.selected');
 
+
     Route::get('list_product', [\App\Http\Controllers\Admin\ProductController::class, 'list_product'])->name('pos.list_product');
     Route::post('save-product', [\App\Http\Controllers\Admin\ProductController::class, 'save_product'])->name('pos.save_product');
     Route::post('getProduct', [\App\Http\Controllers\Admin\ProductController::class, 'getProduct'])->name('pos.getProduct');
@@ -124,6 +125,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     Route::post('save_sale', [\App\Http\Controllers\Admin\SaleController::class, 'save_sale'])->name('pos.save_sale');
+    Route::post('save_retail_sale', [\App\Http\Controllers\Admin\SaleController::class, 'save_retail_sale'])->name('pos.save_retail_sale');
     Route::post('temp_save_sale', [\App\Http\Controllers\Admin\SaleController::class, 'temp_save_sale'])->name('pos.temp_save_sale');
     Route::get('print_temp_sale/{sale_id?}/{customer_id?}/{date?}/{received_amount?}', [\App\Http\Controllers\Admin\SaleController::class, 'print_temp_sale'])->name('pos.print_temp_sale');
     Route::get('print_purchase_detail/{sale_id?}/{date?}', [\App\Http\Controllers\Admin\SaleController::class, 'print_purchase_detail'])->name('pos.print_purchase_detail');
@@ -385,5 +387,32 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/balanceReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'balanceReport'])->name('pos.balanceReport');
     Route::get('/profitAndLossReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'profitAndLossReport'])->name('pos.profitAndLossReport');
 
+    Route::post('/getBalance', [\App\Http\Controllers\Finance\FinanceController::class, 'getBalance'])->name('pos.getBalance');
+    Route::get('/cash-payment-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'cash_payment_voucher'])->name('pos.cash_payment_voucher');
+    Route::post('/save_cash_payment_voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'save_cash_payment_voucher'])->name('pos.save_cash_payment_voucher');
+
+    Route::get('/cash-receipt-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'cash_receipt_voucher'])->name('pos.cash_receipt_voucher');
+    Route::post('/save_cash_receipt_voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'save_cash_receipt_voucher'])->name('pos.save_cash_receipt_voucher');
+
+
+
+    //--------------   in/out patient for hospital  --------------------//
+
+    Route::get("hospital-patient-admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "hospital_patient_admission"])->name("pos.hospital_patient_admission");
+    Route::get("hospital-list-admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "hospital_list_admission"])->name("pos.hospital_list_admission");
+    Route::get("in_patient_investigation", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_investigation"])->name("pos.in_patient_investigation");
+    Route::get("in_patient_service_charges", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_service_charges"])->name("pos.in_patient_service_charges");
+    Route::get("in_patient_payment", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_payment"])->name("pos.in_patient_payment");
+    Route::get("in_patient_discharged_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_list"])->name("pos.in_patient_discharged_list");
+    Route::get("primary_discharge/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "primary_discharge"])->name("pos.primary_discharge");
+    Route::get('in_patient_pharmacy_sale', [\App\Http\Controllers\Admin\SaleController::class, 'in_patient_pharmacy_sale'])->name('pos.in_patient_pharmacy_sale')->middleware('store.selected');
+
+
+
+    Route::post("save_patient_payment", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "save_patient_payment"])->name("pos.save_patient_payment");
+    Route::post("calculate_patient_discharge_amount", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "calculate_patient_discharge_amount"])->name("pos.calculate_patient_discharge_amount");
+    Route::post("primary_discharge_in_patient", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "primary_discharge_in_patient"])->name("pos.primary_discharge_in_patient");
+    Route::get("list-in-admited-patients", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "list_in_admitted_patients"])->name("pos.list_in_admitted_patients");
+    Route::post("hospital_store_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "hospital_store_patient_admission"])->name("pos.hospital_store_patient_admission");
 
 });

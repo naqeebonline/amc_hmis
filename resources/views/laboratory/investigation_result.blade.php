@@ -123,20 +123,49 @@
                     searchable: true
                 },
 
+
                 {
-                    data: 'patient.mr_no',
-                    name: 'patient.mr_no',
-                    searchable: true
-                },
-                {
-                    data: 'patient.name',
+                    data: null,
                     name: 'patient.name',
-                    searchable: true
+                    searchable: true,
+                    render: function(data, type, row) {
+                        if (row.patient) {
+                            return row.patient.mr_no;
+                        }else{
+                            return ''
+                        }
+
+
+                    }
+                },
+
+                {
+                    data: null,
+                    name: 'patient.name',
+                    searchable: true,
+                    render: function(data, type, row) {
+                        if (row.patient) {
+                            return row.patient.name;
+                        }else{
+                            return ''
+                        }
+
+
+                    }
                 },
                 {
-                    data: 'patient.gender',
+                    data: null,
                     name: 'patient.gender',
-                    searchable: true
+                    searchable: true,
+                    render: function(data, type, row) {
+                        if (row.patient) {
+                            return row.patient.gender;
+                        }else{
+                            return ''
+                        }
+
+
+                    }
                 },
 
                 {

@@ -60,6 +60,8 @@ class ProductController extends Controller
     {
 
         //dd(request()->all());
+        $data = request()->except(["id","_token"]);
+        $data['store_id'] = session('store_id');
         Product::updateOrCreate(
             ["ProductID"=>request()->id],
             request()->except(["id","_token"])

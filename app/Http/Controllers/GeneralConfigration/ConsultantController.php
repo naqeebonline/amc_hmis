@@ -9,6 +9,7 @@ use App\Models\Configuration\ConsultantDepartment;
 use App\Models\Configuration\Consultants;
 use App\Models\Configuration\ConsultantSpeciality;
 use App\Models\Configuration\ConsultantType;
+use App\Models\Finance\FinanceHead;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
@@ -44,9 +45,36 @@ class ConsultantController extends Controller
 
     public function save_consultant()
     {
+
+        if(request()->name == '' || request()->cnic == ''){
+            echo "invalid";
+            exit;
+        }
+        $finance_head = FinanceHead::where("description",request()->cnic)->first();
+        $finance_head_id = "";
+
+        $type = "liability";
+
+        if($finance_head){
+            $finance_head_id = $finance_head->id;
+            $code = $finance_head->description;
+
+        }else{
+            $create_head = [
+                "name" => "Doctor- ".request()->name,
+                "type"  => $type,
+                "description" => request()->cnic
+            ];
+            $finance_head = FinanceHead::create($create_head);
+            $finance_head_id = $finance_head->id;
+        }
+        $data = request()->except(["id","_token"]);
+        $data['finance_head_id'] = $finance_head_id;
+
+
         Consultants::updateOrCreate(
             ["id"=>request()->id],
-            request()->except(["id","_token"])
+            $data
         );
         return ["status"=>true,"message"=>"Record saved successfully"];
     }

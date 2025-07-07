@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware' => 'auth'], function () {
     Route::get('appointment', [\App\Http\Controllers\Appointments\AppointmentController::class, 'appointment'])->name('pos.appointments');
     Route::get('general_patient_investigation', [\App\Http\Controllers\PatientController\PatientInvestigationController::class, 'general_patient_investigation'])->name('pos.general_patient_investigation');
+    Route::post('delete_patient_investigation', [\App\Http\Controllers\PatientController\PatientInvestigationController::class, 'delete_patient_investigation'])->name('pos.delete_patient_investigation');
     Route::get("pharmacy_audit", [\App\Http\Controllers\Admin\StockController::class, 'pharmacy_audit'])->name('pos.pharmacy_audit');
 
 
@@ -30,7 +31,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('update_ward_request_items', [\App\Http\Controllers\PatientController\WardController::class, 'update_ward_request_items'])->name('pos.update_ward_request_items');
     Route::get('delete_ward_request_item/{id}', [\App\Http\Controllers\PatientController\WardController::class, 'delete_ward_request_item'])->name('pos.delete_ward_request_item');
     Route::get('sync_patient_data', [\App\Http\Controllers\PatientController\WardController::class, 'sync_patient_data'])->name('pos.sync_patient_data');
-
 
 
 
