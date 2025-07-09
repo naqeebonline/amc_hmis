@@ -34,6 +34,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             });
@@ -41,10 +42,13 @@ class FinanceController extends Controller
         $totals = $query->selectRaw('SUM(amount) as received_amount')->first();
         $data['data'] = $totals;
 
+
         $data['pharmacy_return'] = $this->total_return_in_pharmacy($closing_date,$user_id);
         $data['appointments'] = $this->appointmentsPayment($closing_date,$user_id);
         $data['investigations'] = $this->investigationPayment($closing_date,$user_id);
         $data['service_charges'] = $this->serviceCharges($closing_date,$user_id);
+        $data['in_patient_sale'] = $this->in_patient_sale($closing_date,$user_id);
+
 
        return view("Finance.daily_closing",$data);
     }
@@ -262,6 +266,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             });
@@ -277,6 +282,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             });
@@ -294,6 +300,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('patient_service_charges.service_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("patient_service_charges.is_active",1)
             ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered"])
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('patient_service_charges.created_by',$user_id);
@@ -311,6 +318,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
@@ -320,6 +328,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
@@ -329,6 +338,7 @@ class FinanceController extends Controller
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
@@ -353,6 +363,14 @@ class FinanceController extends Controller
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
 
 
+        Sale::where("is_posted",0)->when($closing_date, function ($query) use ($closing_date) {
+            return $query->whereDate('CreatedAt', '<=', date("Y-m-d", strtotime($closing_date)));
+        })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('CreatedBy',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+
+
         return true;
     }
 
@@ -363,6 +381,7 @@ class FinanceController extends Controller
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability","expense","income"])->get();
         $data['voucher'] = FinanceTransaction::query()
             ->where('reference_type', 'cash_payment_voucher')
+            ->where(["is_active"=>1])
             ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
             ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
             ->select(
@@ -370,9 +389,8 @@ class FinanceController extends Controller
                 'debit_heads.name as debit_head_name',
                 'credit_heads.name as credit_head_name'
             )
-            ->where("reference_type","cash_payment_voucher")
             ->orderBy("id","DESC")
-            ->get();
+            ->paginate(30);
 
 
 
@@ -392,6 +410,7 @@ class FinanceController extends Controller
                 'reference_type' => 'cash_payment_voucher',
                 'reference_id' => NULL,
                 'user_id' => auth()->id(),
+                'is_approved' => 0,
                 'remarks' => request()->remarks.". This entry made by ".auth()->user()->name,
                 'created_at' => now()
             ];
@@ -405,6 +424,20 @@ class FinanceController extends Controller
     {
         $data['finance_heads'] = FinanceHead::where(["type"=>"asset"])->get();
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability"])->get();
+
+        $data['voucher'] = FinanceTransaction::query()
+            ->where('reference_type', 'cash_receipt_voucher')
+            ->where(["is_active"=>1])
+            ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
+            ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
+            ->select(
+                'finance_transactions.*',
+                'debit_heads.name as debit_head_name',
+                'credit_heads.name as credit_head_name'
+            )
+
+            ->orderBy("id","DESC")
+            ->paginate(30);
         return view("Finance.cash_receipt_voucher",$data);
     }
 
@@ -419,6 +452,7 @@ class FinanceController extends Controller
                 'credit_head_id' => request()->credit_head_id, // Appointments income
                 'reference_type' => 'cash_receipt_voucher',
                 'reference_id' => NULL,
+                'is_approved' => 0,
                 'user_id' => auth()->id(),
                 'remarks' => request()->remarks,
                 'created_at' => now()
@@ -433,10 +467,12 @@ class FinanceController extends Controller
     {
         $debits = DB::table('finance_transactions')
             ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
+            ->where(["is_approved"=>1,"is_active"=>1])
             ->groupBy('debit_head_id');
 
         // Subquery: Credit totals
         $credits = DB::table('finance_transactions')
+            ->where(["is_approved"=>1,"is_active"=>1])
             ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
             ->groupBy('credit_head_id');
 
@@ -462,6 +498,37 @@ class FinanceController extends Controller
             });
 
             return $report[0]['balance'] ?? 0;
+    }
+
+
+    public function in_patient_sale($closing_date='',$user_id='')
+    {
+
+
+        $query = Sale::where("is_posted",0)->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('CreatedAt', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('CreatedBy',$user_id);
+            });
+
+        $totals = $query->selectRaw('SUM(TotalSale)-SUM(Discount) as in_patient_sale')->first();
+
+        return $totals->in_patient_sale ?? 0;
+
+
+    }
+
+    public function approve_transaction_entry()
+    {
+        FinanceTransaction::where(["id"=>request()->id])->update(["is_approved"=>1]);
+        return ["status"=>true,"message"=>"record approved successfully"];
+    }
+
+    public function delete_transaction_entry()
+    {
+        FinanceTransaction::where(["id"=>request()->id])->update(["is_active"=>0]);
+        return ["status"=>true,"message"=>"record approved successfully"];
     }
 
 

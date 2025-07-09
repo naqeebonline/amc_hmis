@@ -14,11 +14,13 @@ class FinanceReportController extends Controller
     {
         $debits = DB::table('finance_transactions')
             ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
+            ->where(["is_approved"=>1,"is_active"=>1])
             ->groupBy('debit_head_id');
 
         // Subquery: Credit totals
         $credits = DB::table('finance_transactions')
             ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
+            ->where(["is_approved"=>1,"is_active"=>1])
             ->groupBy('credit_head_id');
 
         // Merge into finance_heads
@@ -53,6 +55,7 @@ class FinanceReportController extends Controller
         // Get total income from credit side (income is credited)
         $totalIncome = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.credit_head_id', '=', 'fh.id')
+            ->where(["ft.is_approved"=>1,"ft.is_active"=>1])
             ->where('fh.type', 'income')
            // ->where("fh.id",5)
             ->sum('ft.amount');
@@ -61,6 +64,7 @@ class FinanceReportController extends Controller
         $totalExpense = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.debit_head_id', '=', 'fh.id')
             ->where('fh.type', 'expense')
+            ->where(["ft.is_approved"=>1,"ft.is_active"=>1])
            // ->where("fh.id",11)
             ->sum('ft.amount');
 

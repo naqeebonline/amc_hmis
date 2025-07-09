@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Store;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
 use Validator;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
     {
 
         Schema::defaultStringLength(125);
+        Paginator::useBootstrapFive();
         //Add this custom validation rule.
         Validator::extend('alpha_spaces', function ($attribute, $value) {
 

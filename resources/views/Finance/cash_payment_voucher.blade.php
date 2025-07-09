@@ -110,6 +110,7 @@
                                     <th>Debit Head</th>
                                     <th>Amount</th>
                                     <th>Remarks</th>
+                                    <th>Actions</th>
                                 </tr>
 
                                 @foreach($voucher as $key => $value)
@@ -120,10 +121,26 @@
                                         <td>{{$value->debit_head_name}}</td>
                                         <td>{{$value->amount}}</td>
                                         <td>{{$value->remarks}}</td>
+                                        <td>
+                                            @if($value->is_approved == 0)
+                                                <button class="btn btn-sm btn-success approve_entry" record-id="{{$value->id}}" title="Approve">
+                                                    <i class="fas fa-check-circle "></i>
+                                                </button>
+
+                                                <!-- Delete button -->
+                                                <button class="btn btn-sm btn-danger delete_entry" record-id="{{$value->id}}" title="Delete">
+                                                    <i class="fas fa-times "></i>
+                                                </button>
+                                            @endif
+                                        </td>
                                     </tr>
 
                                 @endforeach
                             </table>
+
+                            <div class="d-flex justify-content-center mt-2">
+                                {!! $voucher->links() !!}
+                            </div>
                         </div>
                     </div>
 
@@ -204,6 +221,49 @@
                     $("#cr_amount_display").text(res);
                 }
             })
+        });
+
+
+        $("body").on("click",".approve_entry",function () {
+            var value = $(this).attr('record-id');
+            if (confirm('Are you sure to approve this record ?')) {
+                $.ajax({
+                    type: 'post',
+                    url: "{{ route('pos.approve_transaction_entry') }}",
+                    data: {
+                        id: value,
+                        _token: '{{ csrf_token() }}'
+
+                    },
+                    success: function(res) {
+                        window.location.reload();
+                    }
+                })
+            } else {
+                $("#discharge_patient").show();
+                //alert('Why did you press cancel? You should have confirmed');
+            }
+        });
+
+        $("body").on("click",".delete_entry",function () {
+           var value = $(this).attr('record-id');
+            if (confirm('Are you sure to delete this record ?')) {
+                $.ajax({
+                    type: 'post',
+                    url: "{{ route('pos.delete_transaction_entry') }}",
+                    data: {
+                        id: value,
+                        _token: '{{ csrf_token() }}'
+
+                    },
+                    success: function(res) {
+                        window.location.reload();
+                    }
+                })
+            } else {
+                $("#discharge_patient").show();
+                //alert('Why did you press cancel? You should have confirmed');
+            }
         });
     </script>
 @endpush

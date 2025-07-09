@@ -69,8 +69,8 @@
                             <div class="col-md-6 col-sm-4 mb-3">
                                 <table class="table table-bordered">
                                     <tr>
-                                        <td style="width: 60%">Investigation</td>
-                                        <td style="width: 40%">{{$investigations->cash_in_hand ?? 0}}</td>
+                                        <td style="width: 50%">Investigation</td>
+                                        <td style="width: 50%">{{$investigations->cash_in_hand ?? 0}}</td>
                                     </tr>
 
                                     <tr>
@@ -80,7 +80,7 @@
 
                                     <tr>
                                         <td>Pharmacy Sale</td>
-                                        <td>{{$data->received_amount ?? 0}}</td>
+                                        <td>{{$data->received_amount ?? 0}} &nbsp;&nbsp;&nbsp; <span style="color: red">In Patient Sale ({{ ($in_patient_sale) - ($data->received_amount ?? 0) }})</span></td>
                                     </tr>
 
                                     <tr>

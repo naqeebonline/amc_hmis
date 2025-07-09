@@ -395,6 +395,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/cash-receipt-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'cash_receipt_voucher'])->name('pos.cash_receipt_voucher');
     Route::post('/save_cash_receipt_voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'save_cash_receipt_voucher'])->name('pos.save_cash_receipt_voucher');
+    Route::post('/approve_transaction_entry', [\App\Http\Controllers\Finance\FinanceController::class, 'approve_transaction_entry'])->name('pos.approve_transaction_entry');
+    Route::post('delete_transaction_entry', [\App\Http\Controllers\Finance\FinanceController::class, 'delete_transaction_entry'])->name('pos.delete_transaction_entry');
 
 
 
