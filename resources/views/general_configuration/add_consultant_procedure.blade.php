@@ -105,9 +105,9 @@
                             <input type="number" required id="consultant_share_percentage" name="consultant_share_percentage" class="form-control " placeholder="" autocomplete="off">
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3" style="pointer-events: none;">
                             <label for="nameBasic" class="form-label">Consultant Share Amount<span class="asterisk">*</span></label>
-                            <input type="number" required id="consultant_share_amount" name="consultant_share_amount" class="form-control " placeholder="" autocomplete="off">
+                            <input type="number" required id="consultant_share_amount" name="consultant_share_amount" class="form-control " readonly placeholder="" autocomplete="off">
                         </div>
 
 
@@ -175,13 +175,23 @@
 
 
 
-        $("body").on("keyup","#consultant_share_percentage",function (e) {
-                var value = $(this).val();
-                var consultant_charges = $("#consultant_charges").val();
-                var percentage_amount = ((consultant_charges) * (value)) / 100;
-
-                 $("#consultant_share_amount").val(percentage_amount);
+        $("body").on("keyup","#consultant_share_percentage,#consultant_charges",function (e) {
+            calculateAmount();
         });
+
+        function calculateAmount(){
+            var value = $("#consultant_share_percentage").val();
+            var consultant_charges = $("#consultant_charges").val();
+            if(value == ''){
+                value = 0;
+            }
+            if(!consultant_charges){
+                consultant_charges = 0;
+            }
+            var percentage_amount = ((consultant_charges) * (value)) / 100;
+
+            $("#consultant_share_amount").val(percentage_amount);
+        }
 
         $("body").on("click",".edit_record",function (e) {
             record_id = $(this).attr("data-id");

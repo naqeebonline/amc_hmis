@@ -361,8 +361,8 @@
 
 
                     <div class="col-md-2">
-                        <label for="remarks">Bill Amount</label>
-                        <input type="number" readonly style="font-weight: bold; font-size: 14px;" id="BillAmount" class="form-control">
+                        <label for="remarks">Total Bill</label>
+                        <input type="number" readonly style="font-weight: bold; font-size: 24px;" id="BillAmount" class="form-control">
                     </div>
 
 
@@ -383,15 +383,26 @@
                         <label for="remarks">Discount Amount</label>
                         <input type="number" readonly style="font-weight: bold; color:'green'; font-size: 14px;" id="discount_amount" value="0" class="form-control">
                     </div>
-                    <div class="col-md-4">
-                        <label for="remarks">Bill Description</label>
-                        <input type="text" name="BillDiscription" id="BillDiscription" class="form-control">
-                    </div>
-
                     <div class="col-md-2">
                         <label for="remarks">Received Amount</label>
-                        <input type="number"  id="ReceivedAmount" style="color:red;font-weight: bold; font-size: 12px;" value="0" class="form-control">
+                        <input type="number"  id="ReceivedAmount"  disabled style="color:red;font-weight: bold; font-size: 24px;" value="0" class="form-control">
                     </div>
+                    <div class="col-md-4" style="display: none;">
+                        <label for="remarks">Bill Description</label>
+                        <input type="text" name="BillDiscription" id="BillDiscription" value="-" class="form-control">
+                    </div>
+
+                    <div class="col-md-2" >
+                        <label for="remarks">Received Amount</label>
+                        <input type="number" style="font-weight: bold;font-size: 24px;" name="ReceivedAmountFromCustomer" id="ReceivedAmountFromCustomer" value="0" class="form-control">
+                    </div>
+
+                    <div class="col-md-2" >
+                        <label for="remarks">Return</label>
+                        <input type="number" name="ReturnToCustomer" style="font-weight: bold;font-size: 24px;" id="ReturnToCustomer" value="0" class="form-control">
+                    </div>
+
+
 
 
 
@@ -401,8 +412,8 @@
             <div class="row mt-3">
                 <div class="col-md-12">
                     <button class="btn btn-custom me-2" id="save_bill">Save Bill</button>
-                    <a class="btn btn-custom me-2" target="_blank" >New Bill</a>
-                    <a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red" href="javascript:void(0)">Logout</a>
+                   {{-- <a class="btn btn-custom me-2" target="_blank" >New Bill</a>--}}
+                    {{--<a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red" href="javascript:void(0)">Logout</a>--}}
 
                 </div>
             </div>
@@ -475,6 +486,26 @@
        var url = "{{route('pos.add_new_sale')}}?type=Ward&ward_request="+id;
        window.location = url;
     });
+
+    $("body").on("keyup","#ReceivedAmountFromCustomer",function () {
+
+        calculateReturnAmount();
+    });
+
+    function calculateReturnAmount(){
+        var bill_amount = $("#ReceivedAmount").val();
+        var ReceivedAmountFromCustomer = $("#ReceivedAmountFromCustomer").val();
+        if(bill_amount == ''){
+            bill_amount = 0;
+        }
+        if(ReceivedAmountFromCustomer == ''){
+            ReceivedAmountFromCustomer = 0;
+        }
+
+        var return_amount = (ReceivedAmountFromCustomer) - (bill_amount);
+        $("#ReturnToCustomer").val(return_amount);
+    }
+
      previous_bill_table = $('#previous-bill-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -486,7 +517,7 @@
                 pageLength: 50,
                 ajax: {
                     url: `{{ route('pos.retail_previous_bills') }}`,
-                    
+
                 },
 
                 columns: [
@@ -703,6 +734,13 @@
         $("body").on("click","#save_bill",function(){
             var count_error_items = $('.horizontal-menu li').length;
 
+            var return_amount = $("#ReturnToCustomer").val();
+            if(return_amount < 0){
+                alert("Please collect amount from customer");
+                $("#ReceivedAmountFromCustomer").focus();
+                return false;
+            }
+
             if(count_error_items > 0){
                 popupMsg("Please Add grn of pending item of KIT or Skip low quantity Items","error");
                 return false;
@@ -721,6 +759,7 @@
             ReceivedAmount = $("#ReceivedAmount").val();
             BillDiscription = $("#BillDiscription").val();
             BillAmount = $("#BillAmount").val();
+            ReceivedAmountFromCustomer = $("#ReceivedAmountFromCustomer").val();
             bill_address = '';
             discount_percentage = $("#discount_id").val();
             $("#save_bill").hide();
@@ -792,6 +831,7 @@
                 data:{
                     SID,
                     patient_id,
+                    ReceivedAmountFromCustomer,
                     ward_request_id,
                     patient_admission_id,
                     discount_percentage,
@@ -1184,6 +1224,8 @@
                      $("#product_table").append(html);
             }
         }
+
+        calculateReturnAmount();
 
     }
 

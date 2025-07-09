@@ -380,6 +380,10 @@ class SaleController extends Controller
         $patient_id = request()->patient_id;
         $admission_id = request()->patient_admission_id ?? 0;
         $customer = Patient::where(["id"=>$patient_id])->first();
+        $ReceivedAmountFromCustomer = 0;
+        if(request()->ReceivedAmountFromCustomer){
+            $ReceivedAmountFromCustomer = request()->ReceivedAmountFromCustomer;
+        }
         //-------------------------------------------//
         $Invoice = $this->returnInvoiceNumber();
         $SupplierID = $patient_id;
@@ -413,6 +417,7 @@ class SaleController extends Controller
             'SCID'     => (session('store_id') == env('SEHAT_CARD_PHARMACY_STORE_ID')) ? 1 : 2,// 1 sehat card user,2 walking customer of retail store , table use sup_cus_details
             'store_id'     => session('store_id'),// sehat card user
             'wr_id'     => request()->ward_request_id ?? 0,// sehat card user
+            'ReceivedAmountFromCustomer'   => $ReceivedAmountFromCustomer,
             'patient_id'   => $patient_id,
             'admission_id'   => $admission_id,
             'InvoiceNo' => $Invoice,

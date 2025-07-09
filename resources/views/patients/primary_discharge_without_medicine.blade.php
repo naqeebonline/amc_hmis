@@ -200,7 +200,9 @@
                                         <tr>
                                             <th width="50%" >Procedure Amount: {{$admission->procedure_rate ?? 0}}</th>
                                             <th width="50%">
-
+                                               @if(!$is_service_charges_posted)
+                                                    <span style="color: red">Please click submit button to post services charges</span>
+                                                @endif
                                             </th>
                                         </tr>
                                         @foreach($service_type as $key => $value)
@@ -301,7 +303,8 @@
         var left_hand_balance = $("#left_hand_balance").val();
         var right_hand_balance = $("#right_hand_balance").val();
         var admission_status = "{{$admission->admission_status}}";
-        if(left_hand_balance == 0 && right_hand_balance <= 0 && admission_status == "Admit") {
+        var is_service_charges_posted = "{{$is_service_charges_posted}}";
+        if(left_hand_balance == 0 && right_hand_balance <= 0 && admission_status == "Admit" && is_service_charges_posted == true) {
                 $("#discharge_patient").show();
         }else{
             $("#discharge_patient").hide();

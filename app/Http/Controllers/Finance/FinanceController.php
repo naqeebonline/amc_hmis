@@ -7,6 +7,7 @@ use App\Models\Appointments\Appointment;
 use App\Models\Finance\DailyUserClosing;
 use App\Models\Finance\FinanceHead;
 use App\Models\Finance\FinanceTransaction;
+use App\Models\Patient\InPatientAdmission;
 use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientInvestigation;
 use App\Models\Patient\PatientInvestigationPayment;
@@ -148,14 +149,16 @@ class FinanceController extends Controller
         }
 
         if($service_charges > 0){
-            $query = PatientServiceCharges::where("is_posted",0)
-                ->where("is_active",1)
-                ->with(['service_type'])
+            $query = PatientServiceCharges::where("patient_service_charges.is_posted",0)
+                ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered"])
+                ->leftJoin("in_patient_admissions","in_patient_admissions.id","=","patient_service_charges.admission_id")
+                //->whereNull("admission_id")
                 ->when($closing_date, function ($query) use ($closing_date) {
-                    return $query->whereDate('service_date', '<=', date("Y-m-d", strtotime($closing_date)));
+                    return $query->whereDate('patient_service_charges.service_date', '<=', date("Y-m-d", strtotime($closing_date)));
                 })
+
                 ->when($user_id, function ($query) use ($user_id) {
-                    return $query->where('created_by',$user_id);
+                    return $query->where('patient_service_charges.created_by',$user_id);
                 })->get();
             foreach ($query as $key => $value){
 
@@ -173,9 +176,9 @@ class FinanceController extends Controller
             }
 
             //-------- doctor account will credit from procedure percentage of admission  -----------//
-            $all_admissions = PatientAdmission::with(['consultant'])
+            $all_admissions = InPatientAdmission::with(['consultant'])
                 ->where("is_posted",0)
-                ->where("admission_status","Discharged")
+                ->whereIn("admission_status",["Discharged","Reffered"])
                 ->when($closing_date, function ($query) use ($closing_date) {
                     return $query->whereDate('admission_date', '<=', date("Y-m-d", strtotime($closing_date)));
                 })

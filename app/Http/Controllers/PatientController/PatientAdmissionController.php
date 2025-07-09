@@ -189,6 +189,8 @@ class PatientAdmissionController extends Controller
         return view("patients.discharged_patient_list", $data);
     }
 
+
+
     public function discharged_patient_list()
     {
 
@@ -250,6 +252,7 @@ class PatientAdmissionController extends Controller
             ->rawColumns(["alert","totalCost","balance","edit_admission_date", "actions"])
             ->make(true);
     }
+
 
 
     public function ward_bed()
@@ -1327,6 +1330,17 @@ class PatientAdmissionController extends Controller
         return view("patients.in_patient_investigation", $data);
     }
 
+    public function in_patient_discharged_list()
+    {
+
+
+        $data['title'] = "Discharged Patient";
+        $data['type'] = "sehat_card";
+        $data["procedure_type"] = ProcedureType::whereIsActive(1)->get();
+        $data["consultant"] = Consultants::whereIsActive(1)->get();
+        return view("patients.in_patient_discharged_list", $data);
+    }
+
     function in_patient_service_charges()
     {
         $data["patients"] = InPatientAdmission::where("admission_status", "Admit")
@@ -1359,7 +1373,7 @@ class PatientAdmissionController extends Controller
 
 
 
-    public function in_patient_discharged_list()
+    public function in_patient_admission_list()
     {
 
 
@@ -1367,8 +1381,74 @@ class PatientAdmissionController extends Controller
         $data["procedure_type"] = ProcedureType::whereIsActive(1)->get();
         $data["consultant"] = Consultants::whereIsActive(1)->get();
         $data['type'] = "hospital_patient";
-        return view("patients.in_patient_discharged_list", $data);
+        return view("patients.in_patient_admission_list", $data);
     }
+
+
+    public function in_patient_discharged_listing()
+    {
+
+        $patients = InPatientAdmission::where(["is_active" => 1])
+            ->whereIn("admission_status",["Discharged","Reffered","Canceled"])
+            ->with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant','sub_consultant')
+
+            ->when(request()->from_date, function ($query) {
+                $fromDate = Carbon::parse(request()->from_date)->endOfDay();
+                $query->where('discharge_date','>=',date("Y-m-d",strtotime($fromDate)));
+            })
+            ->when(request()->to_date, function ($query) {
+                $toDate = Carbon::parse(request()->to_date)->endOfDay();
+                $query->where('discharge_date','<=',date("Y-m-d",strtotime($toDate)));
+            })
+            /*->when(request()->procedure_type_id, function ($query) {
+                //  dd("here");
+                $query->where(['patient_admissions.procedure_type_id'=> request()->procedure_type_id]);
+            })*/
+            /*->when(request()->consultant_id, function ($query)  {
+                $query->where(function ($query) {
+                    $query->where('consultant_id', request()->consultant_id);
+                       // ->orWhere('sub_consultant_id', request()->consultant_id);
+                });
+
+            })*/
+            ->when(request()->consultant_id, function ($query) {
+                $query->where(['consultant_id'=> request()->consultant_id]);//->orWhere(['sub_consultant_id'=> request()->consultant_id]);
+            })
+            ->orderBy("discharge_date","desc");
+
+        return DataTables::of($patients)
+            ->addColumn("edit_admission_date", function ($patient) {
+                return  date("Y-m-d", strtotime($patient->admission_date));
+            })
+            ->addColumn("actions", function ($patient) {
+                $buttons =  '<a target="_blank" href="' . route('pos.print_in_patient_admission', [$patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bx-printer tf-icons"></i></a>
+                     
+                      <a href="' . route('pos.primary_discharge', [$patient->id]) . '"  class="btn btn-sm btn-success edit_record"><i class="bx bxs-show tf-icons"></i></a>
+                        ';
+                if ($patient->procedure_type_id == 6 || $patient->procedure_type_id == 208 || $patient->procedure_type_id == 211) {
+                    $buttons = $buttons . '<a  href="' . route('pos.patient_baby', [$patient->patient_id, $patient->id]) . '"  class="btn btn-primary btn-sm mt-2">View Baby Information</a>';
+                }
+                return $buttons;
+            })
+            ->addColumn("alert", function ($patient) {
+               /* $res = (new PatientExpenseController())->getAdmissionDetails1($patient);
+                return  $res['alert'];*/
+               return 0;
+            })
+            ->addColumn("totalCost", function ($patient) {
+               /* $res = (new PatientExpenseController())->getAdmissionDetails1($patient);
+                return  $res['totalCost'];*/
+                return 0;
+            })
+            ->addColumn("balance", function ($patient)  {
+                /*$res = (new PatientExpenseController())->getAdmissionDetails1($patient);
+                return  $res['balance'];*/
+                return 0;
+            })
+            ->rawColumns(["alert","totalCost","balance","edit_admission_date", "actions"])
+            ->make(true);
+    }
+
 
     function primary_discharge($admission_id='')
     {
@@ -1398,14 +1478,18 @@ class PatientAdmissionController extends Controller
         $data["patient"] = $admission->patient;
         $data['service_type'] = ServiceType::where(["show_in_discharge_form"=>1])->whereIsActive(1)->get();
         $total_service_charges = 0;
+
+        $data['is_service_charges_posted'] = false;
         foreach ($data['service_type'] as $key => $value){
 
             $value->patient_charges = PatientServiceCharges::where(["patient_id"=>$admission->patient_id,"admission_id"=>$admission->id,"service_type_id"=>$value->id])->where(["is_active"=>1])->first();
             //$value->patient_charges = $this->getServiceRate($consultant_id,$procedure_id,$value->id);
 
             if($value->patient_charges){
+                $data['is_service_charges_posted'] = true;
                 $total_service_charges = ($total_service_charges) + ($value->patient_charges->service_rate ?? 0);
             }else{
+                $data['is_service_charges_posted'] = false;
                 $consultant_charges = $this->getServiceRate($consultant_id,$procedure_id,$value->id);
                 //dd($consultant_charges);
                 $value->consultant_charges = $consultant_charges;
