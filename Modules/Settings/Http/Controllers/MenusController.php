@@ -18,7 +18,7 @@ class MenusController extends Controller
      */
     public function index()
     {
-        $menus = Menu::with(['parent', 'myApp'])->get();
+        $menus = Menu::with(['parent', 'myApp'])->orderBy("order","asc")->get();
         // dd($menus);
 
         $data = [

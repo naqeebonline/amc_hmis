@@ -49,7 +49,7 @@
                         <form id="add_in_patient_payment" method="post" action="{{ route('pos.calculate_patient_discharge_amount') }}">
                             @csrf
                             <div class="card-body">
-                                <h5>In Patient Payments</h5>
+                                <h5 style="text-align: center;">Discharge Form</h5>
 
 
                                 <div class="row">
@@ -102,6 +102,7 @@
 
                             <div class="card-body">
                             <div class="row">
+                                <h4 style="text-align: center;color:green">Procedure Name: {{$admission->consultant_procedure->procedure->name ?? ""}}</h4>
                                 <div class="col-md-6">
                                     <table class="table table-bordered">
                                         <tr>
@@ -133,6 +134,7 @@
                                             <td width="60%" style="color:red">Total Payment Received form Patient</td>
                                             <td width="40%">
                                                 {{ $total_payment_paid_by_patient =  ($total_received_payment ?? 0) + $admission->advance_payment ?? 0}}
+                                                <a href="{{route('pos.in_patient_payment')}}?patient_id={{$admission->patient_id}}">Receive Payment</a>
                                             </td>
                                         </tr>
 
@@ -213,9 +215,9 @@
                                                 <td width="50%">
                                                     <input type="hidden"  id="amount" style="height: 30px !important;" name="service_charges_id[]" value="{{$value->id}}" class="form-control" placeholder="" autocomplete="off">
                                                     @if($value->type !="Fixed")
-                                                        <input  type="number" required id="amount" style="height: 30px !important; width: 50% !important;" name="service_charges_amount[]" value="{{$value->patient_charges->service_rate ?? 0}}" class="form-control" placeholder="" autocomplete="off">
+                                                        <input  type="number" required id="amount" style="height: 30px !important; width: 50% !important;" name="service_charges_amount[]" value="{{$value->patient_charges->service_rate ?? $value->consultant_charges}}" class="form-control" placeholder="" autocomplete="off">
                                                     @else
-                                                        <input  type="number" required id="amount" style="height: 30px !important; width: 50% !important;" name="service_charges_amount[]" value="{{$value->patient_charges->service_rate ?? ($value->price)}}" class="form-control" placeholder="" autocomplete="off">
+                                                        <input  type="number" required id="amount" style="height: 30px !important; width: 50% !important;" name="service_charges_amount[]" value="{{$value->patient_charges->service_rate ?? ($value->consultant_charges)}}" class="form-control" placeholder="" autocomplete="off">
                                                     @endif
                                                 </td>
 

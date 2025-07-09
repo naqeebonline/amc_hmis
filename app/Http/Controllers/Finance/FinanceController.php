@@ -7,6 +7,7 @@ use App\Models\Appointments\Appointment;
 use App\Models\Finance\DailyUserClosing;
 use App\Models\Finance\FinanceHead;
 use App\Models\Finance\FinanceTransaction;
+use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientInvestigation;
 use App\Models\Patient\PatientInvestigationPayment;
 use App\Models\Patient\PatientServiceCharges;
@@ -77,11 +78,6 @@ class FinanceController extends Controller
 
 
         $record = [];
-
-
-
-
-
 
 
         if($sale > 0){
@@ -175,6 +171,35 @@ class FinanceController extends Controller
                     'created_at' => now()
                 ]);
             }
+
+            //-------- doctor account will credit from procedure percentage of admission  -----------//
+            $all_admissions = PatientAdmission::with(['consultant'])
+                ->where("is_posted",0)
+                ->where("admission_status","Discharged")
+                ->when($closing_date, function ($query) use ($closing_date) {
+                    return $query->whereDate('admission_date', '<=', date("Y-m-d", strtotime($closing_date)));
+                })
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('discharge_by',$user_id);
+                })->get();
+
+            foreach ($all_admissions as $key => $value){
+                if($value->consultant_share > 0){
+                    $rec = [
+                        'transaction_date' => today(),
+                        'amount' => $value->consultant_share_amount,
+                        'debit_head_id' => financeHeadId('doctor_commission'),  // Doctor commision expense
+                        'credit_head_id' => $value->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
+                        'reference_type' => 'in_patient_admission',
+                        'reference_id' => $value->id,
+                        'user_id' => auth()->id(),
+                        'remarks' => 'Consultant share posted to doctor account by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
+                }
+
+            }
         }
 
 
@@ -219,13 +244,15 @@ class FinanceController extends Controller
 
     public function serviceCharges($closing_date='',$user_id='')
     {
-        $query = PatientServiceCharges::where("is_posted",0)
+        $query = PatientServiceCharges::where("patient_service_charges.is_posted",0)
+            ->leftJoin("in_patient_admissions","in_patient_admissions.id","=","patient_service_charges.admission_id")
             //->whereNull("admission_id")
             ->when($closing_date, function ($query) use ($closing_date) {
-                return $query->whereDate('service_date', '<=', date("Y-m-d", strtotime($closing_date)));
+                return $query->whereDate('patient_service_charges.service_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered"])
             ->when($user_id, function ($query) use ($user_id) {
-                return $query->where('created_by',$user_id);
+                return $query->where('patient_service_charges.created_by',$user_id);
             });
 
         $totals = $query->sum('service_rate');

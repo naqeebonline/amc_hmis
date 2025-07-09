@@ -123,7 +123,7 @@
                                 <label for="nameBasic" class="form-label">Procedure Type<span
                                         class="asterisk">*</span></label>
 
-                                <select name="procedure_type_id" required id="procedure_type_id" class="form-control">
+                                <select name="consultant_procedure_id" required id="consultant_procedure_id" class="form-control">
                                     <option value="">Select Procedure</option>
                                     @foreach ($procedure_type as $value)
                                         <option data-net_rate="{{ $value->net_rate }}" value="{{ $value->id }}">
@@ -299,7 +299,7 @@
                         <label for="nameBasic" class="form-label">Procedure Type<span
                                     class="asterisk">*</span></label>
 
-                        <select id="edit_procedure_type_id" class="form-select">
+                        <select id="edit_consultant_procedure_id" class="form-select">
                             <option value="">Select Procedure...</option>
                             @foreach ($procedure_type as $value)
                                 <option data-net_rate="{{ $value->net_rate }}" value="{{ $value->id }}">
@@ -346,7 +346,7 @@
     <script>
         setTimeout(function() {
             $("#patient_id").select2();
-            $("#procedure_type_id").select2();
+            $("#consultant_procedure_id").select2();
 
             $("#relation_id").select2();
 
@@ -354,15 +354,92 @@
             $("#ward_id").select2();
             $("#bed_id").select2();
             $("#edit_consultant_id").select2({dropdownParent: $('.my_modal')});
-            $("#edit_procedure_type_id").select2({dropdownParent: $('.my_modal')});
+            $("#edit_consultant_procedure_id").select2({dropdownParent: $('.my_modal')});
 
         }, 1000);
 
-        $("body").on("change","#procedure_type_id",function (e) {
-            var procedure_rate = $('#procedure_type_id').find(':selected').attr('data-net_rate');
-            $("#procedure_rate").val(procedure_rate);
+        $("body").on("change","#consultant_id",function (e) {
+             var consultant_id = $(this).val();
+            get_procedures(consultant_id);
 
-            //$("#sec_procedure_type_id").val('').trigger("change");
+        });
+
+        $("body").on("change","#edit_consultant_id",function (e) {
+             var consultant_id = $(this).val();
+            get_edit_procedures(consultant_id,"");
+
+        });
+
+        function get_procedures(consultant_id){
+            $.ajax({
+                type: "post",
+                url: "{{ route('pos.get_consultant_procedures') }}",
+                data: {
+                    consultant_id: consultant_id,
+                    "_token": "{{ csrf_token() }}"
+                },
+                success: function(res) {
+                    let $select = $('#consultant_procedure_id'); // Replace with your <select> element ID
+                    $select.empty(); // Clear existing options
+                    $select.append(`<option value="" data-net_rate=""></option>`);
+                    $.each(res.data, function(index, value) {
+                        let option = `<option data-net_rate="${value.amount}" value="${value.id}">
+                            ${value.procedure_name} (Rs: ${value.amount})
+                          </option>`;
+                        $select.append(option);
+                    });
+
+                    $select.select2('destroy').select2({
+                        placeholder: "Select Procedure....", // optional
+                        allowClear: true                // optional
+                    });
+
+                }
+            });
+        }
+        function get_edit_procedures(consultant_id,consultant_procedure_id){
+            $.ajax({
+                type: "post",
+                url: "{{ route('pos.get_consultant_procedures') }}",
+                data: {
+                    consultant_id: consultant_id,
+                    "_token": "{{ csrf_token() }}"
+                },
+                success: function(res) {
+                    let $select = $('#edit_consultant_procedure_id'); // Replace with your <select> element ID
+                    $select.empty(); // Clear existing options
+                    $select.append(`<option value="" data-net_rate=""></option>`);
+                    $.each(res.data, function(index, value) {
+                        let option = `<option data-net_rate="${value.amount}" value="${value.id}">
+                            ${value.procedure_name} (Rs: ${value.amount})
+                          </option>`;
+                        $select.append(option);
+                    });
+
+                    /*$select.select2('destroy').select2({
+                        placeholder: "Select Procedure....", // optional
+                        allowClear: true                // optional
+                    });*/
+
+                    setTimeout(function () {
+                        $("#edit_consultant_procedure_id").val(consultant_procedure_id).trigger("change");
+                    },1200)
+
+                }
+            });
+        }
+
+
+        $("body").on("change","#edit_consultant_procedure_id",function (e) {
+            var procedure_rate = $('#edit_consultant_procedure_id').find(':selected').attr('data-net_rate');
+            $("#edit_procedure_rate").val(procedure_rate);
+
+        });
+
+        $("body").on("change","#consultant_procedure_id",function (e) {
+            var procedure_rate = $('#consultant_procedure_id').find(':selected').attr('data-net_rate');
+            $("#procedure_rate").val(procedure_rate);
+            alert(procedure_rate);
         });
 
 
@@ -370,7 +447,8 @@
         $("body").on("click","#update_admission",function (e) {
            var consultant_id =  $("#edit_consultant_id").val();
 
-           var procedure_type_id =  $("#edit_procedure_type_id").val();
+           var consultant_procedure_id =  $("#edit_consultant_procedure_id").val();
+
            var edit_procedure_rate =  $("#edit_procedure_rate").val();
            var edit_advance_payment =  $("#edit_advance_payment").val();
             var admission_id = $('#edit_admission_id').val();
@@ -381,7 +459,7 @@
                 alert("Please Select Consultant...");
                 return false;
             }
-            if(procedure_type_id == ''){
+            if(consultant_procedure_id == ''){
                 alert("Please Select Procedure Type");
                 return false;
             }
@@ -399,14 +477,14 @@
 
             $.ajax({
                 type: "post",
-                url: "{{ route('pos.update_patient_admission') }}",
+                url: "{{ route('pos.update_in_patient_admission') }}",
                 data: {
 
                     consultant_id: consultant_id,
                     procedure_rate: edit_procedure_rate,
                     advance_payment: edit_advance_payment,
 
-                    procedure_type_id: procedure_type_id,
+                    consultant_procedure_id: consultant_procedure_id,
                     admission_id: admission_id,
                     consultant_share: consultant_share,
                     "_token": "{{ csrf_token() }}"
@@ -414,7 +492,7 @@
                 success: function(res) {
                     $("#edit_consultant_id").val('').trigger("change");
 
-                    $("#procedure_type_id").val('').trigger("change");
+                    $("#consultant_procedure_id").val('').trigger("change");
                     $("#edit_admission_id").val('');
                     $("#edit_advance_payment").val(0);
 
@@ -485,13 +563,13 @@
                     }
                 },*/
                 {
-                    data: 'procedure_type.name',
-                    name: 'procedure_type.name',
+                    data: 'consultant_procedure.procedure.name',
+                    name: 'consultant_procedure.procedure.name',
                     searchable: true
                 },
                 {
-                    data: 'procedure_type.type',
-                    name: 'procedure_type.type',
+                    data: 'consultant_procedure.procedure.type',
+                    name: 'consultant_procedure.procedure.type',
                     searchable: true
                 },
                 {
@@ -669,7 +747,7 @@
             $("#patient_id").val('');
             $("#bed_id").val('').trigger("change");
             $("#ward_id").val('').trigger("change");
-            $("#procedure_type_id").val('').trigger("change");
+            $("#consultant_procedure_id").val('').trigger("change");
             $("#consultant_id").val('').trigger("change");
             $("#admission_data").val('');
             $("#emergency_contact_no").val('');
@@ -691,7 +769,9 @@
 
             $('#edit_consultant_id').val(details.consultant_id).trigger('change');
 
-            $('#edit_procedure_type_id').val(details.procedure_type_id).trigger('change');
+            //$('#edit_consultant_procedure_id').val(details.consultant_procedure_id).trigger('change');
+            get_edit_procedures(details.consultant_id,details.consultant_procedure_id);
+
             $('#patient_admission_edit_modal').modal("show");
 
 
@@ -704,7 +784,7 @@
             $("#g4no").val(details.g4no);
             $("#emergency_contact_no").val(details.emergency_contact_no);
             $("#guardian_name").val(details.guardian_name);
-            $("#procedure_type_id").val(details.procedure_type_id).trigger("change");
+            $("#consultant_procedure_id").val(details.consultant_procedure_id).trigger("change");
             $("#consultant_id").val(details.consultant_id).trigger("change");
             $("#bed_id").val(details.bed_id);
             $("#patient_id").val(details.patient_id).trigger('change');
@@ -724,7 +804,7 @@
                     url: "{{ route('pos.deactivate_record') }}",
                     data: {
                         id: id,
-                        table: "patient_admissions",
+                        table: "in_patient_admissions",
                         _token: '{{ csrf_token() }}'
 
                     },

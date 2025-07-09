@@ -7,6 +7,7 @@ use App\Http\Controllers\PatientController\PatientAdmissionController;
 use App\Models\Customer;
 use App\Models\GrnDetails;
 use App\Models\Market;
+use App\Models\Patient\InPatientAdmission;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientAdmission;
 use App\Models\Product;
@@ -83,7 +84,7 @@ class SaleController extends Controller
         }
         //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
         $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1,"patient_type"=>"sehat_card"])
-            ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
+            //->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
             ->with(["patient"])->get();
 
         $data['invoiceNo'] = $this->returnInvoiceNumber();
@@ -151,7 +152,7 @@ class SaleController extends Controller
 
         }
         //$data['customers'] = Customer::where(["Type" => 2])->orderBy("Name", "ASC")->get();
-        $data['admitted_patients'] = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1])
+        $data['admitted_patients'] = InPatientAdmission::where(["admission_status" => "Admit","is_active"=>1])
             ->where("patient_type","!=","sehat_card")
             ->where("patient_type","!=","configuration")
            // ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))

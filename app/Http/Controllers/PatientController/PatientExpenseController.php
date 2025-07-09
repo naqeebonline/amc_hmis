@@ -255,8 +255,8 @@ class PatientExpenseController extends Controller
 
         $data['consultant_share'] = $admission->consultant_share;
         if($admission->procedure_rate == 0){
-            $data['procedure_amount1'] = $admission->procedure_type->net_rate;
-            $data['procedure_amount'] = $admission->procedure_type->net_rate;
+            $data['procedure_amount1'] = $admission->consultant_procedure->amount;
+            $data['procedure_amount'] = $admission->consultant_procedure->amount;
         }
         /*if($admission->consultant_share == 0){
             $data['consultant_share'] = $admission->consultant->share_percentage;

@@ -336,6 +336,7 @@
                         _token: '{{ csrf_token() }}',
                     },
                     success: function(response) {
+                        var redirect = "{{$redirect}}";
                         $("#service_charges_table").DataTable().destroy();
                         $("#amount").val('');
                         $("#remarks").val('');
@@ -350,6 +351,9 @@
                         alert("Payment Saved successfully");
 
                         $("#save_my_btn").prop('disabled', false).text("Submit");
+                        if(redirect){
+                            window.location = "{{route('pos.primary_discharge')}}/"+admission_id;
+                        }
 
 
                     },

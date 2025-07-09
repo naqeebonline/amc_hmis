@@ -90,9 +90,14 @@ class CustomerPayments extends Controller
         }
 
         $TotalSale = Sale::where(["patient_id"=>$customer_id])
+
             ->when($date, function ($query) use ($date) {
                 return $query->where('Date', '>=', date("Y-m-d",strtotime($date)));
-            })->sum('TotalSale');
+            })
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+            ->sum('TotalSale');
 
         $TotalReceived = SalePayment::where(["patient_id"=>$customer_id])
             ->when($date, function ($query) use ($date) {

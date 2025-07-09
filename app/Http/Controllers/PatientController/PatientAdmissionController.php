@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PatientController;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuration\ConsultantProcedure;
 use App\Models\Configuration\Consultants;
 use App\Models\Configuration\Investigation;
 use App\Models\Configuration\InvestigationSubCategory;
@@ -12,6 +13,7 @@ use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
 use App\Models\Machine\MachinePatient;
 use App\Models\Machine\MachineShift;
+use App\Models\Patient\InPatientAdmission;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientBaby;
@@ -46,7 +48,7 @@ class PatientAdmissionController extends Controller
         $data["wards"] = Ward::get();
         $data["procedure_type"] = ProcedureType::whereIsActive(1)->get();
         $data["consultant"] = Consultants::whereIsActive(1)->get();
-        return view("patients.hospital_patient_admission", $data);
+        return view("patients.patient_admission", $data);
     }
 
 
@@ -347,13 +349,42 @@ class PatientAdmissionController extends Controller
         ]);
     }
 
+    public function save_in_patient_investigation()
+    {
+        $data = request()->except(['_token', "id"]);
+
+        $data['inv_date'] = request()->inv_date . " " . date("h:i:s");
+        $investigation = InvestigationSubCategory::where(["id"=>request()->investigation_sub_category_id])->first();
+        $data['inv_amount'] = $investigation->price ?? 0;
+        $data['sale_price'] = $investigation->sale_price ?? 0;
+        if (request()->id == 0) {
+            $data['created_by'] = auth()->user()->id;
+            $data['patient_type'] = "sehat_card";
+        } else {
+            $data['updated_by'] = auth()->user()->id;
+        }
+        PatientInvestigation::updateOrCreate(
+            ["id" => request()->id],
+            $data
+        );
+        //$this->updateAdmissionDetails(request()->admission_id);
+        return response()->json([
+            "status" => true,
+            "message" => "Record save successfully."
+        ]);
+    }
+
 
     public function get_admission_investigations($patient_id = '', $admission_id = '')
     {
+       // dd("here");
         $patients = PatientInvestigation::where("is_active", 1)->with("investigation")
             ->when($patient_id, function ($query) use ($patient_id) {
                 $query->where('patient_id', $patient_id);
             })
+            /*->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })*/
             ->when($admission_id, function ($query) use ($admission_id) {
                 $query->where('admission_id', $admission_id);
             })
@@ -370,7 +401,7 @@ class PatientAdmissionController extends Controller
             })
 
             ->addColumn("print_invoice_number", function ($patient) {
-                return '<a target="_blank" href="' . route('pos.print_lab_invoice', [$patient->invoice_no]) . '">' . $patient->invoice_no . '</a>';
+                return '<a target="_blank" href="' . route('pos.print_hospital_lab_invoice', [$patient->invoice_no]) . '">' . $patient->invoice_no . '</a>';
             })
             ->rawColumns(["print_invoice_number", "actions"])
             ->make(true);
@@ -635,6 +666,16 @@ class PatientAdmissionController extends Controller
         return view("reports.patient_admission_report", $data);
     }
 
+    public function print_in_patient_admission($id)
+    {
+        $data["patient"] = InPatientAdmission::whereId($id)->with("user", "patient", "ward", "bed", "consultant", "consultant_procedure.procedure",'relation')->first();
+
+        $data['cnic_array'] =str_split($data["patient"]->patient->cnic);
+        $data['cnic_array'] = array_reverse($data['cnic_array'], true);
+       // $this->updateAdmissionDetails($id);
+        return view("reports.in_patient_admission_report", $data);
+    }
+
 
     public function patient_refunds()
     {
@@ -872,6 +913,43 @@ class PatientAdmissionController extends Controller
         );
 
         $this->updateAdmissionDetails(request()->admission_id);
+        return ["status"=>true,"message"=>"Record updated successfully"];
+    }
+
+    public function update_in_patient_admission()
+    {
+        $share_amount = 0;
+        if(request()->consultant_share !='' && request()->consultant_share > 0){
+            $percentage = request()->consultant_share/100;
+            $share_amount = (request()->procedure_rate) * ($percentage);
+        }
+
+        $consultant_procedure_id = ConsultantProcedure::where(["id"=>request()->consultant_procedure_id])->first();
+
+
+
+        $data['consultant_share'] = $consultant_procedure_id->consultant_share_percentage;
+        $data['consultant_share_amount'] = $consultant_procedure_id->consultant_share_amount;
+        $data['procedure_rate'] = request()->procedure_rate;
+
+        InPatientAdmission::where(["id"=>request()->admission_id])->update(
+            [
+                "consultant_id"=>request()->consultant_id,
+               // "sc_ref_no"=>request()->edit_sc_ref_no,
+                //"sub_consultant_id"=>request()->sub_consultant_id,
+                "consultant_procedure_id"=>request()->consultant_procedure_id,
+                "consultant_share"=>$consultant_procedure_id->consultant_share_percentage,
+                "procedure_rate"=>request()->procedure_rate,
+                "consultant_share_amount"=>$consultant_procedure_id->consultant_share_amount,
+                //"sec_procedure_type_id"=>request()->sec_procedure_type_id,
+                //"sec_procedure_rate"=>request()->sec_procedure_rate ?? 0,
+                "advance_payment"=>request()->advance_payment ?? 0,
+                //"sc_ref_no"=>request()->edit_sc_ref_no ?? 0,
+                "updated_by"=>auth()->user()->id,
+            ]
+        );
+
+      //  $this->updateAdmissionDetails(request()->admission_id);
         return ["status"=>true,"message"=>"Record updated successfully"];
     }
 
@@ -1143,7 +1221,7 @@ class PatientAdmissionController extends Controller
     public function hospital_patient_admission()
     {
         $data['title'] = "Patient Admission";
-        $admitted_patient = PatientAdmission::where(["admission_status" => "Admit","is_active"=>1])->where("patient_type","hospital_patient")->pluck("patient_id");
+        $admitted_patient = InPatientAdmission::where(["admission_status" => "Admit","is_active"=>1])->where("patient_type","hospital_patient")->pluck("patient_id");
         //dd($admitted_patient);
         $data["patients"] = Patient::whereNotIn("id", $admitted_patient)->get();
         $data["relations"] = Relation::get();
@@ -1157,41 +1235,43 @@ class PatientAdmissionController extends Controller
 
     public function hospital_list_admission()
     {
-        $patients = PatientAdmission::where(["is_active"=> 1,"admission_status"=>"Admit"])->with("patient", "ward", "bed", 'procedure_type', 'consultant','sub_consultant')
+        $patients = InPatientAdmission::where(["is_active"=> 1,"admission_status"=>"Admit"])->with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant','sub_consultant')
             ->orderBy("id","desc")
             ->where("patient_type","hospital_patient");
+
+
         $res = [];
         return DataTables::of($patients)
 
             ->addColumn("edit_admission_date", function ($patient) {
                 //dd(date("Y-m-d", strtotime($patient->admission_date)));
-                return  date("Y-m-d", strtotime($patient->admission_date));
+                //return  date("Y-m-d", strtotime($patient->admission_date));
             })
             ->addColumn("alert", function ($patient) {
-                $res = (new PatientExpenseController())->getAdmissionDetails1($patient);
-                return  $res['alert'];
+                /*$res = (new PatientExpenseController())->getAdmissionDetails1($patient);
+                return  $res['alert'];*/
             })
             ->addColumn("totalCost", function ($patient) use($res) {
-                $res = (new PatientExpenseController())->getAdmissionDetails1($patient);
-                return  $res['totalCost'];
+                /*$res = (new PatientExpenseController())->getAdmissionDetails1($patient);
+                return  $res['totalCost'];*/
             })
             ->addColumn("balance", function ($patient) use($res) {
-                $res = (new PatientExpenseController())->getAdmissionDetails1($patient);
-                return  $res['balance'];
+                /*$res = (new PatientExpenseController())->getAdmissionDetails1($patient);
+                return  $res['balance'];*/
             })
             ->addColumn("actions", function ($patient) {
                 $buttons =  '<a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-warning edit_record"><i class="tf-icons bx bx-pencil"></i></a> 
                         <button data-id="' . $patient->id . '" class="btn btn-danger btn-sm delete_record"><i class="bx bx-trash tf-icons"></i></button>
                         <a href="' . route('pos.view_patient_summary', [$patient->patient_id, $patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bxs-show tf-icons"></i></a>
-                        <a href="' . route('pos.print_patient_admission', [$patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bx-printer tf-icons"></i></a>
+                        <a href="' . route('pos.print_in_patient_admission', [$patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bx-printer tf-icons"></i></a>
                       
                         ';
                 if ($patient->admission_status == "Admit") {
                     $buttons = $buttons . '<button data-id="' . $patient->id . '" class="btn btn-danger btn-sm cancel_admission mt-2">Admission Cancelation</button>';
                 }
-                if ($patient->procedure_type_id == 6 || $patient->procedure_type_id == 208 || $patient->procedure_type_id == 211) {
+                /*if ($patient->procedure_type_id == 6 || $patient->procedure_type_id == 208 || $patient->procedure_type_id == 211) {
                     $buttons = $buttons . '<a  href="' . route('pos.patient_baby', [$patient->patient_id, $patient->id]) . '"  class="btn btn-success btn-sm mt-2">Add Baby Information</a>';
-                }
+                }*/
 
 
 
@@ -1216,48 +1296,20 @@ class PatientAdmissionController extends Controller
             $data = request()->except(['_token', "id","patient_id"]);
             $data['updated_by'] = auth()->user()->id;
         }
-        $procedure_type_id = ProcedureType::where(["id"=>request()->procedure_type_id])->first();
+        $consultant_procedure_id = ConsultantProcedure::where(["id"=>request()->consultant_procedure_id])->first();
 
         $consultant = Consultants::where(["id"=>request()->consultant_id])->first();
-        $data['consultant_share'] = $consultant->share_percentage;
+        $data['consultant_share'] = $consultant_procedure_id->consultant_share_percentage;
+        $data['consultant_share_amount'] = $consultant_procedure_id->consultant_share_amount;
         $data['procedure_rate'] = request()->procedure_rate;
 
-        $share_amount = 0;
-        if($data['consultant_share'] !='' && $data['consultant_share'] > 0){
-            $percentage = $data['consultant_share']/100;
-            $share_amount = ($data['procedure_rate']) * ($percentage);
-        }
 
-        $data['consultant_share_amount'] = $share_amount;
-
-
-        $data['sec_procedure_rate'] = 0;
-        if(request()->sec_procedure_type_id){
-            $sec_procedure_type_id = ProcedureType::where(["id"=>request()->sec_procedure_type_id])->first();
-            $data['sec_procedure_rate'] = $sec_procedure_type_id->net_rate ?? 0;
-        }
 
         $data['patient_type'] = "hospital_patient";
-       $admission =  PatientAdmission::updateOrCreate(
+       $admission =  InPatientAdmission::updateOrCreate(
             ["id" => request()->id],
             $data
         );
-
-        /*if(!request()->id){
-            PatientPayment::updateOrCreate(
-                ["id" => request()->id],
-                [
-                    "patient_id" => request()->patient_id,
-                    "admission_id" => $admission->id,
-                    "amount"        => request()->advance_payment,
-                    "payment_type"  => "advance",
-                    "remarks"       =>"Advance payment received from patient during admission.",
-                    "created_by"    => auth()->user()->id,
-                    "created_at"    => date("Y-m-d H:i:s")
-                ]
-            );
-        }*/
-
 
         return response()->json([
             "status" => true,
@@ -1268,7 +1320,7 @@ class PatientAdmissionController extends Controller
 
     public function in_patient_investigation()
     {
-        $data["patients"] = PatientAdmission::where("admission_status", "Admit")
+        $data["patients"] = InPatientAdmission::where("admission_status", "Admit")
             ->with("patient", "ward", "bed")->where("patient_type","hospital_patient")->get();
         $data['investigation'] = InvestigationSubCategory::whereIsActive(1)->get();
         $data['service_type'] = ServiceType::whereIsActive(1)->get();
@@ -1277,7 +1329,7 @@ class PatientAdmissionController extends Controller
 
     function in_patient_service_charges()
     {
-        $data["patients"] = PatientAdmission::where("admission_status", "Admit")
+        $data["patients"] = InPatientAdmission::where("admission_status", "Admit")
             ->where("patient_type","hospital_patient")
             //->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
             ->with("patient", "ward", "bed")->get();
@@ -1288,7 +1340,7 @@ class PatientAdmissionController extends Controller
 
     function in_patient_payment()
     {
-        $data["patients"] = PatientAdmission::where("admission_status", "Admit")
+        $data["patients"] = InPatientAdmission::where("admission_status", "Admit")
             ->where("patient_type","hospital_patient")
             ->when(request()->has('patient_id'), function ($query) {
                 $query->where('patient_id',request()->patient_id);
@@ -1296,7 +1348,10 @@ class PatientAdmissionController extends Controller
             //->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
             ->with("patient", "ward", "bed")->get();
 
-
+        $data['redirect'] = false;
+        if(request()->has('patient_id')){
+            $data['redirect'] = true;
+        }
 
         $data['service_type'] = ServiceType::whereIsActive(1)->get();
         return view("patients.in_patient_payment", $data);
@@ -1317,9 +1372,17 @@ class PatientAdmissionController extends Controller
 
     function primary_discharge($admission_id='')
     {
-        $admission = PatientAdmission::with("patient", "ward", "bed", 'procedure_type', 'consultant')
+        $admission = InPatientAdmission::with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant')
             ->where("id",$admission_id)
             ->first();
+
+
+        $procedure_id = $admission->consultant_procedure_id;
+        $consultant_id = $admission->consultant_id;
+
+       // dd($consultant_id,$procedure_id);
+
+        //dd($procedure_id,$consultant_id);
 
         $admissionDate = Carbon::parse($admission->admission_date);
         $dischargeDate = Carbon::parse($admission->discharge_date);
@@ -1336,9 +1399,17 @@ class PatientAdmissionController extends Controller
         $data['service_type'] = ServiceType::where(["show_in_discharge_form"=>1])->whereIsActive(1)->get();
         $total_service_charges = 0;
         foreach ($data['service_type'] as $key => $value){
+
             $value->patient_charges = PatientServiceCharges::where(["patient_id"=>$admission->patient_id,"admission_id"=>$admission->id,"service_type_id"=>$value->id])->where(["is_active"=>1])->first();
+            //$value->patient_charges = $this->getServiceRate($consultant_id,$procedure_id,$value->id);
+
             if($value->patient_charges){
                 $total_service_charges = ($total_service_charges) + ($value->patient_charges->service_rate ?? 0);
+            }else{
+                $consultant_charges = $this->getServiceRate($consultant_id,$procedure_id,$value->id);
+                //dd($consultant_charges);
+                $value->consultant_charges = $consultant_charges;
+                $total_service_charges = ($total_service_charges) + ($consultant_charges);
             }
         }
         $data['total_service_charges'] = $total_service_charges;
@@ -1356,6 +1427,20 @@ class PatientAdmissionController extends Controller
         }
 
 
+    }
+
+    public function getServiceRate($consultant_id,$procedure_id,$service_type_id)
+    {
+        $data = DB::table('consultant_procedures')
+            ->select('consultant_procedures.*', 'consultant_procedure_pricing.amount as service_amount','service_type.name as service_name')
+            ->leftJoin('consultant_procedure_pricing', 'consultant_procedure_pricing.consultant_procedure_id', '=', 'consultant_procedures.id')
+            ->leftJoin('service_type', 'service_type.id', '=', 'consultant_procedure_pricing.service_type_id')
+            ->where("consultant_procedures.consultant_id",$consultant_id)
+            ->where("consultant_procedures.id",$procedure_id)
+            ->where("consultant_procedure_pricing.service_type_id",$service_type_id)
+            ->first();
+
+        return $data->service_amount ?? 0;
     }
 
     public function patientInvestigationBalance($patient_id,$admission_id)
@@ -1408,9 +1493,9 @@ class PatientAdmissionController extends Controller
 
     public function list_in_admitted_patients()
     {
-        $patients = PatientAdmission::where(["is_active"=> 1, "admission_status"=> "Admit"])
+        $patients = InPatientAdmission::where(["is_active"=> 1, "admission_status"=> "Admit"])
             //->where(["admission_status"=>"Admit"])
-            ->with("patient", "ward", "bed", 'procedure_type', 'consultant')
+            ->with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant')
             ->where("patient_type","hospital_patient");
         return DataTables::of($patients)
 
@@ -1446,7 +1531,7 @@ class PatientAdmissionController extends Controller
                 "created_at" => date("Y-m-d H:i:s-"),
             ];
             PatientServiceCharges::updateOrCreate(
-                ["patient_id" => request()->patient_id, "admission_id" => request()->admission_id, "service_type_id" => $service_charges_id[$key]],
+                ["patient_id" => request()->patient_id, "admission_id" => request()->admission_id, "service_type_id" => $service_charges_id[$key],"is_active"=>1],
                 $data
             );
         }
@@ -1483,7 +1568,7 @@ class PatientAdmissionController extends Controller
 
 
         if($total_payment_paid_by_patient > 0){
-            PatientAdmission::where(["patient_id"=>request()->patient_id,"id"=>request()->admission_id])
+            InPatientAdmission::where(["patient_id"=>request()->patient_id,"id"=>request()->admission_id])
                 ->update([
                     "total_amount_received_from_patient"=>$total_payment_paid_by_patient,
                     "discharge_by"          =>auth()->user()->id,

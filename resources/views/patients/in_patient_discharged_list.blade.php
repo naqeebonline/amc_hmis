@@ -30,7 +30,7 @@
                             <thead>
                             <tr>
                                 <th >Patient MR no.</th>
-                                <th >Sehat Card Ref#</th>
+
                                 <th >Patient Name</th>
                                 <th >Guardian Name</th>
                                 <th >Consultant</th>
@@ -87,11 +87,7 @@
                     name: 'patient.mr_no',
                     searchable: true
                 },
-                {
-                    data: 'sc_ref_no',
-                    name: 'sc_ref_no',
-                    searchable: true
-                },
+
                 {
                     data: 'patient.name',
                     name: 'patient.name',
@@ -108,8 +104,8 @@
                     searchable: true
                 },
                 {
-                    data: 'procedure_type.name',
-                    name: 'procedure_type.name',
+                    data: 'consultant_procedure.procedure.name',
+                    name: 'consultant_procedure.procedure.name',
                     searchable: true
                 },
                 {

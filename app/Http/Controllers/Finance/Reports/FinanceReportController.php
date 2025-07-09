@@ -54,14 +54,14 @@ class FinanceReportController extends Controller
         $totalIncome = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.credit_head_id', '=', 'fh.id')
             ->where('fh.type', 'income')
-            ->where("fh.id",5)
+           // ->where("fh.id",5)
             ->sum('ft.amount');
 
         // Get total expenses from debit side (expenses are debited)
         $totalExpense = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.debit_head_id', '=', 'fh.id')
             ->where('fh.type', 'expense')
-            ->where("fh.id",11)
+           // ->where("fh.id",11)
             ->sum('ft.amount');
 
         // Calculate net profit/loss

@@ -271,8 +271,10 @@
                                 <option value="">Select Product...</option>
                                 <?php foreach ($products as $key => $value): ?>
                                    {{-- @if($value->avaliable_qty > 0)--}}
+                                @if($value->ProductName != '' && $value->ProductName != '-')
                                     <option value="{{$value->ProductID}}" data-purchasePrice={{$value->SalePrice}} data-taxPercentage="{{$value->taxPercentage}}">{{$value->ProductName}} | PS: {{$value->pack_size}} | Qty {{$value->avaliable_qty}}</option>
                                     {{--@endif--}}
+                                @endif
                                 <?php endforeach; ?>
                             </select>
                             {{--<input type="text" name="product_name" id="product_name" class="form-control" placeholder="Product Name">--}}

@@ -344,7 +344,7 @@
             if (isValid) {
                 $("#save_inv_btn").prop("disabled", true).text("Saving...");
                 $("#add_patient_investgiation").ajaxSubmit({
-                    url: '{{ route('pos.save_patient_investigation') }}',
+                    url: '{{ route('pos.save_in_patient_investigation') }}',
                     type: 'post',
                     data: {
                         _token: '{{ csrf_token() }}',

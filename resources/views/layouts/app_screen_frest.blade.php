@@ -355,7 +355,7 @@
                                         @continue($mp->show_in_menu == 'no')
 
                                         <li class="menu-item @if (\Illuminate\Support\Facades\Route::currentRouteName() == $mpr->route) active @endif">
-                                            <a href="{{ route($mpr->route) }}" class="menu-link">
+                                            <a href="{{ route($mpr->route) }}" style="font-size: 12px !important; font-weight: bold" class="menu-link">
                                                 {{ $mpr->title }}
                                             </a>
                                             @php $assignedMenus[$mpr->route] = $mpr->title @endphp
