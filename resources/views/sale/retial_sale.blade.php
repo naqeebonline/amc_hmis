@@ -384,7 +384,7 @@
                         <input type="number" readonly style="font-weight: bold; color:'green'; font-size: 14px;" id="discount_amount" value="0" class="form-control">
                     </div>
                     <div class="col-md-2">
-                        <label for="remarks">Received Amount</label>
+                        <label for="remarks">Net Bill</label>
                         <input type="number"  id="ReceivedAmount"  disabled style="color:red;font-weight: bold; font-size: 24px;" value="0" class="form-control">
                     </div>
                     <div class="col-md-4" style="display: none;">
