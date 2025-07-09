@@ -443,7 +443,9 @@
                         <tr>
                             <th width="5%">Invoice #</th>
                             <th>Patient</th>
-                            <th>Total</th>
+                            <th>Total Sale</th>
+
+                            <th>After Discount</th>
 
                             <th>Received</th>
                             <th style="width: 30%">Actions</th>
@@ -502,6 +504,11 @@
                     {
                         data: 'patient.name',
                         name: 'patient.name',
+                        searchable: true
+                    },
+                    {
+                        data: 'TotalSale',
+                        name: 'TotalSale',
                         searchable: true
                     },
 

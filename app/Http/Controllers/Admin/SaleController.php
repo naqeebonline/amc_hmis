@@ -10,6 +10,7 @@ use App\Models\Market;
 use App\Models\Patient\InPatientAdmission;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientAdmission;
+use App\Models\PharmacyRetrun;
 use App\Models\Product;
 use App\Models\ReceiveablesDetail;
 use App\Models\Sale;
@@ -396,6 +397,7 @@ class SaleController extends Controller
         $Discount = request()->discount_amount ?? 0;
         $demage = 0;
         $ReceivedAmount = request()->ReceivedAmount;
+
         $userID = auth()->user()->id;
         $totalTax = 0;
         $TotalSale = request()->BillAmount;
@@ -776,6 +778,84 @@ class SaleController extends Controller
 
     public function return_pharmacy_item()
     {
+
+
+        $sale_details = SaleDetails::where(["SDID"=>request()->SDID])->first();
+
+        $sale = Sale::where(["SaleID"=>$sale_details->SaleID])->first();
+
+        $admission_id = $sale->admission_id;
+
+        $is_admitted_patient = "no";
+
+        //---- check if patient is admitt or not  ---//
+        if($admission_id){
+            $check_patient_admission = InPatientAdmission::whereId($admission_id)->where("admission_status","Admit")->first();
+            if($check_patient_admission){
+                $is_admitted_patient = "yes";
+            }else{
+                $is_admitted_patient = "no";
+            }
+        }
+        //----- end of check -----//
+
+
+
+
+
+        $retrun_qty = request()->ReturnQuantity;
+
+        $total_return_qty = ($sale_details->ReturnQuantity) + ($retrun_qty);
+
+        $total_sale_amount = ($sale->TotalSale) - ((request()->return_amount) + (request()->return_discount_amount));
+
+        $received_amount = ($sale->received_amount) - (request()->return_amount);
+
+
+        //---- check if patient is admitt then correct the bill otherwise make entry in pharmacy_return_items table for user closing balance.---//
+        //--- close balance will adjust from pharmacy return table only amount will be minus from total sale amount of user during closing  ---//
+
+        if($is_admitted_patient == "yes" && $sale->received_amount == 0){
+            //dd(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+        }else{
+
+            PharmacyRetrun::create([
+                "sale_id" => $sale_details->SaleID,
+                "sale_detail_id" => request()->SDID,
+                "product_id" => $sale_details->ProductID,
+                "quantity" => request()->ReturnQuantity,
+                "amount" => request()->return_amount,
+                "created_by" => auth()->user()->id,
+                "created_at" => date("Y-m-d H:i:s"),
+            ]);
+            SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+        }
+        //-------- end of check  ------//
+
+        //------------- now grn detals .........//
+        $result = GrnDetails::where(["GDID"=>$sale_details->GDID])->first();
+        $remainingQuanity=($result->RemainingQuantity)+($retrun_qty);
+        $soldQuantity=($result->SoldQuantity)-($retrun_qty);
+        $TotalReturn=($result->TotalReturn)+($retrun_qty);
+        $grn_detailDate=array(
+            "SoldQuantity" =>$soldQuantity,
+            "TotalReturn"  =>$TotalReturn,
+            "RemainingQuantity" =>$remainingQuanity,
+            "ProductStatus"     =>1
+        );
+        GrnDetails::where(['GDID'=>$sale_details->GDID])->update($grn_detailDate);
+
+        return response()->json(["status"=>true,"message"=>"done"]);
+        //$this->Zk_Common_Model->update_records('grn_details',$grn_detailDate,array('GDID'=>$GDID));
+    }
+
+
+    public function return_pharmacy_item_backup()
+    {
+
+
         $sale_details = SaleDetails::where(["SDID"=>request()->SDID])->first();
         $sale = Sale::where(["SaleID"=>$sale_details->SaleID])->first();
         $discount_percentage =  $sale->discount_percentage;

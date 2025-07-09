@@ -255,6 +255,8 @@ class SupplierPayments extends Controller
         $customer_id = $data['record']->SCID;
         $billDate = date("d-m-Y", strtotime($data['record']->Date));
 
+        $discount_percentage = $data['record']->discount_percentage;
+
         //$data['PreviousBalance']=(new CustomerPayments())->customer_previous_balance($customer_id,$date);
 
         $data['data'] = SaleDetails::with('product')->where(['SaleID' => $SaleID])->get();
@@ -271,6 +273,7 @@ class SupplierPayments extends Controller
                 $return = "Yes";
             }
         }
+
 
         $result = [];
 
@@ -301,6 +304,8 @@ class SupplierPayments extends Controller
 
 
         $data['TotalAmount'] = $totalAmount;
+        $data['TotalDiscount'] = ($totalAmount * $discount_percentage)/100;
+
         $data['show_customer_contact'] = "true";
 
         $data['customer'] = Customer::where("SCID", $customer_id)->get();

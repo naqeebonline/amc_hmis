@@ -299,7 +299,6 @@
         });
 
         $("body").on("input", "#ReturnQuantity", function(e) {
-            "use strict";
             let returnQuantity = parseInt($(this).val()) || 0;
             let Quantity = parseInt($("#Quantity").val()) || 0;
             $("#return_details").html('');
@@ -310,9 +309,9 @@
             }
 
             var total_amount = parseInt(sale_price * returnQuantity) || 0;
-            var percentage_amount = parseInt((total_amount * discount_percentage)/100);
-            var return_amount = total_amount - percentage_amount;
-            $("#return_details").append(`<b>Total Amount:${total_amount} <br> Discount Rs:${percentage_amount} (${discount_percentage}%) <br> <span style='color:red'>Return Amount: ${return_amount}</span></b>`);
+            return_discount_amount = parseInt((total_amount * discount_percentage)/100);
+            return_amount = total_amount - return_discount_amount;
+            $("#return_details").append(`<b>Total Amount:${total_amount} <br> Discount Rs:${return_discount_amount} (${discount_percentage}%) <br> <span style='color:red'>Return Amount: ${return_amount}</span></b>`);
         });
 
         $("body").on("click", "#return_item_to_stock", function(e) {
@@ -327,6 +326,8 @@
                 url: "{{ route('pos.return_pharmacy_item') }}",
                 data: {
                     SDID: SDID,
+                    return_discount_amount: return_discount_amount,
+                    return_amount: return_amount,
                     ReturnQuantity: ReturnQuantity,
                     _token: '{{ csrf_token() }}'
 

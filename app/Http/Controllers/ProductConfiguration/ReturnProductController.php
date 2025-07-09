@@ -32,6 +32,7 @@ class ReturnProductController extends Controller
         $data['service_type'] = ServiceType::whereIsActive(1)->get();
 
         $data['sale_id'] = $sale_id;
+
         return view("sale.return_pharamacy_product", $data);
     }
 }

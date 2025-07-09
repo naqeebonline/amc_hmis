@@ -329,7 +329,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get("print_admitted_patient_treatment_report/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_admitted_patient_treatment_report"])->name("pos.print_admitted_patient_treatment_report");
     Route::get("patient_treatment_chart_report/{patient_id?}/{admission_id?}/{medicine_type_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_treatment_chart_report"])->name("pos.patient_treatment_chart_report");
-    Route::post("update_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_patient_admission"])->name("pos.update_patient_admission");
+    Route::post("updat-e_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_patient_admission"])->name("pos.update_patient_admission");
     Route::post("update_patient_admission_info", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_patient_admission_info"])->name("pos.update_patient_admission_info");
     Route::get("canceled_patients", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "canceled_patients"])->name("pos.canceled_patients");
     Route::get("canceled_patient_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "canceled_patient_list"])->name("pos.canceled_patient_list");

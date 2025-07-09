@@ -12,6 +12,7 @@ use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientInvestigation;
 use App\Models\Patient\PatientInvestigationPayment;
 use App\Models\Patient\PatientServiceCharges;
+use App\Models\PharmacyRetrun;
 use App\Models\Sale;
 use App\Models\SalePayment;
 use App\Models\Users;
@@ -40,6 +41,7 @@ class FinanceController extends Controller
         $totals = $query->selectRaw('SUM(amount) as received_amount')->first();
         $data['data'] = $totals;
 
+        $data['pharmacy_return'] = $this->total_return_in_pharmacy($closing_date,$user_id);
         $data['appointments'] = $this->appointmentsPayment($closing_date,$user_id);
         $data['investigations'] = $this->investigationPayment($closing_date,$user_id);
         $data['service_charges'] = $this->serviceCharges($closing_date,$user_id);
@@ -74,6 +76,7 @@ class FinanceController extends Controller
         $sale = $sale_totals->received_amount ?? 0;
         $appointments = $appointments->total_fees ?? 0;
         $investigations = $investigations->cash_in_hand ?? 0;
+        $pharmacy_return = $this->total_return_in_pharmacy($closing_date,$user_id);
         $service_charges = $this->serviceCharges($closing_date,$user_id);
         $total_amount = ($sale) + ($appointments) + ($investigations) + ($service_charges);
 
@@ -84,7 +87,7 @@ class FinanceController extends Controller
         if($sale > 0){
             array_push($record,[
                 'transaction_date' => today(),
-                'amount' => $sale,
+                'amount' => ($sale),
                 'debit_head_id' => request()->finance_head_id,  //cash at office
                 'credit_head_id' => financeHeadId('pharmacy_income'), // pharmacy income
                 'reference_type' => 'sale',
@@ -93,6 +96,30 @@ class FinanceController extends Controller
                 'remarks' => 'Full pharmacy sale posted to cash at office by '.auth()->user()->name,
                 'created_at' => now()
             ]);
+        }
+        if($pharmacy_return > 0){
+            $return = $query = PharmacyRetrun::where("is_posted",0)
+                ->when($closing_date, function ($query) use ($closing_date) {
+                    return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+                })
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('created_by',$user_id);
+                })->get();
+            foreach ($return as $key => $value){
+                array_push($record,[
+                    'transaction_date' => today(),
+                    'amount' => $value->amount, // return amount
+                    'debit_head_id' => financeHeadId('pharmacy_income'), // reduce income
+                    'credit_head_id' => request()->finance_head_id, // reduce cash
+                    'reference_type' => 'pharmacy_return',
+                    'reference_id' => null,
+                    'user_id' => auth()->id(),
+                    'remarks' => 'Pharmacy return (cash refunded)',
+                    'created_at' => now()
+                ]);
+            }
+
+
         }
         if($appointments > 0){
             array_push($record,[
@@ -215,6 +242,20 @@ class FinanceController extends Controller
         return redirect()->back()->with('success', 'Record Posted Successfully.');
     }
 
+    public function total_return_in_pharmacy($closing_date='',$user_id='')
+    {
+        $query = PharmacyRetrun::where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            })->sum('amount');
+
+
+        return $query;
+    }
+
     public function appointmentsPayment($closing_date='',$user_id='')
     {
         $query = Appointment::where("is_posted",0)
@@ -301,6 +342,16 @@ class FinanceController extends Controller
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+
+        PharmacyRetrun::where("is_posted",0)
+            //->whereNull("admission_id")
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+
 
         return true;
     }

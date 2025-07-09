@@ -84,13 +84,18 @@
                                     </tr>
 
                                     <tr>
+                                        <td>Pharmacy Return</td>
+                                        <td>- {{$pharmacy_return ?? 0}}</td>
+                                    </tr>
+
+                                    <tr>
                                         <td>Service Charges</td>
                                         <td>{{$service_charges ?? 0}}</td>
                                     </tr>
 
                                     <tr>
                                         <td><strong>Total</strong></td>
-                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand) + ($service_charges)}}</strong></td>
+                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand) + ($service_charges) - ($pharmacy_return)}}</strong></td>
                                     </tr>
                                     <tr>
                                         <td>Cash Closing</td>

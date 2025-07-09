@@ -77,7 +77,7 @@
             <tr>
                 <th colspan="3"></th>
                 <th style="font-size: 12px">Discount:</th>
-                <th style="font-size: 12px">{{ $record->Discount }}</th>
+                <th style="font-size: 12px">{{ round($TotalDiscount) }}</th>
             </tr>
             <tr>
                 <th colspan="3"></th>
