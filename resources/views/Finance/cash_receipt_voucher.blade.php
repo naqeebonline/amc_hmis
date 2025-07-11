@@ -129,8 +129,8 @@
                                                 </button>
                                             @endif
 
-                                                <a href="{{ route('pos.print_voucher', $value->voucher_id) }}" target="_blank" class="btn btn-sm btn-primary">
-                                                    <i class="fa fa-print"></i> Print Voucher
+                                                <a href="{{ route('pos.printDailyClosingVoucher', $value->voucher_id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-print"></i>
                                                 </a>
                                         </td>
                                     </tr>

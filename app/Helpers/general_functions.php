@@ -513,6 +513,60 @@ function getFMCUserNotifictions()
         'count' => $count ?? 0,
     ];
 }
+function numberToWords($num)
+{
+    $ones = [
+        '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+        'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+        'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+    ];
+
+    $tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    $digits = ['', 'Thousand', 'Lakh', 'Crore'];
+
+    if ($num == 0) return 'Zero only';
+
+    $result = '';
+
+    // Split number into groups
+    $number = str_pad($num, 9, '0', STR_PAD_LEFT);
+    $crore = (int)substr($number, 0, 2);
+    $lakh = (int)substr($number, 2, 2);
+    $thousand = (int)substr($number, 4, 2);
+    $hundred = (int)substr($number, 6, 1);
+    $remainder = (int)substr($number, 7, 2);
+
+    if ($crore > 0) {
+        $result .= convert2Digit($crore, $ones, $tens) . ' Crore ';
+    }
+    if ($lakh > 0) {
+        $result .= convert2Digit($lakh, $ones, $tens) . ' Lakh ';
+    }
+    if ($thousand > 0) {
+        $result .= convert2Digit($thousand, $ones, $tens) . ' Thousand ';
+    }
+    if ($hundred > 0) {
+        $result .= $ones[$hundred] . ' Hundred ';
+    }
+    if ($remainder > 0) {
+        if ($result != '') {
+            $result .= 'and ';
+        }
+        $result .= convert2Digit($remainder, $ones, $tens) . ' ';
+    }
+
+    return trim($result) . ' only/-';
+}
+
+function convert2Digit($num, $ones, $tens)
+{
+    if ($num < 20) {
+        return $ones[$num];
+    } else {
+        return $tens[intval($num / 10)] . (($num % 10 != 0) ? ' ' . $ones[$num % 10] : '');
+    }
+}
 
 function getUserRole(){
     return auth()->user()->roles->pluck('name')[0];
@@ -557,3 +611,5 @@ function generateVoucherNumber(string $type, int $userId): string
     // Combine into final voucher number
     return "{$typeSlug}-{$userCode}-{$nextNumber}";
 }
+
+

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 11, 2025 at 02:38 PM
+-- Generation Time: Jul 11, 2025 at 08:23 PM
 -- Server version: 8.3.0
 -- PHP Version: 7.4.33
 
@@ -46,7 +46,15 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   `posted_on` datetime DEFAULT NULL,
   `is_active` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `appointments`
+--
+
+INSERT INTO `appointments` (`id`, `appointment_number`, `patient_id`, `consultant_id`, `opd_type_id`, `appointment_date`, `fee`, `hospital_share`, `consultant_share`, `created_at`, `updated_at`, `created_by`, `updated_by`, `is_posted`, `posted_on`, `is_active`) VALUES
+(1, 'A-0001', 1, 1, 1, '2025-07-12 00:36:11', 700.00, 700.00, 0.00, '2025-07-12 00:36:11', '2025-07-12 00:38:27', 2, NULL, 1, '2025-07-12 00:00:00', 1),
+(2, 'A-0002', 5, 2, 2, '2025-07-12 00:36:32', 700.00, 400.00, 300.00, '2025-07-12 00:36:32', '2025-07-12 00:38:27', 2, NULL, 1, '2025-07-12 00:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -500,7 +508,14 @@ CREATE TABLE IF NOT EXISTS `daily_user_closings` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `daily_user_closings`
+--
+
+INSERT INTO `daily_user_closings` (`id`, `user_id`, `investigation_amount`, `sale_amount`, `appointment_amount`, `total_amount`, `closing_date`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 2, 1350.00, 3400.00, 1400.00, 6150.00, '2025-07-12 00:00:00', 'Closing done by Ayaz Ahmad on 2025-07-12 00:38:27', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -653,6 +668,7 @@ INSERT INTO `expense_sub` (`ESID`, `ESTitle`, `ExpenseID`, `IsActive`, `Editable
 DROP TABLE IF EXISTS `finance_heads`;
 CREATE TABLE IF NOT EXISTS `finance_heads` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `head_code` varchar(255) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `type` enum('income','expense','asset','liability','capital') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'asset',
   `description` text,
@@ -665,28 +681,28 @@ CREATE TABLE IF NOT EXISTS `finance_heads` (
 -- Dumping data for table `finance_heads`
 --
 
-INSERT INTO `finance_heads` (`id`, `name`, `type`, `description`, `created_at`) VALUES
-(1, 'Partner A Asim', 'liability', 'investment_capital_injection', '2025-06-29 14:49:51'),
-(2, 'Cash At Office', 'asset', 'cash_at_office', '2025-06-29 14:50:32'),
-(3, 'Pharmacy Income', 'income', 'pharmacy_income', '2025-06-29 14:50:32'),
-(4, 'Appointment Income', 'income', 'appointment_income', '2025-06-29 14:50:32'),
-(5, 'Investigation Income', 'income', 'investigation_income', '2025-06-29 14:50:32'),
-(6, 'Pharmacy Purchase', 'expense', 'pharmacy_purchase', '2025-06-29 14:50:32'),
-(8, 'Doctor Commission', 'expense', 'doctor_commission', '2025-06-29 14:50:32'),
-(10, 'Partner B Amajad', 'liability', 'investment_capital_injection', '2025-06-29 14:49:51'),
-(11, 'Investigation Consumable', 'expense', 'investigation_consumable', '2025-06-29 14:50:32'),
-(14, 'OT Charges', 'income', 'OT_Charges', '2025-07-02 06:43:53'),
-(15, 'Anesthesia Charges', 'income', 'Anesthesia_Charges', '2025-07-02 06:44:31'),
-(16, 'NICU Charges', 'income', 'NICU_Charges', '2025-07-02 06:44:40'),
-(17, 'Oxygen Charges', 'income', 'Oxygen_Charges', '2025-07-02 06:44:48'),
-(18, 'Service Charges', 'income', 'Service_Charges', '2025-07-02 06:45:11'),
-(19, 'Bed Charges', 'income', 'Bed_Charges', '2025-07-02 06:45:20'),
-(20, 'Room Charges', 'income', 'Room_Charges', '2025-07-02 06:45:28'),
-(28, 'Supplier- XYZ Pharma', 'liability', '03005374834', '2025-07-05 10:14:33'),
-(23, 'Image Charges', 'income', 'Image_Charges', '2025-07-02 11:38:03'),
-(27, 'Supplier- Ab Pharmacy', 'liability', '03005918898', '2025-07-05 10:14:04'),
-(26, 'Doctor- Dr Ishaq khan', 'liability', '1620241383099', '2025-07-05 10:12:30'),
-(33, 'Doctor- Dr Toheed Khan', 'liability', '2342342342333', '2025-07-08 10:27:06');
+INSERT INTO `finance_heads` (`id`, `head_code`, `name`, `type`, `description`, `created_at`) VALUES
+(1, '001', 'Partner A Asim', 'liability', 'investment_capital_injection', '2025-06-29 14:49:51'),
+(2, '002', 'Cash At Office', 'asset', 'cash_at_office', '2025-06-29 14:50:32'),
+(3, '003', 'Pharmacy Income', 'income', 'pharmacy_income', '2025-06-29 14:50:32'),
+(4, '004', 'Appointment Income', 'income', 'appointment_income', '2025-06-29 14:50:32'),
+(5, NULL, 'Investigation Income', 'income', 'investigation_income', '2025-06-29 14:50:32'),
+(6, NULL, 'Pharmacy Purchase', 'expense', 'pharmacy_purchase', '2025-06-29 14:50:32'),
+(8, NULL, 'Doctor Commission', 'expense', 'doctor_commission', '2025-06-29 14:50:32'),
+(10, NULL, 'Partner B Amajad', 'liability', 'investment_capital_injection', '2025-06-29 14:49:51'),
+(11, NULL, 'Investigation Consumable', 'expense', 'investigation_consumable', '2025-06-29 14:50:32'),
+(14, NULL, 'OT Charges', 'income', 'OT_Charges', '2025-07-02 06:43:53'),
+(15, NULL, 'Anesthesia Charges', 'income', 'Anesthesia_Charges', '2025-07-02 06:44:31'),
+(16, NULL, 'NICU Charges', 'income', 'NICU_Charges', '2025-07-02 06:44:40'),
+(17, NULL, 'Oxygen Charges', 'income', 'Oxygen_Charges', '2025-07-02 06:44:48'),
+(18, NULL, 'Service Charges', 'income', 'Service_Charges', '2025-07-02 06:45:11'),
+(19, NULL, 'Bed Charges', 'income', 'Bed_Charges', '2025-07-02 06:45:20'),
+(20, NULL, 'Room Charges', 'income', 'Room_Charges', '2025-07-02 06:45:28'),
+(28, NULL, 'Supplier- XYZ Pharma', 'liability', '03005374834', '2025-07-05 10:14:33'),
+(23, NULL, 'Image Charges', 'income', 'Image_Charges', '2025-07-02 11:38:03'),
+(27, NULL, 'Supplier- Ab Pharmacy', 'liability', '03005918898', '2025-07-05 10:14:04'),
+(26, NULL, 'Doctor- Dr Ishaq khan', 'liability', '1620241383099', '2025-07-05 10:12:30'),
+(33, NULL, 'Doctor- Dr Toheed Khan', 'liability', '2342342342333', '2025-07-08 10:27:06');
 
 -- --------------------------------------------------------
 
@@ -711,7 +727,19 @@ CREATE TABLE IF NOT EXISTS `finance_transactions` (
   PRIMARY KEY (`id`),
   KEY `debit_head_id` (`debit_head_id`),
   KEY `credit_head_id` (`credit_head_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `finance_transactions`
+--
+
+INSERT INTO `finance_transactions` (`id`, `voucher_id`, `transaction_date`, `amount`, `debit_head_id`, `credit_head_id`, `reference_type`, `reference_id`, `user_id`, `remarks`, `created_at`, `is_active`) VALUES
+(1, 1, '2025-07-12', 3400.00, 2, 3, 'sale', NULL, 2, 'Full pharmacy sale posted to cash at office by Ayaz Ahmad', '2025-07-11 19:38:27', 1),
+(2, 1, '2025-07-12', 1400.00, 2, 4, 'appointments', NULL, 2, 'Full appointment fee posted to cash at office by Ayaz Ahmad', '2025-07-11 19:38:27', 1),
+(3, 1, '2025-07-12', 300.00, 8, 33, 'commission', 2, 2, 'Consultant appointment share posted to doctor account by Ayaz Ahmad', '2025-07-11 19:38:27', 1),
+(4, 1, '2025-07-12', 1350.00, 2, 5, 'patient_investigations', NULL, 2, 'Full investigation fee posted to cash at office by Ayaz Ahmad', '2025-07-11 19:38:27', 1),
+(5, 2, '2025-07-12', 100.00, 33, 2, 'cash_payment_voucher', NULL, 2, 'some remakr. Payment to Doctor- Dr Toheed Khan From Cash At Office by Ayaz Ahmad', '2025-07-11 20:16:43', 1),
+(6, 3, '2025-07-12', 100.00, 2, 33, 'cash_receipt_voucher', NULL, 2, 'received from toheed- Payment Received fromDoctor- Dr Toheed Khan . Transfer to Doctor- Dr Toheed Khan by Ayaz Ahmad', '2025-07-11 20:17:34', 1);
 
 -- --------------------------------------------------------
 
@@ -736,7 +764,16 @@ CREATE TABLE IF NOT EXISTS `finance_vouchers` (
   UNIQUE KEY `voucher_number` (`voucher_number`),
   KEY `created_by` (`created_by`),
   KEY `approved_by` (`approved_by`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `finance_vouchers`
+--
+
+INSERT INTO `finance_vouchers` (`id`, `voucher_number`, `voucher_type`, `voucher_date`, `total_amount`, `remarks`, `created_by`, `approved_by`, `approved_at`, `created_at`, `updated_at`) VALUES
+(1, 'CLOSING-002-001', 'closing', '2025-07-12', 6150.00, 'Daily user closing of Ayaz Ahmad', 2, 2, '2025-07-11 20:21:57', '2025-07-11 19:38:27', NULL),
+(2, 'PAYMENT-002-001', 'payment', '2025-07-12', 100.00, 'Payment Done by Ayaz Ahmad', 2, 2, '2025-07-11 20:20:59', '2025-07-11 20:16:43', NULL),
+(3, 'RECEIPT-002-001', 'receipt', '2025-07-12', 100.00, 'Payment received by Ayaz Ahmad', 2, 2, '2025-07-11 20:21:08', '2025-07-11 20:17:34', NULL);
 
 -- --------------------------------------------------------
 
@@ -908,7 +945,7 @@ CREATE TABLE IF NOT EXISTS `grn_details` (
 --
 
 INSERT INTO `grn_details` (`GDID`, `store_id`, `ProductID`, `GRNID`, `batch_no`, `Quantity`, `Damage`, `UnitPrice`, `discount`, `pack_price`, `pack_size`, `taxPercentage`, `taxAmount`, `gst_tax_amount`, `advance_tax_amount`, `advance_tax`, `gst_tax`, `SoldQuantity`, `TotalReturn`, `RemainingQuantity`, `ProductStatus`, `expiry_date`) VALUES
-(1, 2, 1151, 1, '234', 242400, NULL, 12.00, 0.00, 1200.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 87, 18, 242313, 1, '2026-03-05'),
+(1, 2, 1151, 1, '234', 242400, NULL, 12.00, 0.00, 1200.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 88, 18, 242312, 1, '2026-03-05'),
 (2, 2, 1155, 1, '24', 32400, NULL, 17.00, 0.00, 1700.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 51, 0, 32349, 1, '2026-03-05'),
 (3, 2, 884, 1, '24234', 7020, NULL, 16.67, 0.00, 500.00, 30.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 5, 0, 7015, 1, '2026-03-05'),
 (4, 2, 885, 1, '24234', 9360, NULL, 10.00, 0.00, 400.00, 40.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 23, 2, 9337, 1, '2026-03-05'),
@@ -2799,7 +2836,7 @@ INSERT INTO `patients` (`id`, `mr_no`, `regdate`, `name`, `cnic`, `father_husban
 (2, 'AMC-0000', NULL, 'Walking Customer', '1620241383077', '-', 'male', 36, 0, 0, '1989-07-05', 1, 1, '03149465659', 1, NULL, NULL, '2025-07-05 15:59:08', '2025-07-05 15:59:08', 'walking_customer'),
 (3, 'AMC-0003', NULL, 'Zulfiqar Khan', '1620223423423', '-', 'male', 33, 0, 0, '1992-07-07', 3, 40, '03005918898', 1, NULL, NULL, '2025-07-07 20:03:49', '2025-07-07 20:03:49', 'hospital_patient'),
 (4, 'AMC-0004', NULL, 'Azlan khan', '1223423423423', 'naqeeb ahmad', 'male', 7, 0, 0, '2018-07-07', 22, 1, '03149465659', 1, NULL, NULL, '2025-07-07 20:56:42', '2025-07-07 20:56:42', 'hospital_patient'),
-(5, 'AMC-0005', NULL, 'Nawaz shah', '312313123123', '-', 'male', 334, 0, 0, '1691-07-08', 1, 1, '03129465659', 1, NULL, NULL, '2025-07-08 23:28:11', '2025-07-08 23:28:11', 'hospital_patient');
+(5, 'AMC-0005', NULL, 'Nawaz shah', '312313123123', '-', 'male', 334, 0, 0, '1691-07-08', 1, 1, '03129465659', 1, NULL, NULL, '2025-07-08 23:28:11', '2025-07-12 00:36:32', 'hospital_patient');
 
 -- --------------------------------------------------------
 
@@ -4735,7 +4772,16 @@ CREATE TABLE IF NOT EXISTS `patient_investigations` (
   KEY `admission_id` (`admission_id`),
   KEY `patient_id` (`patient_id`),
   KEY `investigation_id` (`investigation_sub_category_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `patient_investigations`
+--
+
+INSERT INTO `patient_investigations` (`id`, `invoice_no`, `patient_id`, `admission_id`, `investigation_sub_category_id`, `consultant_id`, `consultant_share_percentage`, `consultant_share_amount`, `inv_amount`, `sale_price`, `frequency`, `discount_percentage`, `discount_amount`, `inv_date`, `inv_out_date`, `inv_comment`, `created_by`, `created_at`, `updated_by`, `updated_at`, `is_active`, `patient_type`, `is_posted`, `posted_on`, `status`) VALUES
+(1, '1752262601768', 5, NULL, 1, 0, 0, 0, 140.00, 500.00, 1, 0.00, 0.00, '2025-07-12 00:36:58', NULL, NULL, 2, '2025-07-12 00:36:58', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(2, '1752262601768', 5, NULL, 2, 0, 0, 0, 70.00, 250.00, 1, 0.00, 0.00, '2025-07-12 00:36:58', NULL, NULL, 2, '2025-07-12 00:36:58', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(3, '1752262601768', 5, NULL, 3, 0, 0, 0, 420.00, 600.00, 1, 0.00, 0.00, '2025-07-12 00:36:58', NULL, NULL, 2, '2025-07-12 00:36:58', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -4757,7 +4803,14 @@ CREATE TABLE IF NOT EXISTS `patient_investigations_payments` (
   `posted_on` datetime DEFAULT NULL,
   `is_active` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `patient_investigations_payments`
+--
+
+INSERT INTO `patient_investigations_payments` (`id`, `patient_id`, `admission_id`, `invoice_no`, `amount`, `remarks`, `created_by`, `created_at`, `is_posted`, `posted_on`, `is_active`) VALUES
+(1, 5, NULL, 1752262601768, 1350.00, 'investigation_payment', 2, '2025-07-12 00:36:58', 1, '2025-07-12 00:00:00', 1);
 
 -- --------------------------------------------------------
 
@@ -7259,7 +7312,7 @@ INSERT INTO `products` (`ProductID`, `store_id`, `main_category_id`, `sub_catego
 (1148, 2, 2, 33, 34, 700, 124, 'Orcid 500mg Tab', 0, 0, NULL, NULL, 475.00, 10.00, 47.50, 47.50, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1149, 2, 2, 33, 34, 569, 127, 'Texklar 500mg tab', 0, 0, NULL, NULL, 510.00, 10.00, 51.00, 51.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1150, 2, 2, 33, 34, 206, 313, 'Bexus 500mg Tab', 0, 0, NULL, NULL, 200.00, 10.00, 20.00, 20.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
-(1151, 2, 3, 137, 6, 87, 179, '10cc zindagi Siring', 0, 0, NULL, NULL, 1200.00, 100.00, 12.00, 12.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 242317.00, 0),
+(1151, 2, 3, 137, 6, 87, 179, '10cc zindagi Siring', 0, 0, NULL, NULL, 1200.00, 100.00, 12.00, 12.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 242313.00, 0),
 (1152, 2, 3, 137, 6, 87, 179, '5cc zindagi Siring', 0, 0, NULL, NULL, 600.00, 50.00, 12.00, 12.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1153, 2, 3, 137, 6, 87, 179, '20cc zindagi Siring', 0, 0, NULL, NULL, 2200.00, 100.00, 22.00, 22.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1154, 2, 3, 137, 6, 87, 179, 'Drip Set Zindagi', 0, 0, NULL, NULL, 600.00, 60.00, 22.00, 22.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
@@ -8383,7 +8436,14 @@ CREATE TABLE IF NOT EXISTS `sale` (
   KEY `SCID` (`SCID`),
   KEY `SalemanID` (`SalemanID`),
   KEY `Date` (`Date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `sale`
+--
+
+INSERT INTO `sale` (`SaleID`, `store_id`, `SCID`, `wr_id`, `patient_id`, `admission_id`, `InvoiceNo`, `Date`, `Description`, `TNo`, `TotalSale`, `received_amount`, `ReceivedAmountFromCustomer`, `Discount`, `discount_percentage`, `SalemanID`, `SalemanCommesion`, `CustomerMobile`, `CreatedBy`, `CreatedAt`, `ModifiedBy`, `ModifiedAt`, `SalemanCommesionStatus`, `sale_descriptions`, `bill_details`, `is_sehat_card`, `medicine_type`, `is_posted`, `posted_on`) VALUES
+(1, 2, 2, 0, 2, 0, '1', '2025-07-12 00:00:00', 'Walking Customer - AMC-0000', NULL, 3400.00, 3400.00, 3500.00, 0, 0, 0, 0, NULL, 2, '2025-07-12', NULL, NULL, 0, '-', '[{\"ProductID\":\"1151\",\"Product\":\"10cc zindagi Siring | PS: 100.00 | Qty 242313\",\"Name\":\"10cc zindagi Siring | PS: 100.00 | Qty 242313\",\"UnitePrice\":\"3400\",\"Quantity\":\"1\",\"Total\":\"3400\",\"AvailableQuantity\":\"242313\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"242313\",\"dose_type\":\"-\"}]', 1, 'Home', 1, '2025-07-12 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -8433,7 +8493,14 @@ CREATE TABLE IF NOT EXISTS `sale_details` (
   KEY `ProductID` (`ProductID`),
   KEY `SaleID` (`SaleID`),
   KEY `GDID` (`GDID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `sale_details`
+--
+
+INSERT INTO `sale_details` (`SDID`, `store_id`, `ProductID`, `SaleID`, `Quantity`, `UnitePrice`, `taxPercentage`, `taxAmount`, `PurchasePrice`, `ReturnQuantity`, `GDID`, `patient_id`, `admission_id`, `return_by`, `dose_type`) VALUES
+(1, 2, 1151, 1, 1, 3400.00, NULL, 0.00, 12.00, 0, 1, 2, 0, NULL, '-');
 
 -- --------------------------------------------------------
 
@@ -8455,7 +8522,14 @@ CREATE TABLE IF NOT EXISTS `sale_payments` (
   `posted_on` datetime DEFAULT NULL,
   `is_active` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `sale_payments`
+--
+
+INSERT INTO `sale_payments` (`id`, `patient_id`, `admission_id`, `sale_id`, `amount`, `remarks`, `created_by`, `created_at`, `is_posted`, `posted_on`, `is_active`) VALUES
+(1, 2, 0, 1, 3400.00, NULL, 2, '2025-07-12 00:37:54', 1, '2025-07-12 00:00:00', 1);
 
 -- --------------------------------------------------------
 

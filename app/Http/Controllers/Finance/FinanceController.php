@@ -440,7 +440,7 @@ class FinanceController extends Controller
             "voucher_type"   => "payment",
             "voucher_date"   => date("Y-m-d"),
             "total_amount"   => $amount,
-            "remarks"   => "Payment Done by ".auth()->user()->name,
+            "remarks"   =>    request()->remarks.". Paid by ".auth()->user()->name,
             "created_by"   => auth()->user()->id,
             "created_at"   => date("Y-m-d H:i:s"),
         ];
@@ -500,7 +500,7 @@ class FinanceController extends Controller
             "voucher_type"   => "receipt",
             "voucher_date"   => date("Y-m-d"),
             "total_amount"   => $amount,
-            "remarks"   => "Payment received by ".auth()->user()->name,
+            "remarks"   => request()->remarks.". Payment received by ".auth()->user()->name,
             "created_by"   => auth()->user()->id,
             "created_at"   => date("Y-m-d H:i:s"),
         ];

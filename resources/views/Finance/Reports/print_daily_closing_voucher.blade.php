@@ -216,48 +216,56 @@
     <section class="items">
 
 
-        <h4>Voucher No: {{ $voucher->voucher_number }}</h4>
-        <p style="line-height: 1rem;">Date: {{ \Carbon\Carbon::parse($voucher->voucher_date)->format('d-m-Y') }}</p>
-        <p style="line-height: 1rem;">Type: {{ ucfirst($voucher->voucher_type) }}</p>
-        <p style="line-height: 1rem;">Remarks: {{ $voucher->remarks }}</p>
-        <p style="line-height: 1rem;">Created By: {{ $voucher->createdBy->name ?? 'N/A' }}</p>
-        <p style="line-height: 1rem;">Approved By: {{ $voucher->approvedBy->name ?? 'Not Approved' }}</p>
 
-        <table class="table table-bordered mt-3">
+        <table class="table table-bordered">
+            <tr>
+                <td style="font-weight: bold;width: 20%">Voucher Date</td>
+                <td style="width: 40%">{{ \Carbon\Carbon::parse($voucher->voucher_date)->format('l F d Y') }}</td>
+                <td style="font-weight: bold">Voucher Number</td>
+                <td>{{$voucher->voucher_number}}</td>
+
+            </tr>
+
+            <tr>
+                <td style="font-weight: bold; ">Ref#</td>
+                <td >{{$voucher->remarks}}</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+        <table class="table table-bordered">
             <thead>
             <tr>
-                <th style="width: 5%">#</th>
-                <th>Transaction Date</th>
-                <th>Debit Head</th>
-                <th>Credit Head</th>
-                <th>Remarks</th>
-                <th style="width: 10%">Amount</th>
-
+                <th style="width:5%">S.No</th>
+                <th style="width:55%">Account Title</th>
+                <th>Debit (Rupees)</th>
+                <th>Credit (Rupees)</th>
+                <th>Balance</th>
             </tr>
             </thead>
             <tbody>
-            <?php $total = 0; ?>
-            @foreach($voucher->transactions as $key => $txn)
+            @foreach ($sortedRows as $index => $row)
                 <tr>
-                    <td>{{ $key + 1 }}</td>
-                    <td>{{ \Carbon\Carbon::parse($txn->transaction_date)->format('d-m-Y') }}</td>
-                    <td>{{ $txn->debitHead->name ?? '-' }}</td>
-                    <td>{{ $txn->creditHead->name ?? '-' }}</td>
-                    <td>{{ $txn->remarks }}</td>
-                    <td>{{ number_format($txn->amount, 2) }}</td>
-
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $row['head_code'] }} - {{ $row['head_title'] }}</td>
+                    <td>{{ number_format($row['debit'], 0) }}</td>
+                    <td>{{ number_format($row['credit'], 0) }}</td>
+                    @if($row['credit'] > 0)
+                        <td>({{ number_format($row['balance'], 0) }})</td>
+                    @else
+                    <td>{{ number_format($row['balance'], 0) }}</td>
+                    @endif
                 </tr>
             @endforeach
             <tr>
+                <td colspan="2"><strong>Total in Words: {{numberToWords($totalDebit)}}</strong></td>
+                <td><strong>{{ number_format($totalDebit, 0) }}</strong></td>
+                <td><strong>{{ number_format($totalCredit, 0) }}</strong></td>
                 <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td style="font-weight: bold">{{$voucher->total_amount ?? 0}}</td>
             </tr>
             </tbody>
         </table>
+
     </section>
 
 

@@ -170,7 +170,9 @@ class FinanceReportController extends Controller
         return back()->with('success', 'Daily income posted to finance transactions.');
     }
 
-    public function printVoucher($voucher_id)
+
+
+    public function printDailyClosingVoucher($voucher_id)
     {
         $voucher = FinanceVoucher::with([
             'transactions' => function ($query) {
@@ -180,14 +182,48 @@ class FinanceReportController extends Controller
                 })->with(['debitHead', 'creditHead']);
             },
             'createdBy',
-            'approvedBy'
+            'approvedBy',
+            'transactions.debitHead',
+            'transactions.creditHead'
         ])->findOrFail($voucher_id);
 
-        $commissionEntries = $voucher->transactions()->where('reference_type', 'commission')->get();
+        $rows = collect();
 
+        foreach ($voucher->transactions as $transaction) {
+            // Debit entries
+            if ($transaction->debit_head_id && $transaction->debitHead) {
+                $rows->push([
+                    'type' => 'debit',
+                    'head_code' => $transaction->debitHead->head_code,
+                    'head_title' => $transaction->debitHead->name,
+                    'debit' => $transaction->amount,
+                    'credit' => 0,
+                    'balance' => $transaction->amount
+                ]);
+            }
 
+            // Credit entries
+            if ($transaction->credit_head_id && $transaction->creditHead) {
+                $rows->push([
+                    'type' => 'credit',
+                    'head_code' => $transaction->creditHead->head_code,
+                    'head_title' => $transaction->creditHead->name,
+                    'debit' => 0,
+                    'credit' => $transaction->amount,
+                    'balance' =>  $transaction->amount
+                ]);
+            }
+        }
 
-        return view('Finance.Reports.print_voucher', compact('voucher','commissionEntries'));
+        // Sort so that debit entries come first
+        $sortedRows = $rows->sortBy(function ($item) {
+            return $item['type'] === 'debit' ? 0 : 1;
+        })->values();
+
+        $totalDebit = $sortedRows->sum('debit');
+        $totalCredit = $sortedRows->sum('credit');
+        return view('Finance.Reports.print_daily_closing_voucher', compact('voucher', 'sortedRows', 'totalDebit', 'totalCredit'));
+       // return view('Finance.Reports.print_daily_closing_voucher', compact('voucher', 'rows', 'totalDebit', 'totalCredit'));
     }
 
 }
