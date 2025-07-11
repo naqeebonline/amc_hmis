@@ -269,5 +269,26 @@
                 //alert('Why did you press cancel? You should have confirmed');
             }
         });
+
+        $("body").on("click",".delete_entry",function () {
+            var value = $(this).attr('record-id');
+            if (confirm('Are you sure to delete this record ?')) {
+                $.ajax({
+                    type: 'post',
+                    url: "{{ route('pos.delete_transaction_entry') }}",
+                    data: {
+                        id: value,
+                        _token: '{{ csrf_token() }}'
+
+                    },
+                    success: function(res) {
+                        window.location.reload();
+                    }
+                })
+            } else {
+                $("#discharge_patient").show();
+                //alert('Why did you press cancel? You should have confirmed');
+            }
+        });
     </script>
 @endpush

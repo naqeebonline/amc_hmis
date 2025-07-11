@@ -49,13 +49,19 @@ class FinanceController extends Controller
         $data['investigations'] = $this->investigationPayment($closing_date,$user_id);
         $data['service_charges'] = $this->serviceCharges($closing_date,$user_id);
         $data['in_patient_sale'] = $this->in_patient_sale($closing_date,$user_id);
-        $data['voucher'] = FinanceVoucher::where(["created_by"=>auth()->user()->id])->with(['user'])->orderBy("id","desc")->paginate(20);
+        $data['voucher'] = FinanceVoucher::where(["created_by"=>auth()->user()->id,"voucher_type"=>"closing"])->with(['user'])->orderBy("id","desc")->paginate(20);
 
        return view("Finance.daily_closing",$data);
     }
 
     public function post_daily_closing()
     {
+        $not_approve_transaction = FinanceVoucher::where(["voucher_type"=>"closing","created_by"=>auth()->user()->id])->whereNull('approved_by')->first();
+        if($not_approve_transaction){
+            return redirect()->back()->with("error","Unapproved transaction exist. approve it and then post next transaction");
+        }
+
+        dd($not_approve_transaction);
         $user_id = request()->user_id;
         $closing_date = request()->closing_date;
         if(request()->finance_head_id == ''){
@@ -268,7 +274,7 @@ class FinanceController extends Controller
             "total_amount"=>$total_amount,
             "remarks"=>$remarks
             ]);
-        $this->update_post_status($closing_date,$user_id);
+
         return redirect()->back()->with('success', 'Record Posted Successfully.');
     }
 
@@ -582,14 +588,20 @@ class FinanceController extends Controller
 
     public function approve_transaction_entry()
     {
-
+        $voucher = FinanceVoucher::where("id",request()->id)->first();
         FinanceVoucher::where(["id"=>request()->id])->update(["approved_by"=>auth()->user()->id,"approved_at"=>date("Y-m-d H:i:s")]);
+
+        if($voucher->voucher_type == 'closing'){
+            $this->update_post_status($voucher->voucher_date,$voucher->created_by);
+        }
+
         return ["status"=>true,"message"=>"record approved successfully"];
     }
 
     public function delete_transaction_entry()
     {
-        FinanceTransaction::where(["id"=>request()->id])->update(["is_active"=>0]);
+        FinanceVoucher::where(["id"=>request()->id])->delete();
+        FinanceTransaction::where(["voucher_id"=>request()->id])->delete();
         return ["status"=>true,"message"=>"record approved successfully"];
     }
 
