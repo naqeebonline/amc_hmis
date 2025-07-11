@@ -525,3 +525,35 @@ function financeHeadId($code){
 function financeHeadCode($id){
     return \App\Models\Finance\FinanceHead::whereId($id)->value('description');
 }
+
+function financeHeadName($id){
+    return \App\Models\Finance\FinanceHead::whereId($id)->value('name');
+}
+
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+
+function generateVoucherNumber(string $type, int $userId): string
+{
+    // Normalize and format components
+    $typeSlug = strtoupper(Str::slug($type)); // e.g. SALE or PURCHASE
+    $userCode = str_pad($userId, 3, '0', STR_PAD_LEFT); // e.g. 001
+
+    // Count existing vouchers of this type
+    $lastVoucher = DB::table('finance_vouchers')
+        ->where('voucher_type', $type)
+        ->orderByDesc('id')
+        ->value('voucher_number'); // e.g. SALE-001-004
+
+    // Extract last number
+    $lastNumber = 0;
+    if ($lastVoucher && preg_match('/-(\d+)$/', $lastVoucher, $matches)) {
+        $lastNumber = (int) $matches[1];
+    }
+
+    // Increment
+    $nextNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT); // e.g. 005
+
+    // Combine into final voucher number
+    return "{$typeSlug}-{$userCode}-{$nextNumber}";
+}

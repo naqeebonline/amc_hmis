@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Finance\Reports;
 use App\Http\Controllers\Controller;
 use App\Models\Finance\FinanceHead;
 use App\Models\Finance\FinanceTransaction;
+use App\Models\Finance\FinanceVoucher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,17 +14,17 @@ class FinanceReportController extends Controller
     public function balanceReport()
     {
         $debits = DB::table('finance_transactions')
+            ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
+            ->whereNotNull('finance_vouchers.approved_by')
             ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
-            ->where(["is_approved"=>1,"is_active"=>1])
             ->groupBy('debit_head_id');
 
-        // Subquery: Credit totals
         $credits = DB::table('finance_transactions')
+            ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
+            ->whereNotNull('finance_vouchers.approved_by')
             ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
-            ->where(["is_approved"=>1,"is_active"=>1])
             ->groupBy('credit_head_id');
 
-        // Merge into finance_heads
         $report = FinanceHead::leftJoinSub($debits, 'debits', 'finance_heads.id', '=', 'debits.head_id')
             ->leftJoinSub($credits, 'credits', 'finance_heads.id', '=', 'credits.head_id')
             ->select(
@@ -55,7 +56,6 @@ class FinanceReportController extends Controller
         // Get total income from credit side (income is credited)
         $totalIncome = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.credit_head_id', '=', 'fh.id')
-            ->where(["ft.is_approved"=>1,"ft.is_active"=>1])
             ->where('fh.type', 'income')
            // ->where("fh.id",5)
             ->sum('ft.amount');
@@ -64,7 +64,6 @@ class FinanceReportController extends Controller
         $totalExpense = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'ft.debit_head_id', '=', 'fh.id')
             ->where('fh.type', 'expense')
-            ->where(["ft.is_approved"=>1,"ft.is_active"=>1])
            // ->where("fh.id",11)
             ->sum('ft.amount');
 
@@ -169,6 +168,26 @@ class FinanceReportController extends Controller
       //  DB::table('finance_transactions')->insert($entries);
 
         return back()->with('success', 'Daily income posted to finance transactions.');
+    }
+
+    public function printVoucher($voucher_id)
+    {
+        $voucher = FinanceVoucher::with([
+            'transactions' => function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNull('reference_type')
+                        ->orWhere('reference_type', '!=', 'commission');
+                })->with(['debitHead', 'creditHead']);
+            },
+            'createdBy',
+            'approvedBy'
+        ])->findOrFail($voucher_id);
+
+        $commissionEntries = $voucher->transactions()->where('reference_type', 'commission')->get();
+
+
+
+        return view('Finance.Reports.print_voucher', compact('voucher','commissionEntries'));
     }
 
 }

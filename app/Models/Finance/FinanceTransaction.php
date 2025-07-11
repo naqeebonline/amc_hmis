@@ -12,4 +12,14 @@ class FinanceTransaction extends Model
     protected $primaryKey = 'id';
     protected $guarded = ["id"];
     public $timestamps = false;
+
+    public function debitHead()
+    {
+        return $this->belongsTo(FinanceHead::class, 'debit_head_id');
+    }
+
+    public function creditHead()
+    {
+        return $this->belongsTo(FinanceHead::class, 'credit_head_id');
+    }
 }

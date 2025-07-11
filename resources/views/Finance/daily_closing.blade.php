@@ -129,6 +129,72 @@
     </div>
 
 
+    <div class="row mt-2">
+        <div class="col-12">
+
+            <!-- Traffic sources -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 mb-3">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Voucher#</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Voucher Date</th>
+                                    <th>Created By</th>
+                                    <th>Actions</th>
+                                </tr>
+
+                                @foreach($voucher as $key => $value)
+                                    <tr>
+                                        <td>{{$key + 1}}</td>
+                                        <td>{{$value->voucher_number}}</td>
+                                        <td>{{$value->voucher_type}}</td>
+                                        <td>{{$value->total_amount}}</td>
+                                        <td>{{$value->voucher_date}}</td>
+                                        <td>{{$value->user->name ?? ''}}</td>
+                                        <td>
+
+                                            @if(!$value->approved_by)
+                                                <button class="btn btn-sm btn-success approve_entry" record-id="{{$value->id}}" title="Approve">
+                                                    <i class="fas fa-check-circle "></i>
+                                                </button>
+
+                                                <!-- Delete button -->
+                                                <button class="btn btn-sm btn-danger delete_entry" record-id="{{$value->id}}" title="Delete">
+                                                    <i class="fas fa-times "></i>
+                                                </button>
+                                            @endif
+
+                                                <a href="{{ route('pos.print_voucher', $value->id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-print"></i> Print Voucher
+                                                </a>
+                                        </td>
+                                    </tr>
+
+                                @endforeach
+                            </table>
+
+                            <div class="d-flex justify-content-center mt-2">
+                                {!! $voucher->links() !!}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
     <div class="modal fade" id="add_new_record_model" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <form class="modal-content form-submit-event" id="from_submit">
@@ -179,5 +245,27 @@
             $("#user_id").select2();
             $("#finance_head_id").select2();
         },1000);
+
+
+        $("body").on("click",".approve_entry",function () {
+            var value = $(this).attr('record-id');
+            if (confirm('Are you sure to approve this record ?')) {
+                $.ajax({
+                    type: 'post',
+                    url: "{{ route('pos.approve_transaction_entry') }}",
+                    data: {
+                        id: value,
+                        _token: '{{ csrf_token() }}'
+
+                    },
+                    success: function(res) {
+                        window.location.reload();
+                    }
+                })
+            } else {
+                $("#discharge_patient").show();
+                //alert('Why did you press cancel? You should have confirmed');
+            }
+        });
     </script>
 @endpush

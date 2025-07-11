@@ -388,6 +388,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/post_daily_closing', [\App\Http\Controllers\Finance\FinanceController::class, 'post_daily_closing'])->name('pos.post_daily_closing');
     Route::get('/balanceReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'balanceReport'])->name('pos.balanceReport');
     Route::get('/profitAndLossReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'profitAndLossReport'])->name('pos.profitAndLossReport');
+    Route::get('/printVoucher/{id}', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'printVoucher'])->name('pos.print_voucher');
 
     Route::post('/getBalance', [\App\Http\Controllers\Finance\FinanceController::class, 'getBalance'])->name('pos.getBalance');
     Route::get('/cash-payment-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'cash_payment_voucher'])->name('pos.cash_payment_voucher');

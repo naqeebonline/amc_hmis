@@ -93,6 +93,7 @@ class AppointmentController extends Controller
 
         $appointment = Appointment::where(["patient_id"=> $patient->id, "consultant_id"=>request()->consultant_id,"opd_type_id"=>request()->opd_type_id])
             ->whereDate('appointment_date',request()->regdate)
+            ->where("is_active",1)
             ->first();
         if ($appointment) {
             // Appointment exists

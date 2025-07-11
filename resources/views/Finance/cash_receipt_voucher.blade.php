@@ -118,8 +118,8 @@
                                         <td>{{$value->amount}}</td>
                                         <td>{{$value->remarks}}</td>
                                         <td>
-                                            @if($value->is_approved == 0)
-                                                <button class="btn btn-sm btn-success approve_entry" record-id="{{$value->id}}" title="Approve">
+                                            @if(!$value->approved_by)
+                                                <button class="btn btn-sm btn-success approve_entry" record-id="{{$value->voucher_id}}" title="Approve">
                                                     <i class="fas fa-check-circle "></i>
                                                 </button>
 
@@ -128,6 +128,10 @@
                                                     <i class="fas fa-times "></i>
                                                 </button>
                                             @endif
+
+                                                <a href="{{ route('pos.print_voucher', $value->voucher_id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                                    <i class="fa fa-print"></i> Print Voucher
+                                                </a>
                                         </td>
                                     </tr>
 

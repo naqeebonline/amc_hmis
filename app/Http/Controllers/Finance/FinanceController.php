@@ -7,6 +7,7 @@ use App\Models\Appointments\Appointment;
 use App\Models\Finance\DailyUserClosing;
 use App\Models\Finance\FinanceHead;
 use App\Models\Finance\FinanceTransaction;
+use App\Models\Finance\FinanceVoucher;
 use App\Models\Patient\InPatientAdmission;
 use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientInvestigation;
@@ -48,7 +49,7 @@ class FinanceController extends Controller
         $data['investigations'] = $this->investigationPayment($closing_date,$user_id);
         $data['service_charges'] = $this->serviceCharges($closing_date,$user_id);
         $data['in_patient_sale'] = $this->in_patient_sale($closing_date,$user_id);
-
+        $data['voucher'] = FinanceVoucher::where(["created_by"=>auth()->user()->id])->with(['user'])->orderBy("id","desc")->paginate(20);
 
        return view("Finance.daily_closing",$data);
     }
@@ -84,13 +85,25 @@ class FinanceController extends Controller
         $service_charges = $this->serviceCharges($closing_date,$user_id);
         $total_amount = ($sale) + ($appointments) + ($investigations) + ($service_charges);
 
+        $voucher = generateVoucherNumber("closing",$user_id);
+
+        $voucher_data = [
+            "voucher_number" =>$voucher,
+            "voucher_type"   => "closing",
+            "voucher_date"   => date("Y-m-d"),
+            "total_amount"   => $total_amount,
+            "remarks"   => "Daily user closing of ".auth()->user()->name ?? '',
+            "created_by"   => auth()->user()->id,
+            "created_at"   => date("Y-m-d H:i:s"),
+        ];
+        $voucher = FinanceVoucher::create($voucher_data);
 
         $record = [];
-
 
         if($sale > 0){
             array_push($record,[
                 'transaction_date' => today(),
+                'voucher_id' => $voucher->id,
                 'amount' => ($sale),
                 'debit_head_id' => request()->finance_head_id,  //cash at office
                 'credit_head_id' => financeHeadId('pharmacy_income'), // pharmacy income
@@ -111,6 +124,7 @@ class FinanceController extends Controller
                 })->get();
             foreach ($return as $key => $value){
                 array_push($record,[
+                    'voucher_id' => $voucher->id,
                     'transaction_date' => today(),
                     'amount' => $value->amount, // return amount
                     'debit_head_id' => financeHeadId('pharmacy_income'), // reduce income
@@ -127,6 +141,7 @@ class FinanceController extends Controller
         }
         if($appointments > 0){
             array_push($record,[
+                'voucher_id' => $voucher->id,
                 'transaction_date' => today(),
                 'amount' => $appointments,
                 'debit_head_id' => request()->finance_head_id,  //cash at office
@@ -148,14 +163,15 @@ class FinanceController extends Controller
             foreach ($all_appointments as $key => $value){
                 if($value->consultant_share > 0){
                     $rec = [
+                        'voucher_id' => $voucher->id,
                         'transaction_date' => today(),
                         'amount' => $value->consultant_share,
                         'debit_head_id' => financeHeadId('doctor_commission'),  // Doctor commision expense
                         'credit_head_id' => $value->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
-                        'reference_type' => 'appointments',
+                        'reference_type' => 'commission',
                         'reference_id' => $value->id,
                         'user_id' => auth()->id(),
-                        'remarks' => 'Consultant share posted to doctor account by '.auth()->user()->name,
+                        'remarks' => 'Consultant appointment share posted to doctor account by '.auth()->user()->name,
                         'created_at' => now()
                     ];
                     array_push($record,$rec);
@@ -167,6 +183,7 @@ class FinanceController extends Controller
 
         if($investigations > 0){
             array_push($record,[
+                'voucher_id' => $voucher->id,
                 'transaction_date' => today(),
                 'amount' => $investigations,
                 'debit_head_id' => request()->finance_head_id,  //cash at office
@@ -194,10 +211,12 @@ class FinanceController extends Controller
             foreach ($query as $key => $value){
 
                 array_push($record,[
+                    'voucher_id' => $voucher->id,
                     'transaction_date' => today(),
                     'amount' => $value->service_rate,
                     'debit_head_id' => request()->finance_head_id,  //cash at office
                     'credit_head_id' => $value->service_type->finance_head_id, // service_head id
+                    //'reference_type' => financeHeadCode($value->service_type->finance_head_id),
                     'reference_type' => financeHeadCode($value->service_type->finance_head_id),
                     'reference_id' => $value->id,
                     'user_id' => auth()->id(),
@@ -220,14 +239,15 @@ class FinanceController extends Controller
             foreach ($all_admissions as $key => $value){
                 if($value->consultant_share > 0){
                     $rec = [
+                        'voucher_id' => $voucher->id,
                         'transaction_date' => today(),
                         'amount' => $value->consultant_share_amount,
                         'debit_head_id' => financeHeadId('doctor_commission'),  // Doctor commision expense
                         'credit_head_id' => $value->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
-                        'reference_type' => 'in_patient_admission',
+                        'reference_type' => 'commission',
                         'reference_id' => $value->id,
                         'user_id' => auth()->id(),
-                        'remarks' => 'Consultant share posted to doctor account by '.auth()->user()->name,
+                        'remarks' => 'Consultant procedure share posted to doctor account by '.auth()->user()->name,
                         'created_at' => now()
                     ];
                     array_push($record,$rec);
@@ -236,12 +256,18 @@ class FinanceController extends Controller
             }
         }
 
-
-
-
         FinanceTransaction::insert($record);
+
         $remarks = "Closing done by ".auth()->user()->name." on ".date("Y-m-d H:i:s");
-        DailyUserClosing::create(["user_id"=>auth()->user()->id,"closing_date"=>$closing_date,"investigation_amount"=>$investigations,"sale_amount"=>$sale,"appointment_amount"=>$appointments,"total_amount"=>$total_amount,"remarks"=>$remarks]);
+        DailyUserClosing::create([
+            "user_id"=>auth()->user()->id,
+            "closing_date"=>$closing_date,
+            "investigation_amount"=>$investigations,
+            "sale_amount"=>$sale,
+            "appointment_amount"=>$appointments,
+            "total_amount"=>$total_amount,
+            "remarks"=>$remarks
+            ]);
         $this->update_post_status($closing_date,$user_id);
         return redirect()->back()->with('success', 'Record Posted Successfully.');
     }
@@ -314,6 +340,9 @@ class FinanceController extends Controller
 
     public function update_post_status($closing_date,$user_id)
     {
+
+
+
         SalePayment::where("is_posted",0)
             ->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
@@ -384,10 +413,13 @@ class FinanceController extends Controller
             ->where(["is_active"=>1])
             ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
             ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
+            ->leftJoin('finance_vouchers as fv', 'finance_transactions.voucher_id', '=', 'fv.id')
             ->select(
                 'finance_transactions.*',
                 'debit_heads.name as debit_head_name',
-                'credit_heads.name as credit_head_name'
+                'credit_heads.name as credit_head_name',
+                'fv.approved_by',
+                'fv.approved_at'
             )
             ->orderBy("id","DESC")
             ->paginate(30);
@@ -401,8 +433,23 @@ class FinanceController extends Controller
     public function save_cash_payment_voucher()
     {
         $amount = request()->amount;
+        $voucher = generateVoucherNumber("Payment",auth()->user()->id);
+
+        $voucher_data = [
+            "voucher_number" =>$voucher,
+            "voucher_type"   => "payment",
+            "voucher_date"   => date("Y-m-d"),
+            "total_amount"   => $amount,
+            "remarks"   => "Payment Done by ".auth()->user()->name,
+            "created_by"   => auth()->user()->id,
+            "created_at"   => date("Y-m-d H:i:s"),
+        ];
+        $voucher = FinanceVoucher::create($voucher_data);
+
+
         if($amount > 0){
             $record = [
+                'voucher_id' => $voucher->id,
                 'transaction_date' => today(),
                 'amount' => $amount,
                 'credit_head_id' => request()->credit_head_id, // Appointments income
@@ -410,8 +457,7 @@ class FinanceController extends Controller
                 'reference_type' => 'cash_payment_voucher',
                 'reference_id' => NULL,
                 'user_id' => auth()->id(),
-                'is_approved' => 0,
-                'remarks' => request()->remarks.". This entry made by ".auth()->user()->name,
+                'remarks' => request()->remarks.". Payment to ".financeHeadName(request()->debit_head_id)." From ".financeHeadName(request()->credit_head_id)." by ".auth()->user()->name,
                 'created_at' => now()
             ];
         }
@@ -430,10 +476,13 @@ class FinanceController extends Controller
             ->where(["is_active"=>1])
             ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
             ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
+            ->leftJoin('finance_vouchers as fv', 'finance_transactions.voucher_id', '=', 'fv.id')
             ->select(
                 'finance_transactions.*',
                 'debit_heads.name as debit_head_name',
-                'credit_heads.name as credit_head_name'
+                'credit_heads.name as credit_head_name',
+                'fv.approved_by',
+                'fv.approved_at'
             )
 
             ->orderBy("id","DESC")
@@ -444,17 +493,29 @@ class FinanceController extends Controller
     public function save_cash_receipt_voucher()
     {
         $amount = request()->amount;
+        $voucher = generateVoucherNumber("Receipt",auth()->user()->id);
+
+        $voucher_data = [
+            "voucher_number" =>$voucher,
+            "voucher_type"   => "receipt",
+            "voucher_date"   => date("Y-m-d"),
+            "total_amount"   => $amount,
+            "remarks"   => "Payment received by ".auth()->user()->name,
+            "created_by"   => auth()->user()->id,
+            "created_at"   => date("Y-m-d H:i:s"),
+        ];
+        $voucher = FinanceVoucher::create($voucher_data);
         if($amount > 0){
             $record = [
+                'voucher_id' => $voucher->id,
                 'transaction_date' => today(),
                 'amount' => $amount,
                 'debit_head_id' => request()->debit_head_id,  //cash at office
                 'credit_head_id' => request()->credit_head_id, // Appointments income
                 'reference_type' => 'cash_receipt_voucher',
                 'reference_id' => NULL,
-                'is_approved' => 0,
                 'user_id' => auth()->id(),
-                'remarks' => request()->remarks,
+                "remarks"   => request()->remarks."- Payment Received from".financeHeadName(request()->credit_head_id)." . Transfer to ".financeHeadName(request()->credit_head_id)." by ".auth()->user()->name,
                 'created_at' => now()
             ];
         }
@@ -467,12 +528,12 @@ class FinanceController extends Controller
     {
         $debits = DB::table('finance_transactions')
             ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
-            ->where(["is_approved"=>1,"is_active"=>1])
+
             ->groupBy('debit_head_id');
 
         // Subquery: Credit totals
         $credits = DB::table('finance_transactions')
-            ->where(["is_approved"=>1,"is_active"=>1])
+
             ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
             ->groupBy('credit_head_id');
 
@@ -521,7 +582,8 @@ class FinanceController extends Controller
 
     public function approve_transaction_entry()
     {
-        FinanceTransaction::where(["id"=>request()->id])->update(["is_approved"=>1]);
+
+        FinanceVoucher::where(["id"=>request()->id])->update(["approved_by"=>auth()->user()->id,"approved_at"=>date("Y-m-d H:i:s")]);
         return ["status"=>true,"message"=>"record approved successfully"];
     }
 
