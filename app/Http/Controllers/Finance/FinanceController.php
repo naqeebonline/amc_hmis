@@ -56,13 +56,16 @@ class FinanceController extends Controller
 
     public function post_daily_closing()
     {
+
+
         $not_approve_transaction = FinanceVoucher::where(["voucher_type"=>"closing","created_by"=>auth()->user()->id])->whereNull('approved_by')->first();
         if($not_approve_transaction){
             return redirect()->back()->with("error","Unapproved transaction exist. approve it and then post next transaction");
         }
 
-        dd($not_approve_transaction);
+
         $user_id = request()->user_id;
+
         $closing_date = request()->closing_date;
         if(request()->finance_head_id == ''){
             echo "Please select account head to post amount";
@@ -96,6 +99,8 @@ class FinanceController extends Controller
         $voucher_data = [
             "voucher_number" =>$voucher,
             "voucher_type"   => "closing",
+            'user_id' => $user_id,
+            'created_by' => auth()->user()->id,
             "voucher_date"   => date("Y-m-d"),
             "total_amount"   => $total_amount,
             "remarks"   => "Daily user closing of ".auth()->user()->name ?? '',
@@ -107,19 +112,32 @@ class FinanceController extends Controller
         $record = [];
 
         if($sale > 0){
-            array_push($record,[
-                'transaction_date' => today(),
-                'voucher_id' => $voucher->id,
-                'amount' => ($sale),
-                'debit_head_id' => request()->finance_head_id,  //cash at office
-                'credit_head_id' => financeHeadId('pharmacy_income'), // pharmacy income
-                'reference_type' => 'sale',
-                'reference_id' => NULL,
-                'user_id' => auth()->id(),
-                'remarks' => 'Full pharmacy sale posted to cash at office by '.auth()->user()->name,
-                'created_at' => now()
-            ]);
+            $query = SalePayment::where("is_posted",0)
+                ->when($closing_date, function ($query) use ($closing_date) {
+                    return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+                })
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('created_by',$user_id);
+                })->get();
+
+            foreach ($query as $key => $value){
+                array_push($record,[
+                    'transaction_date' => today(),
+                    'voucher_id' => $voucher->id,
+                    'amount' => ($value->amount),
+                    'debit_head_id' => request()->finance_head_id,  //cash at office
+                    'credit_head_id' => financeHeadId('pharmacy_income'), // pharmacy income
+                    'reference_type' => 'sale_payments',
+                    'reference_id' => $value->id,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
+                    'remarks' => 'Pharmacy Sale posted by '.auth()->user()->name,
+                    'created_at' => now()
+                ]);
+            }
         }
+
+
         if($pharmacy_return > 0){
             $return = $query = PharmacyRetrun::where("is_posted",0)
                 ->when($closing_date, function ($query) use ($closing_date) {
@@ -136,8 +154,9 @@ class FinanceController extends Controller
                     'debit_head_id' => financeHeadId('pharmacy_income'), // reduce income
                     'credit_head_id' => request()->finance_head_id, // reduce cash
                     'reference_type' => 'pharmacy_return',
-                    'reference_id' => null,
-                    'user_id' => auth()->id(),
+                    'reference_id' => $value->id,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
                     'remarks' => 'Pharmacy return (cash refunded)',
                     'created_at' => now()
                 ]);
@@ -146,7 +165,7 @@ class FinanceController extends Controller
 
         }
         if($appointments > 0){
-            array_push($record,[
+            /*array_push($record,[
                 'voucher_id' => $voucher->id,
                 'transaction_date' => today(),
                 'amount' => $appointments,
@@ -157,16 +176,37 @@ class FinanceController extends Controller
                 'user_id' => auth()->id(),
                 'remarks' => 'Full appointment fee posted to cash at office by '.auth()->user()->name,
                 'created_at' => now()
-            ]);
+            ]);*/
 
-            $all_appointments = Appointment::with(['consultant'])->where("is_posted",0)
+            $all_appointments = Appointment::with(['consultant'])
+                ->where("is_posted",0)
+                ->where("is_active",1)
                 ->when($closing_date, function ($query) use ($closing_date) {
                     return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($closing_date)));
                 })
                 ->when($user_id, function ($query) use ($user_id) {
                     return $query->where('created_by',$user_id);
                 })->get();
+
             foreach ($all_appointments as $key => $value){
+                if($value->fee > 0){
+                    array_push($record,[
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => $value->fee,
+                        'debit_head_id' => request()->finance_head_id,  //cash at office
+                        'credit_head_id' => financeHeadId('appointment_income'), // Appointments income
+                        'reference_type' => 'appointments',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Patient Appointment fee posted to cash at office. posted by '.auth()->user()->name,
+                        'created_at' => now()
+                    ]);
+                }
+
+
+                //-- after posting cash to cashAtOffice here the docotro commision will post to doctor account  ---//
                 if($value->consultant_share > 0){
                     $rec = [
                         'voucher_id' => $voucher->id,
@@ -176,8 +216,9 @@ class FinanceController extends Controller
                         'credit_head_id' => $value->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
                         'reference_type' => 'commission',
                         'reference_id' => $value->id,
-                        'user_id' => auth()->id(),
-                        'remarks' => 'Consultant appointment share posted to doctor account by '.auth()->user()->name,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Appointment Share posted to Doctor: '.$value->consultant->name ?? "".' Account. posted by '.auth()->user()->name,
                         'created_at' => now()
                     ];
                     array_push($record,$rec);
@@ -188,18 +229,34 @@ class FinanceController extends Controller
         }
 
         if($investigations > 0){
-            array_push($record,[
-                'voucher_id' => $voucher->id,
-                'transaction_date' => today(),
-                'amount' => $investigations,
-                'debit_head_id' => request()->finance_head_id,  //cash at office
-                'credit_head_id' => financeHeadId('investigation_income'), //investigation_income
-                'reference_type' => 'patient_investigations',
-                'reference_id' => NULL,
-                'user_id' => auth()->id(),
-                'remarks' => 'Full investigation fee posted to cash at office by '.auth()->user()->name,
-                'created_at' => now()
-            ]);
+            $query = PatientInvestigationPayment::where("is_posted",0)
+                ->where("is_active",1)
+                //->whereNull("admission_id")
+                ->when($closing_date, function ($query) use ($closing_date) {
+                    return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+                })
+                ->where("is_active",1)
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('created_by',$user_id);
+                })->get();
+            foreach ($query as $key => $value){
+                array_push($record,[
+                    'voucher_id' => $voucher->id,
+                    'transaction_date' => today(),
+                    'amount' => $value->amount,
+                    'debit_head_id' => request()->finance_head_id,  //cash at office
+                    'credit_head_id' => financeHeadId('investigation_income'), //investigation_income
+                    'reference_type' => 'patient_investigations_payments',
+                    'reference_id' => $value->id,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
+                    'remarks' => 'Investigation Income posted to cash at office. Posted by '.auth()->user()->name,
+                    'created_at' => now()
+                ]);
+
+                //----- here commision of
+            }
+
         }
 
         if($service_charges > 0){
@@ -225,8 +282,9 @@ class FinanceController extends Controller
                     //'reference_type' => financeHeadCode($value->service_type->finance_head_id),
                     'reference_type' => financeHeadCode($value->service_type->finance_head_id),
                     'reference_id' => $value->id,
-                    'user_id' => auth()->id(),
-                    'remarks' => $value->service_type->name." Payment received. posted by ".auth()->user()->name,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
+                    'remarks' => $value->service_type->name." Payment Posted to cash at office. posted by ".auth()->user()->name,
                     'created_at' => now()
                 ]);
             }
@@ -252,8 +310,9 @@ class FinanceController extends Controller
                         'credit_head_id' => $value->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
                         'reference_type' => 'commission',
                         'reference_id' => $value->id,
-                        'user_id' => auth()->id(),
-                        'remarks' => 'Consultant procedure share posted to doctor account by '.auth()->user()->name,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Consultant procedure share posted to doctor: '.$value->consultant->name ?? "".' account by '.auth()->user()->name,
                         'created_at' => now()
                     ];
                     array_push($record,$rec);
@@ -356,7 +415,7 @@ class FinanceController extends Controller
             ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
-            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
 
         Appointment::where("is_posted",0)
@@ -366,7 +425,7 @@ class FinanceController extends Controller
             ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
-            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
         PatientInvestigationPayment::where("is_posted",0)
             //->whereNull("admission_id")
@@ -376,7 +435,7 @@ class FinanceController extends Controller
             ->where("is_active",1)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
-            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
        PatientServiceCharges::where("is_posted",0)
             ->where("is_active",1)
@@ -386,7 +445,7 @@ class FinanceController extends Controller
             })
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
-            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
         PharmacyRetrun::where("is_posted",0)
             //->whereNull("admission_id")
@@ -395,7 +454,7 @@ class FinanceController extends Controller
             })
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
-            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
 
         Sale::where("is_posted",0)->when($closing_date, function ($query) use ($closing_date) {
@@ -403,7 +462,7 @@ class FinanceController extends Controller
         })
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('CreatedBy',$user_id);
-            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"ModifiedBy"=>auth()->user()->id,"ModifiedAt"=>date("Y-m-d")]);
 
 
         return true;
@@ -443,6 +502,7 @@ class FinanceController extends Controller
 
         $voucher_data = [
             "voucher_number" =>$voucher,
+            "user_id"   =>  auth()->user()->id,
             "voucher_type"   => "payment",
             "voucher_date"   => date("Y-m-d"),
             "total_amount"   => $amount,
@@ -503,6 +563,7 @@ class FinanceController extends Controller
 
         $voucher_data = [
             "voucher_number" =>$voucher,
+            "user_id"   =>  auth()->user()->id,
             "voucher_type"   => "receipt",
             "voucher_date"   => date("Y-m-d"),
             "total_amount"   => $amount,
@@ -592,7 +653,7 @@ class FinanceController extends Controller
         FinanceVoucher::where(["id"=>request()->id])->update(["approved_by"=>auth()->user()->id,"approved_at"=>date("Y-m-d H:i:s")]);
 
         if($voucher->voucher_type == 'closing'){
-            $this->update_post_status($voucher->voucher_date,$voucher->created_by);
+            $this->update_post_status($voucher->voucher_date,$voucher->user_id);
         }
 
         return ["status"=>true,"message"=>"record approved successfully"];

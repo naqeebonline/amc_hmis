@@ -612,4 +612,18 @@ function generateVoucherNumber(string $type, int $userId): string
     return "{$typeSlug}-{$userCode}-{$nextNumber}";
 }
 
+function user_advance($user_id,$start_date,$end_date){
+    $total_advance = DB::table("in_patient_payments")
+        ->when($start_date, function ($query) use ($start_date) {
+        $query->whereDate('created_at',">=", $start_date);
+    })
+        ->when($end_date, function ($query) use ($end_date) {
+            $query->whereDate('created_at',"<=", $end_date);
+        })
+        ->where('created_by', $user_id)
+        ->where('is_active', 1)
+        ->sum("amount");
+    return $total_advance;
+}
+
 

@@ -226,4 +226,33 @@ class FinanceReportController extends Controller
        // return view('Finance.Reports.print_daily_closing_voucher', compact('voucher', 'rows', 'totalDebit', 'totalCredit'));
     }
 
+
+    function get_user_base_daily_closing_report(){
+        $start_date = date("Y-m-d");
+        $end_date = date("Y-m-d");
+        $report = DB::table('finance_transactions as ft')
+            ->join('finance_heads as fh', 'fh.id', '=', 'ft.credit_head_id')
+            ->join('users as user', 'ft.user_id', '=', 'user.id')
+            ->select('ft.user_id', 'fh.name as head_name', 'ft.reference_type', DB::raw('COUNT(ft.reference_type) as total_count'),DB::raw('SUM(ft.amount) as total_amount'),'user.name as user_name')
+            ->whereBetween('ft.transaction_date', [$start_date, $end_date])
+            ->where('ft.is_active', 1)
+            ->where('ft.reference_type', '!=', 'commission')
+            ->groupBy('ft.user_id', 'ft.reference_type', 'fh.name')
+            ->orderBy('ft.user_id')
+            ->get()
+            ->groupBy('user_id');
+
+        foreach ($report as $key => $value){
+
+            $advance = user_advance($key,$start_date,$end_date);
+            $value->user_advance = $advance;
+        }
+
+
+
+
+
+        return view('Finance.Reports.user_base_closing_report',compact("start_date","end_date","report"));
+    }
+
 }

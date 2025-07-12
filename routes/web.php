@@ -429,4 +429,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post("update_in_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_in_patient_admission"])->name("pos.update_in_patient_admission");
     Route::get("in_patient_discharged_listing", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_listing"])->name("pos.in_patient_discharged_listing");
     Route::get('/printDailyClosingVoucher/{id}', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'printDailyClosingVoucher'])->name('pos.printDailyClosingVoucher');
+    Route::get('/get_user_base_daily_closing_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'get_user_base_daily_closing_report'])->name('pos.get_user_base_daily_closing_report');
 });
