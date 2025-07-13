@@ -124,7 +124,7 @@
                                                 </button>
 
                                                 <!-- Delete button -->
-                                                <button class="btn btn-sm btn-danger delete_entry" record-id="{{$value->id}}" title="Delete">
+                                                <button class="btn btn-sm btn-danger delete_entry" record-id="{{$value->voucher_id}}" title="Delete">
                                                     <i class="fas fa-times "></i>
                                                 </button>
                                             @endif

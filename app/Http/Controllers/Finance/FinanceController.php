@@ -603,7 +603,7 @@ class FinanceController extends Controller
                 'reference_type' => 'cash_receipt_voucher',
                 'reference_id' => NULL,
                 'user_id' => auth()->id(),
-                "remarks"   => request()->remarks."- Payment Received from".financeHeadName(request()->credit_head_id)." . Transfer to ".financeHeadName(request()->credit_head_id)." by ".auth()->user()->name,
+                "remarks"   => request()->remarks."- Received from ".financeHeadName(request()->credit_head_id)." by".auth()->user()->name,
                 'created_at' => now()
             ];
         }
