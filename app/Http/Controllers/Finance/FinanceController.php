@@ -475,7 +475,7 @@ class FinanceController extends Controller
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability","expense","income"])->get();
         $data['voucher'] = FinanceTransaction::query()
             ->where('reference_type', 'cash_payment_voucher')
-            ->where(["is_active"=>1])
+            ->where(["finance_transactions.is_active"=>1])
             ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
             ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
             ->leftJoin('finance_vouchers as fv', 'finance_transactions.voucher_id', '=', 'fv.id')

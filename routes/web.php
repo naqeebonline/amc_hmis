@@ -414,6 +414,16 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('add_consultant_procedure', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'add_consultant_procedure'])->name('pos.add_consultant_procedure');
     Route::get('consultant_procedure_pricing/{consultant_procedure_id?}', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'consultant_procedure_pricing'])->name('pos.consultant_procedure_pricing');
     Route::get("in_patient_discharged_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_list"])->name("pos.in_patient_discharged_list");
+     //-----         reports   ------//
+    Route::get('/printDailyClosingVoucher/{id}', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'printDailyClosingVoucher'])->name('pos.printDailyClosingVoucher');
+    Route::get('/get_user_base_daily_closing_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'get_user_base_daily_closing_report'])->name('pos.get_user_base_daily_closing_report');
+    Route::get('/get_user_base_daily_closing_report2', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'get_user_base_daily_closing_report2'])->name('pos.get_user_base_daily_closing_report2');
+    Route::get('/trail_balance_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'trail_balance_report'])->name('pos.trail_balance_report');
+    Route::get('/finance_vouchers_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'finance_vouchers_report'])->name('pos.finance_vouchers_report');
+    Route::get('/finance_ledger_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'finance_ledger_report'])->name('pos.finance_ledger_report');
+    Route::get('/outstanding_balances_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'outstanding_balances_report'])->name('pos.outstanding_balances_report');
+
+    //----------------- end of new menues  ------------//
 
 
     Route::post("save_patient_payment", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "save_patient_payment"])->name("pos.save_patient_payment");
@@ -428,6 +438,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('get_consultant_procedures', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'get_consultant_procedures'])->name('pos.get_consultant_procedures');
     Route::post("update_in_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_in_patient_admission"])->name("pos.update_in_patient_admission");
     Route::get("in_patient_discharged_listing", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_listing"])->name("pos.in_patient_discharged_listing");
-    Route::get('/printDailyClosingVoucher/{id}', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'printDailyClosingVoucher'])->name('pos.printDailyClosingVoucher');
-    Route::get('/get_user_base_daily_closing_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'get_user_base_daily_closing_report'])->name('pos.get_user_base_daily_closing_report');
+
 });

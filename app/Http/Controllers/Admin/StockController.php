@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Finance\FinanceTransaction;
+use App\Models\Finance\FinanceVoucher;
 use App\Models\Grn;
 use App\Models\GrnAudit;
 use App\Models\GrnAuditDetails;
@@ -493,17 +494,38 @@ class StockController extends Controller
         GrnRequest::where(["GRNID"=>request()->id])->update(["bill_status"=>1]);
         $grn = GrnRequest::with('supplier')->where(["GRNID"=>request()->id])->first();
 
+
+        //--------- finance entry will goes here   --//
+        $voucher = generateVoucherNumber("GRN-PUR",auth()->user()->id);
+
+        $voucher_data = [
+            "voucher_number" =>$voucher,
+            "user_id"   =>  auth()->user()->id,
+            "voucher_type"   => "pharmacy_purchase",
+            "voucher_date"   => date("Y-m-d"),
+            "total_amount"   => $grn['TotalPurchase'],
+            "remarks"        =>  "Grn approved by  ".auth()->user()->name,
+            "created_by"    => auth()->user()->id,
+            "approved_by"   => auth()->user()->id,
+            "approved_by"   => auth()->user()->id,
+            "approved_at"   => date("Y-m-d H:i:s"),
+        ];
+        $voucher = FinanceVoucher::create($voucher_data);
+
         FinanceTransaction::insert([
+            'voucher_id' => $voucher->id,
             'transaction_date' => today(),
             'amount' => $grn['TotalPurchase'],
             'debit_head_id' => financeHeadId('pharmacy_purchase'),  //because cash will be paid from cash at office
             'credit_head_id' => $grn->supplier->finance_head_id, //
             'reference_type' => 'grn',
             'reference_id' => $grn->GRNID,
-            'user_id' => auth()->id(),
+            'user_id' => $grn->CreatedBy,
+            'created_by' => auth()->user()->id,
             'remarks' => 'Pharmacy product purchased from supplier. grn_request approved by '.auth()->user()->name,
             'created_at' => now()
         ]);
+        //-------    end of finance voucher  -------------//
 
         return response()->json(["status"=>true,"message"=>"done"]);
     }
