@@ -217,7 +217,8 @@
 <div class="invoice-container">
     <header>
         <div class="company-details">
-            <h1 style="text-align: center;margin-left: 50%;width: 100%;">{{env('COMPANY_NAME')}}</h1><br>
+            <p style="text-align: center;margin-left: 50%;width: 100%; font-weight: bold;font-size: 20px">{{env('COMPANY_NAME')}}</p><br>
+            <p style="text-align: center;margin-left: 50%;width: 100%; font-weight: bold;font-size: 15px">Ledger Report</p><br>
 
 
         </div>
@@ -230,7 +231,7 @@
     <section class="items">
 
         <div class="container">
-            <h4 style="text-align: center;">Finance Head Ledger</h4>
+
 
             <form method="GET" action="{{route('pos.finance_ledger_report')}}" class="mb-3">
                 <table class="table table-bordered table-striped">
@@ -260,8 +261,8 @@
                     <thead class="table-light">
                     <tr>
                         <th style="width:12%">Date</th>
-                        <th style="width: 38%">Remarks</th>
-                        <th>User</th>
+                        <th style="width: 35%">Remarks</th>
+                        <th style="width: 15%">User</th>
                         <th>Debit</th>
                         <th>Credit</th>
                         <th>Balance</th>
@@ -273,9 +274,12 @@
                         <td colspan="5"><strong style="float: right; font-size: 12px;">Opening Balance (Before {{ $start_date }})</strong></td>
                         <td><strong style=" font-size: 14px;">{{ number_format($opening_balance, 2) }}</strong></td>
                     </tr>
-                    <?php $running_balance = 0; ?>
+                    <?php $running_balance = 0; $total_cr = 0; $total_dr=0; ?>
                     @foreach($entries as $entry)
-                        <?php $running_balance = $entry->running_balance; ?>
+                        <?php $running_balance = $entry->running_balance;
+                        $total_cr = ($total_cr) + ($entry->credit);
+                        $total_dr = ($total_dr) + ($entry->debit);
+                        ?>
                         <tr>
                             <td>{{ $entry->transaction_date }}</td>
 
@@ -286,6 +290,17 @@
                             <td class="text-end fw-bold">{{ number_format($entry->running_balance, 2) }}</td>
                         </tr>
                     @endforeach
+
+                    <tr>
+                        <td></td>
+
+                        <td></td>
+                        <td></td>
+                        <td class="text-end fw-bold" style="font-weight: bold">DR : {{ number_format($total_dr, 2)}}</td>
+                        <td class="text-end fw-bold" style="font-weight: bold">CR : {{ number_format($total_cr, 2)}}</td>
+                        <td class="text-end fw-bold" style="font-weight: bold; background: lightgrey">{{ number_format($running_balance, 2)}}</td>
+
+                    </tr>
                     </tbody>
                 </table>
             @elseif($finance_head_id)
