@@ -201,6 +201,15 @@
         .table-borderless {
             border: none !important;
         }
+
+
+    </style>
+    <style>
+        @media print {
+            .btn.btn-primary {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -246,7 +255,7 @@
 
             </form>
 
-            @if($entries->isNotEmpty())
+            @if($entries->isNotEmpty() || $opening_balance > 0)
                 <table class="table table-bordered table-striped">
                     <thead class="table-light">
                     <tr>
@@ -259,6 +268,11 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <tr>
+
+                        <td colspan="5"><strong style="float: right; font-size: 12px;">Opening Balance (Before {{ $start_date }})</strong></td>
+                        <td><strong style=" font-size: 14px;">{{ number_format($opening_balance, 2) }}</strong></td>
+                    </tr>
                     <?php $running_balance = 0; ?>
                     @foreach($entries as $entry)
                         <?php $running_balance = $entry->running_balance; ?>

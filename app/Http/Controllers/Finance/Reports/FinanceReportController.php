@@ -449,10 +449,39 @@ class FinanceReportController extends Controller
         $running_balance = 0;
         $head_type = null;
 
+        $opening = DB::table('finance_transactions as ft')
+            ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
+            ->whereNotNull('finance_vouchers.approved_by')
+            ->where('ft.transaction_date', '<', $start_date)
+            ->where(function ($query) use ($finance_head_id) {
+                $query->where('ft.debit_head_id', $finance_head_id)
+                    ->orWhere('ft.credit_head_id', $finance_head_id);
+            })
+            ->selectRaw("
+                SUM(CASE WHEN ft.debit_head_id = ? THEN ft.amount ELSE 0 END) as total_debit,
+                SUM(CASE WHEN ft.credit_head_id = ? THEN ft.amount ELSE 0 END) as total_credit
+            ", [$finance_head_id, $finance_head_id])
+            ->first();
+
+        $total_debit = $opening->total_debit ?? 0;
+        $total_credit = $opening->total_credit ?? 0;
+
+        if (in_array($head_type, ['asset', 'expense'])) {
+            $opening_balance = $total_debit - $total_credit;
+        } else {
+            $opening_balance = $total_credit - $total_debit;
+        }
+
         if ($finance_head_id) {
             // Get the finance head type
             $head = DB::table('finance_heads')->where('id', $finance_head_id)->first();
             $head_type = $head?->type;
+
+                    // Calculate Opening Balance (Before Start Date)
+
+
+        // Initialize running balance with opening
+        $running_balance = $opening_balance;
 
         $entries = DB::table('finance_transactions as ft')
 
@@ -496,7 +525,8 @@ class FinanceReportController extends Controller
             'finance_head_id',
             'entries',
             'start_date',
-            'end_date'
+            'end_date',
+            'opening_balance'
         ));
     }
 
