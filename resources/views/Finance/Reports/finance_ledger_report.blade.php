@@ -246,7 +246,7 @@
                             @endforeach
                         </select>
                         </th>
-                        <th class="text-end">
+                        <th class="text-end" style="width: 15%;">
                             <button type="submit" class="btn btn-primary">Filter</button>
                         </th>
                     </tr>

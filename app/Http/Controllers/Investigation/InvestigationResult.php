@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Investigation;
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\InvestigationParameter;
 use App\Models\Configuration\InvestigationSubCategory;
+use App\Models\Finance\FinanceTransaction;
+use App\Models\Finance\FinanceVoucher;
 use App\Models\ParameterHeading;
 use App\Models\Patient\InvestigationResult as PatientInvestigationResult;
 use App\Models\Patient\Patient;
@@ -101,6 +103,40 @@ class InvestigationResult extends Controller
                     "updated_by" => auth()->user()->id,
                 ]);
             }
+        }
+
+        $current_investigation =  PatientInvestigation::with(['consultant'])->where("id",request()->inv_id)->first();
+        if($current_investigation && $current_investigation->status == 0 && $current_investigation->consultant_share_amount > 0){
+            $voucher = generateVoucherNumber("investigation_shares",auth()->user()->id);
+            $voucher_data = [
+                "voucher_number" =>$voucher,
+                "voucher_type"   => "investigation_shares",
+                'user_id' => auth()->user()->id,
+                'created_by' => auth()->user()->id,
+                "voucher_date"   => date("Y-m-d"),
+                "total_amount"   => $current_investigation->consultant_share_amount,
+                "remarks"   => "Investigation Shares of Doctor ".$current_investigation->consultant->name ?? "",
+                "created_by"   =>  auth()->user()->id,
+                "approved_by"   => auth()->user()->id,
+                "approved_at"   => date("Y-m-d H:i:s"),
+                "created_at"   =>  date("Y-m-d H:i:s"),
+            ];
+            $voucher = FinanceVoucher::create($voucher_data);
+
+            $rec = [
+                'voucher_id' => $voucher->id,
+                'transaction_date' => today(),
+                'amount' => $current_investigation->consultant_share_amount,
+                'debit_head_id' => financeHeadId('doctor_commission'),  // Doctor commision expense
+                'credit_head_id' => $current_investigation->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
+                'reference_type' => 'commission',
+                'reference_id' => $current_investigation->id,
+                'user_id' => auth()->user()->id,
+                'created_by' => auth()->user()->id,
+                'remarks' => 'Lab shares of Invoice#'.$current_investigation->id.' posted to Doctor: '.$current_investigation->consultant->name ?? "".' Account. posted by '.auth()->user()->name,
+                'created_at' => now()
+            ];
+            FinanceTransaction::insert($rec);
         }
 
 

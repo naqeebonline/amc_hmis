@@ -475,7 +475,6 @@ class StockController extends Controller
 
 
         $grn = GrnRequest::where(["GRNID"=>request()->id])->first()->toArray();
-
          unset($grn['GRNID']);
          unset($grn['bill_json_form']);
          unset($grn['bill_status']);

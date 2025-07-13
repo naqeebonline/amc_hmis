@@ -202,6 +202,13 @@
             border: none !important;
         }
     </style>
+    <style>
+        @media print {
+            .btn.btn-primary {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -225,7 +232,7 @@
                 <tr>
                     <th>Start Date: <input type="date" name="start_date" class="form-control" value="{{ $start_date }}"></th>
                     <th class="text-end">End Date: <input type="date" name="end_date" class="form-control" value="{{ $end_date }}"></th>
-                    <th class="text-end"><button type="submit" class="btn btn-primary">Filter</button></th>
+                    <th class="text-end" style="width: 15% !important;"><button type="submit" class="btn btn-primary">Filter</button></th>
                 </tr>
                 </thead>
             </table>
@@ -238,7 +245,7 @@
                 <p class="border-bottom pb-1 " style="font-weight: bold; background-color: #B2BBC3 !important; text-align: center;font-size: 14px;">Date: {{ $date }}</p>
                 <?php $total = 0; ?>
                 @foreach($reportData['users'] as $user)
-                    <?php $total = $total + $user['user_advance']; ?>
+                    <?php //$total = $total + $user['user_advance']; ?>
 
                     <div class="card mt-3">
                         <div class="card-header">
@@ -269,8 +276,8 @@
                                 <tr class="table-secondary">
                                     <th colspan="4" class="text-end">User Total</th>
                                     <th>
-                                        <?php $total = ($total) + (collect($user['transactions'])->sum('total_amount') + $user['user_advance']); ?>
-                                        Rs. {{ number_format((collect($user['transactions'])->sum('total_amount') + $user['user_advance']), 2) }}
+                                        <?php $total = ($total) + (collect($user['transactions'])->sum('total_amount')); ?>
+                                        Rs. {{ number_format((collect($user['transactions'])->sum('total_amount')), 2) }}
                                     </th>
                                 </tr>
                                 </tbody>

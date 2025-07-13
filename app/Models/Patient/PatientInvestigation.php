@@ -2,6 +2,7 @@
 
 namespace App\Models\Patient;
 
+use App\Models\Configuration\Consultants;
 use App\Models\Configuration\Investigation;
 use App\Models\Configuration\InvestigationSubCategory;
 use App\Models\Configuration\Ward;
@@ -32,6 +33,11 @@ class PatientInvestigation extends Model
     public function investigation()
     {
         return $this->belongsTo(InvestigationSubCategory::class, 'investigation_sub_category_id', "id");
+    }
+
+    public function consultant()
+    {
+        return $this->belongsTo(Consultants::class, 'consultant_id', "id");
     }
 
     public function investigationResult()

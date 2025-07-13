@@ -245,6 +245,7 @@
             </thead>
             <tbody>
             @foreach ($sortedRows as $index => $row)
+                @if($row['debit'] == 0 && $row['credit'] > 0)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $row['head_code'] }} - {{ $row['head_title'] }}</td>
@@ -256,10 +257,11 @@
                     <td>{{ number_format($row['balance'], 0) }}</td>
                     @endif
                 </tr>
+                @endif
             @endforeach
             <tr>
                 <td colspan="2"><strong>Total in Words: {{numberToWords($totalDebit)}}</strong></td>
-                <td><strong>{{ number_format($totalDebit, 0) }}</strong></td>
+                <td><strong>{{--{{ number_format($totalDebit, 0) }}--}}</strong></td>
                 <td><strong>{{ number_format($totalCredit, 0) }}</strong></td>
                 <td></td>
             </tr>

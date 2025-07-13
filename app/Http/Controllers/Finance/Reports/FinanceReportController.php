@@ -257,8 +257,8 @@ class FinanceReportController extends Controller
 
 
     function get_user_base_daily_closing_report2(){
-        $start_date = '2025-07-10'; // or request('start_date')
-        $end_date = '2025-07-13';   // or request('end_date')
+        $start_date = request()->start_date ?? date('Y-m-d');
+        $end_date = request()->end_date ?? date('Y-m-d');
 
         $rawReport = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'fh.id', '=', 'ft.credit_head_id')
@@ -445,6 +445,7 @@ class FinanceReportController extends Controller
         // All finance heads for dropdown
         $finance_heads = DB::table('finance_heads')->orderBy('name')->get();
 
+
         $entries = collect();
         $running_balance = 0;
         $head_type = null;
@@ -453,6 +454,7 @@ class FinanceReportController extends Controller
             ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
             ->whereNotNull('finance_vouchers.approved_by')
             ->where('ft.transaction_date', '<', $start_date)
+
             ->where(function ($query) use ($finance_head_id) {
                 $query->where('ft.debit_head_id', $finance_head_id)
                     ->orWhere('ft.credit_head_id', $finance_head_id);

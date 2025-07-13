@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 13, 2025 at 09:49 AM
+-- Generation Time: Jul 13, 2025 at 04:05 PM
 -- Server version: 8.3.0
 -- PHP Version: 7.4.33
 
@@ -670,7 +670,7 @@ CREATE TABLE IF NOT EXISTS `finance_heads` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `finance_heads`
@@ -697,7 +697,8 @@ INSERT INTO `finance_heads` (`id`, `head_code`, `name`, `type`, `description`, `
 (23, NULL, 'Image Charges', 'income', 'Image_Charges', '2025-07-02 11:38:03'),
 (27, NULL, 'Supplier- Ab Pharmacy', 'liability', '03005918898', '2025-07-05 10:14:04'),
 (26, NULL, 'Doctor- Dr Ishaq khan', 'liability', '1620241383099', '2025-07-05 10:12:30'),
-(33, NULL, 'Doctor- Dr Toheed Khan', 'liability', '2342342342333', '2025-07-08 10:27:06');
+(33, NULL, 'Doctor- Dr Toheed Khan', 'liability', '2342342342333', '2025-07-08 10:27:06'),
+(34, '009', 'Adjustment Account', 'liability', 'journal_voucher', '2025-06-29 14:49:51');
 
 -- --------------------------------------------------------
 
@@ -723,7 +724,18 @@ CREATE TABLE IF NOT EXISTS `finance_transactions` (
   PRIMARY KEY (`id`),
   KEY `debit_head_id` (`debit_head_id`),
   KEY `credit_head_id` (`credit_head_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `finance_transactions`
+--
+
+INSERT INTO `finance_transactions` (`id`, `voucher_id`, `transaction_date`, `amount`, `debit_head_id`, `credit_head_id`, `reference_type`, `reference_id`, `user_id`, `remarks`, `created_at`, `created_by`, `is_active`) VALUES
+(1, 1, '2025-07-13', 105.00, 8, 26, 'commission', 1, 2, 'Lab shares Invoice#1 posted to Doctor: Dr Ishaq khan', '2025-07-13 15:26:52', 2, 1),
+(2, 2, '2025-07-13', 67.00, 8, 26, 'commission', 3, 2, 'Lab shares Invoice#3 posted to Doctor: Dr Ishaq khan', '2025-07-13 15:27:05', 2, 1),
+(3, 3, '2025-07-13', 70.00, 8, 33, 'commission', 2, 12248, 'Lab shares Invoice#2 posted to Doctor: Dr Toheed Khan', '2025-07-13 15:27:47', 12248, 1),
+(4, 4, '2025-07-13', 30.00, 8, 33, 'commission', 4, 12248, 'Lab shares Invoice#4 posted to Doctor: Dr Toheed Khan', '2025-07-13 15:28:25', 12248, 1),
+(5, 5, '2025-07-13', 150.00, 8, 33, 'commission', 5, 12248, 'Lab shares Invoice#5 posted to Doctor: Dr Toheed Khan', '2025-07-13 15:28:37', 12248, 1);
 
 -- --------------------------------------------------------
 
@@ -736,7 +748,7 @@ CREATE TABLE IF NOT EXISTS `finance_vouchers` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` bigint DEFAULT NULL,
   `voucher_number` varchar(50) NOT NULL,
-  `voucher_type` enum('sale','pharmacy_purchase','receipt','payment','journal','adjustment','closing') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `voucher_type` enum('sale','pharmacy_purchase','receipt','payment','journal_voucher','adjustment','closing','investigation_shares') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `voucher_date` date DEFAULT NULL,
   `total_amount` decimal(12,2) DEFAULT '0.00',
   `remarks` text,
@@ -923,10 +935,10 @@ CREATE TABLE IF NOT EXISTS `grn_details` (
 --
 
 INSERT INTO `grn_details` (`GDID`, `store_id`, `ProductID`, `GRNID`, `batch_no`, `Quantity`, `Damage`, `UnitPrice`, `discount`, `pack_price`, `pack_size`, `taxPercentage`, `taxAmount`, `gst_tax_amount`, `advance_tax_amount`, `advance_tax`, `gst_tax`, `SoldQuantity`, `TotalReturn`, `RemainingQuantity`, `ProductStatus`, `expiry_date`) VALUES
-(1, 2, 1151, 1, '234', 242400, NULL, 12.00, 0.00, 1200.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 104, 18, 242296, 1, '2026-03-05'),
-(2, 2, 1155, 1, '24', 32400, NULL, 17.00, 0.00, 1700.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 63, 0, 32337, 1, '2026-03-05'),
-(3, 2, 884, 1, '24234', 7020, NULL, 16.67, 0.00, 500.00, 30.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 20, 0, 7000, 1, '2026-03-05'),
-(4, 2, 885, 1, '24234', 9360, NULL, 10.00, 0.00, 400.00, 40.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 45, 2, 9315, 1, '2026-03-05'),
+(1, 2, 1151, 1, '234', 242400, NULL, 12.00, 0.00, 1200.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 112, 18, 242288, 1, '2026-03-05'),
+(2, 2, 1155, 1, '24', 32400, NULL, 17.00, 0.00, 1700.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 72, 0, 32328, 1, '2026-03-05'),
+(3, 2, 884, 1, '24234', 7020, NULL, 16.67, 0.00, 500.00, 30.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 23, 0, 6997, 1, '2026-03-05'),
+(4, 2, 885, 1, '24234', 9360, NULL, 10.00, 0.00, 400.00, 40.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 51, 2, 9309, 1, '2026-03-05'),
 (5, 1, 326, 2, '24234', 234300, NULL, 12.00, 0.00, 1200.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 1, 0, 234299, 1, '2026-03-08'),
 (6, 1, 330, 2, '244', 2423400, NULL, 17.00, 0.00, 1700.00, 100.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 2, 0, 2423400, 1, '2026-03-08'),
 (7, 1, 86, 2, '234324', 46846800, NULL, 17.50, 0.00, 350.00, 20.00, NULL, 0.00, 0.00, 0.00, 0.00, 0.00, 0, 0, 46846800, 1, '2026-03-08'),
@@ -4757,19 +4769,21 @@ CREATE TABLE IF NOT EXISTS `patient_investigations` (
   KEY `admission_id` (`admission_id`),
   KEY `patient_id` (`patient_id`),
   KEY `investigation_id` (`investigation_sub_category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `patient_investigations`
 --
 
 INSERT INTO `patient_investigations` (`id`, `invoice_no`, `patient_id`, `admission_id`, `investigation_sub_category_id`, `consultant_id`, `consultant_share_percentage`, `consultant_share_amount`, `inv_amount`, `sale_price`, `frequency`, `discount_percentage`, `discount_amount`, `inv_date`, `inv_out_date`, `inv_comment`, `created_by`, `created_at`, `updated_by`, `updated_at`, `is_active`, `patient_type`, `is_posted`, `posted_on`, `status`) VALUES
-(1, '1752399898480', 1, NULL, 1, 0, 0, 0, 140.00, 500.00, 1, 0.00, 0.00, '2025-07-13 14:45:13', NULL, NULL, 2, '2025-07-13 14:45:13', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
-(2, '1752399898480', 1, NULL, 2, 0, 0, 0, 70.00, 250.00, 1, 0.00, 0.00, '2025-07-13 14:45:13', NULL, NULL, 2, '2025-07-13 14:45:13', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
-(3, '1752399898480', 1, NULL, 3, 0, 0, 0, 420.00, 600.00, 1, 0.00, 0.00, '2025-07-13 14:45:13', NULL, NULL, 2, '2025-07-13 14:45:13', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
-(4, '1752399913671', 4, NULL, 1, 0, 0, 0, 140.00, 500.00, 1, 0.00, 0.00, '2025-07-13 14:45:28', NULL, NULL, 2, '2025-07-13 14:45:28', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
-(5, '1752399913671', 4, NULL, 2, 0, 0, 0, 70.00, 250.00, 1, 0.00, 0.00, '2025-07-13 14:45:28', NULL, NULL, 2, '2025-07-13 14:45:28', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
-(6, '1752399913671', 4, NULL, 3, 0, 0, 0, 420.00, 600.00, 1, 0.00, 0.00, '2025-07-13 14:45:28', NULL, NULL, 2, '2025-07-13 14:45:28', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0);
+(1, '1752399898480', 1, NULL, 1, 1, 2, 105, 140.00, 500.00, 1, 0.00, 0.00, '2025-07-13 14:45:13', '2025-07-13 20:26:52', 'some test comments', 2, '2025-07-13 14:45:13', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(2, '1752399898480', 1, NULL, 2, 2, 2, 70, 70.00, 250.00, 1, 0.00, 0.00, '2025-07-13 14:45:13', '2025-07-13 20:27:47', 'asdfasdf', 2, '2025-07-13 14:45:13', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(3, '1752399898480', 1, NULL, 3, 1, 2, 67, 420.00, 600.00, 1, 0.00, 0.00, '2025-07-13 14:45:13', '2025-07-13 20:27:05', 'sdfasdf adfa asdfasdf', 2, '2025-07-13 14:45:13', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(4, '1752399913671', 4, NULL, 1, 2, 2, 30, 140.00, 500.00, 1, 0.00, 0.00, '2025-07-13 14:45:28', '2025-07-13 20:28:25', 'sdf', 2, '2025-07-13 14:45:28', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(5, '1752399913671', 4, NULL, 2, 2, 2, 150, 70.00, 250.00, 1, 0.00, 0.00, '2025-07-13 14:45:28', '2025-07-13 20:28:37', 'asdf', 2, '2025-07-13 14:45:28', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(6, '1752399913671', 4, NULL, 3, 1, 2, 100, 420.00, 600.00, 1, 0.00, 0.00, '2025-07-13 14:45:28', '2025-07-13 20:22:01', 'asdf', 2, '2025-07-13 14:45:28', NULL, NULL, 1, 'hospital_patient', 0, NULL, 0),
+(7, '1752422513810', 1, 3, 1, 0, 0, 0, 140.00, 500.00, 1, 0.00, 0.00, '2025-07-13 09:02:15', NULL, NULL, 2, '2025-07-13 21:02:15', NULL, NULL, 1, 'sehat_card', 0, NULL, 0),
+(8, '1752422513810', 1, 3, 2, 0, 0, 0, 70.00, 250.00, 1, 0.00, 0.00, '2025-07-13 09:02:21', NULL, NULL, 2, '2025-07-13 21:02:21', NULL, NULL, 1, 'sehat_card', 0, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -4822,27 +4836,7 @@ CREATE TABLE IF NOT EXISTS `patient_investigation_result` (
   `updated_by` int DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `patient_investigation_result`
---
-
-INSERT INTO `patient_investigation_result` (`id`, `patient_investigation_id`, `parameter_id`, `result_value`, `result_text_value`, `result_entry_date`, `created_by`, `created_at`, `updated_by`, `updated_at`) VALUES
-(1, 1, 1, '11', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(2, 1, 2, '56', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(3, 1, 3, '45', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(4, 1, 4, '45', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(5, 1, 5, '98', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(6, 1, 6, '687', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(7, 1, 7, '67', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(8, 1, 8, '56', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(9, 1, 9, '87', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(10, 1, 10, '98', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(11, 1, 11, '9', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(12, 1, 12, '89', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(13, 1, 13, '9', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL),
-(14, 1, 14, '89', NULL, '2025-07-08 23:37:20', 2, '2025-07-08 23:37:20', 2, NULL);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -7038,8 +7032,8 @@ INSERT INTO `products` (`ProductID`, `store_id`, `main_category_id`, `sub_catego
 (881, 2, 2, 39, 1, 198, 567, 'Zinc Syp', 0, 0, '', NULL, 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 0.00, 0),
 (882, 2, 1, 1, 1, 1, 1, 'Amplus inj', 0, 0, '', '', 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 0.00, 0),
 (883, 2, 1, 1, 1, 1, 1, 'Augmentin tab', 0, 0, '', '', 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 0.00, 0),
-(884, 2, 2, 33, 16, 197, 103, '2 sum 2g', 0, 0, '', '34', 500.00, 30.00, 16.67, 22.00, 3, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 7004.00, 0),
-(885, 2, 1, 2, 3, 1, 2, '2 sum 1g', 0, 0, '', '234', 400.00, 40.00, 10.00, 12.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 9322.00, 0),
+(884, 2, 2, 33, 16, 197, 103, '2 sum 2g', 0, 0, '', '34', 500.00, 30.00, 16.67, 22.00, 3, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 7000.00, 0),
+(885, 2, 1, 2, 3, 1, 2, '2 sum 1g', 0, 0, '', '234', 400.00, 40.00, 10.00, 12.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 9312.00, 0),
 (886, 2, 2, 33, 14, 1, 124, 'Inf Navidate', 0, 0, '', NULL, 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 0.00, 0),
 (887, 2, 1, 1, 1, 1, 1, 'Inf Flygl', 0, 0, '', '', 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 0.00, 0),
 (888, 2, 1, 1, 1, 1, 1, 'Inf R/L', 0, 0, '', '', 0.00, 0.00, 0.00, 0.00, 0, 0, '0000-00-00', 0, '0000-00-00', 1, 0, 0, 0.00, 0.00, 0.00, 0.00, 0),
@@ -7306,11 +7300,11 @@ INSERT INTO `products` (`ProductID`, `store_id`, `main_category_id`, `sub_catego
 (1148, 2, 2, 33, 34, 700, 124, 'Orcid 500mg Tab', 0, 0, NULL, NULL, 475.00, 10.00, 47.50, 47.50, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1149, 2, 2, 33, 34, 569, 127, 'Texklar 500mg tab', 0, 0, NULL, NULL, 510.00, 10.00, 51.00, 51.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1150, 2, 2, 33, 34, 206, 313, 'Bexus 500mg Tab', 0, 0, NULL, NULL, 200.00, 10.00, 20.00, 20.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
-(1151, 2, 3, 137, 6, 87, 179, '10cc zindagi Siring', 0, 0, NULL, NULL, 1200.00, 100.00, 12.00, 12.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 242300.00, 0),
+(1151, 2, 3, 137, 6, 87, 179, '10cc zindagi Siring', 0, 0, NULL, NULL, 1200.00, 100.00, 12.00, 12.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 242292.00, 0),
 (1152, 2, 3, 137, 6, 87, 179, '5cc zindagi Siring', 0, 0, NULL, NULL, 600.00, 50.00, 12.00, 12.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1153, 2, 3, 137, 6, 87, 179, '20cc zindagi Siring', 0, 0, NULL, NULL, 2200.00, 100.00, 22.00, 22.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1154, 2, 3, 137, 6, 87, 179, 'Drip Set Zindagi', 0, 0, NULL, NULL, 600.00, 60.00, 22.00, 22.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
-(1155, 2, NULL, NULL, 6, 87, 179, '1cc Insulin Silver Sirange', 0, 0, NULL, NULL, 1700.00, 100.00, 17.00, 17.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 32341.00, 0),
+(1155, 2, NULL, NULL, 6, 87, 179, '1cc Insulin Silver Sirange', 0, 0, NULL, NULL, 1700.00, 100.00, 17.00, 17.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 32332.00, 0),
 (1156, 2, 3, 137, 6, 87, 179, '5cc clinic Syring', 0, 0, NULL, NULL, 570.00, 100.00, 5.70, 5.70, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1157, 2, 2, 33, 4, 87, 102, 'Fedroxime 400mg', 0, 0, NULL, 'dsf', 240.00, 5.00, 48.00, 48.00, 3, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
 (1158, 2, 2, 33, 14, 87, 1, 'Novazol 100ml', 0, 0, NULL, NULL, 95.00, 1.00, 95.00, 95.00, NULL, NULL, NULL, NULL, NULL, 1, 0, 0, NULL, 0.00, 0.00, 0.00, 0),
@@ -8430,7 +8424,7 @@ CREATE TABLE IF NOT EXISTS `sale` (
   KEY `SCID` (`SCID`),
   KEY `SalemanID` (`SalemanID`),
   KEY `Date` (`Date`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `sale`
@@ -8439,7 +8433,9 @@ CREATE TABLE IF NOT EXISTS `sale` (
 INSERT INTO `sale` (`SaleID`, `store_id`, `SCID`, `wr_id`, `patient_id`, `admission_id`, `InvoiceNo`, `Date`, `Description`, `TNo`, `TotalSale`, `received_amount`, `ReceivedAmountFromCustomer`, `Discount`, `discount_percentage`, `SalemanID`, `SalemanCommesion`, `CustomerMobile`, `CreatedBy`, `CreatedAt`, `ModifiedBy`, `ModifiedAt`, `SalemanCommesionStatus`, `sale_descriptions`, `bill_details`, `is_sehat_card`, `medicine_type`, `is_posted`, `posted_on`) VALUES
 (1, 2, 2, 0, 2, 0, '1', '2025-07-13 00:00:00', 'Walking Customer - AMC-0000', NULL, 5050.00, 5050.00, 6000.00, 0, 0, 0, 0, NULL, 12258, '2025-07-13', NULL, NULL, 0, '-', '[{\"ProductID\":\"1151\",\"Product\":\"10cc zindagi Siring | PS: 100.00 | Qty 242305\",\"Name\":\"10cc zindagi Siring | PS: 100.00 | Qty 242305\",\"UnitePrice\":\"350\",\"Quantity\":\"5\",\"Total\":\"1750\",\"AvailableQuantity\":\"242305\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"242305\",\"dose_type\":\"-\"},{\"ProductID\":\"885\",\"Product\":\"2 sum 1g | PS: 40.00 | Qty 9332\",\"Name\":\"2 sum 1g | PS: 40.00 | Qty 9332\",\"UnitePrice\":\"550\",\"Quantity\":\"6\",\"Total\":\"3300\",\"AvailableQuantity\":\"9332\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"9332\",\"dose_type\":\"-\"}]', 1, 'Home', 0, NULL),
 (2, 2, 2, 0, 2, 0, '2', '2025-07-13 00:00:00', 'Walking Customer - AMC-0000', NULL, 3660.00, 3660.00, 4000.00, 0, 0, 0, 0, NULL, 12258, '2025-07-13', NULL, NULL, 0, '-', '[{\"ProductID\":\"885\",\"Product\":\"2 sum 1g | PS: 40.00 | Qty 9326\",\"Name\":\"2 sum 1g | PS: 40.00 | Qty 9326\",\"UnitePrice\":\"390\",\"Quantity\":\"4\",\"Total\":\"1560\",\"AvailableQuantity\":\"9326\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"9326\",\"dose_type\":\"-\"},{\"ProductID\":\"884\",\"Product\":\"2 sum 2g | PS: 30.00 | Qty 7010\",\"Name\":\"2 sum 2g | PS: 30.00 | Qty 7010\",\"UnitePrice\":\"350\",\"Quantity\":\"6\",\"Total\":\"2100\",\"AvailableQuantity\":\"7010\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"7010\",\"dose_type\":\"-\"}]', 1, 'Home', 0, NULL),
-(3, 2, 2, 0, 2, 0, '3', '2025-07-13 00:00:00', 'Walking Customer - AMC-0000', NULL, 12930.00, 12930.00, 13000.00, 0, 0, 0, 0, NULL, 12254, '2025-07-13', NULL, NULL, 0, '-', '[{\"ProductID\":\"1151\",\"Product\":\"10cc zindagi Siring | PS: 100.00 | Qty 242300\",\"Name\":\"10cc zindagi Siring | PS: 100.00 | Qty 242300\",\"UnitePrice\":\"550\",\"Quantity\":\"4\",\"Total\":\"2200\",\"AvailableQuantity\":\"242300\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"242300\",\"dose_type\":\"-\"},{\"ProductID\":\"1155\",\"Product\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32341\",\"Name\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32341\",\"UnitePrice\":\"660\",\"Quantity\":\"4\",\"Total\":\"2640\",\"AvailableQuantity\":\"32341\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"32341\",\"dose_type\":\"-\"},{\"ProductID\":\"885\",\"Product\":\"2 sum 1g | PS: 40.00 | Qty 9322\",\"Name\":\"2 sum 1g | PS: 40.00 | Qty 9322\",\"UnitePrice\":\"590\",\"Quantity\":\"7\",\"Total\":\"4130\",\"AvailableQuantity\":\"9322\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"9322\",\"dose_type\":\"-\"},{\"ProductID\":\"884\",\"Product\":\"2 sum 2g | PS: 30.00 | Qty 7004\",\"Name\":\"2 sum 2g | PS: 30.00 | Qty 7004\",\"UnitePrice\":\"990\",\"Quantity\":\"4\",\"Total\":\"3960\",\"AvailableQuantity\":\"7004\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"7004\",\"dose_type\":\"-\"}]', 1, 'Home', 0, NULL);
+(3, 2, 2, 0, 2, 0, '3', '2025-07-13 00:00:00', 'Walking Customer - AMC-0000', NULL, 12930.00, 12930.00, 13000.00, 0, 0, 0, 0, NULL, 12254, '2025-07-13', NULL, NULL, 0, '-', '[{\"ProductID\":\"1151\",\"Product\":\"10cc zindagi Siring | PS: 100.00 | Qty 242300\",\"Name\":\"10cc zindagi Siring | PS: 100.00 | Qty 242300\",\"UnitePrice\":\"550\",\"Quantity\":\"4\",\"Total\":\"2200\",\"AvailableQuantity\":\"242300\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"242300\",\"dose_type\":\"-\"},{\"ProductID\":\"1155\",\"Product\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32341\",\"Name\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32341\",\"UnitePrice\":\"660\",\"Quantity\":\"4\",\"Total\":\"2640\",\"AvailableQuantity\":\"32341\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"32341\",\"dose_type\":\"-\"},{\"ProductID\":\"885\",\"Product\":\"2 sum 1g | PS: 40.00 | Qty 9322\",\"Name\":\"2 sum 1g | PS: 40.00 | Qty 9322\",\"UnitePrice\":\"590\",\"Quantity\":\"7\",\"Total\":\"4130\",\"AvailableQuantity\":\"9322\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"9322\",\"dose_type\":\"-\"},{\"ProductID\":\"884\",\"Product\":\"2 sum 2g | PS: 30.00 | Qty 7004\",\"Name\":\"2 sum 2g | PS: 30.00 | Qty 7004\",\"UnitePrice\":\"990\",\"Quantity\":\"4\",\"Total\":\"3960\",\"AvailableQuantity\":\"7004\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"7004\",\"dose_type\":\"-\"}]', 1, 'Home', 0, NULL),
+(4, 2, 2, 0, 1, 3, '4', '2025-07-13 00:00:00', 'naqeeb ahmd - AMC-0001', NULL, 4111.00, 0.00, 0.00, 411, 10, 0, 0, NULL, 2, '2025-07-13', NULL, NULL, 0, NULL, '[{\"ProductID\":\"1151\",\"Product\":\"10cc zindagi Siring | PS: 100.00 | Qty 242296\",\"Name\":\"10cc zindagi Siring | PS: 100.00 | Qty 242296\",\"UnitePrice\":\"450\",\"Quantity\":\"4\",\"Total\":\"1800\",\"AvailableQuantity\":\"242296\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"242296\",\"dose_type\":\"-\"},{\"ProductID\":\"1155\",\"Product\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32337\",\"Name\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32337\",\"UnitePrice\":\"455\",\"Quantity\":\"5\",\"Total\":\"2275\",\"AvailableQuantity\":\"32337\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"32337\",\"dose_type\":\"-\"},{\"ProductID\":\"885\",\"Product\":\"2 sum 1g | PS: 40.00 | Qty 9315\",\"Name\":\"2 sum 1g | PS: 40.00 | Qty 9315\",\"UnitePrice\":\"12.00\",\"Quantity\":\"3\",\"Total\":\"36\",\"AvailableQuantity\":\"9315\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"9315\",\"dose_type\":\"-\"}]', 1, 'Home', 0, NULL),
+(5, 2, 2, 0, 3, 4, '5', '2025-07-13 00:00:00', 'Zulfiqar Khan - AMC-0003', NULL, 9740.00, 0.00, 0.00, 974, 10, 0, 0, NULL, 2, '2025-07-13', NULL, NULL, 0, NULL, '[{\"ProductID\":\"1151\",\"Product\":\"10cc zindagi Siring | PS: 100.00 | Qty 242292\",\"Name\":\"10cc zindagi Siring | PS: 100.00 | Qty 242292\",\"UnitePrice\":\"890\",\"Quantity\":\"4\",\"Total\":\"3560\",\"AvailableQuantity\":\"242292\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"242292\",\"dose_type\":\"-\"},{\"ProductID\":\"1155\",\"Product\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32332\",\"Name\":\"1cc Insulin Silver Sirange | PS: 100.00 | Qty 32332\",\"UnitePrice\":\"780\",\"Quantity\":\"4\",\"Total\":\"3120\",\"AvailableQuantity\":\"32332\",\"taxAmount\":\"0.00\",\"taxPercentage\":null,\"currentAvailableQuantity\":\"32332\",\"dose_type\":\"-\"},{\"ProductID\":\"885\",\"Product\":\"2 sum 1g | PS: 40.00 | Qty 9312\",\"Name\":\"2 sum 1g | PS: 40.00 | Qty 9312\",\"UnitePrice\":\"690\",\"Quantity\":\"3\",\"Total\":\"2070\",\"AvailableQuantity\":\"9312\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"9312\",\"dose_type\":\"-\"},{\"ProductID\":\"884\",\"Product\":\"2 sum 2g | PS: 30.00 | Qty 7000\",\"Name\":\"2 sum 2g | PS: 30.00 | Qty 7000\",\"UnitePrice\":\"330\",\"Quantity\":\"3\",\"Total\":\"990\",\"AvailableQuantity\":\"7000\",\"taxAmount\":\"0.00\",\"taxPercentage\":\"0.00\",\"currentAvailableQuantity\":\"7000\",\"dose_type\":\"-\"}]', 1, 'Home', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -8489,7 +8485,7 @@ CREATE TABLE IF NOT EXISTS `sale_details` (
   KEY `ProductID` (`ProductID`),
   KEY `SaleID` (`SaleID`),
   KEY `GDID` (`GDID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `sale_details`
@@ -8503,7 +8499,14 @@ INSERT INTO `sale_details` (`SDID`, `store_id`, `ProductID`, `SaleID`, `Quantity
 (5, 2, 1151, 3, 4, 550.00, NULL, 0.00, 12.00, 0, 1, 2, 0, NULL, '-'),
 (6, 2, 1155, 3, 4, 660.00, NULL, 0.00, 17.00, 0, 2, 2, 0, NULL, '-'),
 (7, 2, 885, 3, 7, 590.00, 0.00, 0.00, 10.00, 0, 4, 2, 0, NULL, '-'),
-(8, 2, 884, 3, 4, 990.00, 0.00, 0.00, 16.67, 0, 3, 2, 0, NULL, '-');
+(8, 2, 884, 3, 4, 990.00, 0.00, 0.00, 16.67, 0, 3, 2, 0, NULL, '-'),
+(9, 2, 1151, 4, 4, 450.00, NULL, 0.00, 12.00, 0, 1, 1, 3, NULL, '-'),
+(10, 2, 1155, 4, 5, 455.00, NULL, 0.00, 17.00, 0, 2, 1, 3, NULL, '-'),
+(11, 2, 885, 4, 3, 12.00, 0.00, 0.00, 10.00, 0, 4, 1, 3, NULL, '-'),
+(12, 2, 1151, 5, 4, 890.00, NULL, 0.00, 12.00, 0, 1, 3, 4, NULL, '-'),
+(13, 2, 1155, 5, 4, 780.00, NULL, 0.00, 17.00, 0, 2, 3, 4, NULL, '-'),
+(14, 2, 885, 5, 3, 690.00, 0.00, 0.00, 10.00, 0, 4, 3, 4, NULL, '-'),
+(15, 2, 884, 5, 3, 330.00, 0.00, 0.00, 16.67, 0, 3, 3, 4, NULL, '-');
 
 -- --------------------------------------------------------
 

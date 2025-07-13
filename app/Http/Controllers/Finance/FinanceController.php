@@ -253,15 +253,12 @@ class FinanceController extends Controller
                     'remarks' => 'Investigation Income posted to cash at office. Posted by '.auth()->user()->name,
                     'created_at' => now()
                 ]);
-
-                //----- here commision of
             }
-
         }
 
         if($service_charges > 0){
             $query = PatientServiceCharges::where("patient_service_charges.is_posted",0)
-                ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered"])
+                ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered","Canceled"])
                 ->leftJoin("in_patient_admissions","in_patient_admissions.id","=","patient_service_charges.admission_id")
                 //->whereNull("admission_id")
                 ->when($closing_date, function ($query) use ($closing_date) {
@@ -272,27 +269,29 @@ class FinanceController extends Controller
                     return $query->where('patient_service_charges.created_by',$user_id);
                 })->get();
             foreach ($query as $key => $value){
+              if($value->service_rate > 0){
+                  array_push($record,[
+                      'voucher_id' => $voucher->id,
+                      'transaction_date' => today(),
+                      'amount' => $value->service_rate,
+                      'debit_head_id' => request()->finance_head_id,  //cash at office
+                      'credit_head_id' => $value->service_type->finance_head_id, // service_head id
+                      //'reference_type' => financeHeadCode($value->service_type->finance_head_id),
+                      'reference_type' => financeHeadCode($value->service_type->finance_head_id),
+                      'reference_id' => $value->id,
+                      'user_id' => $user_id,
+                      'created_by' => auth()->user()->id,
+                      'remarks' => $value->service_type->name." Payment Posted to cash at office. posted by ".auth()->user()->name,
+                      'created_at' => now()
+                  ]);
+              }
 
-                array_push($record,[
-                    'voucher_id' => $voucher->id,
-                    'transaction_date' => today(),
-                    'amount' => $value->service_rate,
-                    'debit_head_id' => request()->finance_head_id,  //cash at office
-                    'credit_head_id' => $value->service_type->finance_head_id, // service_head id
-                    //'reference_type' => financeHeadCode($value->service_type->finance_head_id),
-                    'reference_type' => financeHeadCode($value->service_type->finance_head_id),
-                    'reference_id' => $value->id,
-                    'user_id' => $user_id,
-                    'created_by' => auth()->user()->id,
-                    'remarks' => $value->service_type->name." Payment Posted to cash at office. posted by ".auth()->user()->name,
-                    'created_at' => now()
-                ]);
             }
 
             //-------- doctor account will credit from procedure percentage of admission  -----------//
             $all_admissions = InPatientAdmission::with(['consultant'])
                 ->where("is_posted",0)
-                ->whereIn("admission_status",["Discharged","Reffered"])
+                ->whereIn("admission_status",["Discharged"])
                 ->when($closing_date, function ($query) use ($closing_date) {
                     return $query->whereDate('admission_date', '<=', date("Y-m-d", strtotime($closing_date)));
                 })
@@ -392,7 +391,7 @@ class FinanceController extends Controller
                 return $query->whereDate('patient_service_charges.service_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
             ->where("patient_service_charges.is_active",1)
-            ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered"])
+            ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered","Canceled"])
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('patient_service_charges.created_by',$user_id);
             });
@@ -406,7 +405,15 @@ class FinanceController extends Controller
     public function update_post_status($closing_date,$user_id)
     {
 
-
+        $all_admissions = InPatientAdmission::with(['consultant'])
+            ->where("is_posted",0)
+            ->whereIn("admission_status",["Discharged","Reffered","Canceled"])
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('admission_date', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('discharge_by',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d")]);
 
         SalePayment::where("is_posted",0)
             ->when($closing_date, function ($query) use ($closing_date) {
@@ -437,6 +444,18 @@ class FinanceController extends Controller
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
+        PatientInvestigation::with(['consultant'])
+            ->where("is_posted",0)
+            ->where("is_active",1)
+            //->whereNull("admission_id")
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->where("is_active",1)
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
+
        PatientServiceCharges::where("is_posted",0)
             ->where("is_active",1)
             ->with(['service_type'])
@@ -447,6 +466,7 @@ class FinanceController extends Controller
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
 
+
         PharmacyRetrun::where("is_posted",0)
             //->whereNull("admission_id")
             ->when($closing_date, function ($query) use ($closing_date) {
@@ -455,6 +475,7 @@ class FinanceController extends Controller
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             })->update(["is_posted"=>1,"posted_on"=>date("Y-m-d"),"updated_by"=>auth()->user()->id,"updated_at"=>date("Y-m-d H:i:s")]);
+
 
 
         Sale::where("is_posted",0)->when($closing_date, function ($query) use ($closing_date) {
