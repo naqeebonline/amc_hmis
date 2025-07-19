@@ -379,6 +379,7 @@ class SaleController extends Controller
             "data" => $request->all()
         ]);*/
         $patient_id = request()->patient_id;
+        $invoice_discount = request()->invoice_discount;
         $admission_id = request()->patient_admission_id ?? 0;
         $customer = Patient::where(["id"=>$patient_id])->first();
         $ReceivedAmountFromCustomer = 0;
@@ -429,6 +430,7 @@ class SaleController extends Controller
             'TotalSale'     => $total,
             'received_amount'     => $ReceivedAmount,
             'Discount'     =>  $Discount,
+            'invoice_discount'     =>  $invoice_discount,
             'discount_percentage'     =>  $discount_percentage,
             'sale_descriptions' => $bill_description,
             'CreatedBy'     => $userID,

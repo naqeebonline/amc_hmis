@@ -171,7 +171,7 @@
         }
         .previous-bills{
             background: #fff;
-            height: 450px;
+            /*height: 450px;*/
             overflow: auto
         }
         .previous-bills table tr th,
@@ -356,67 +356,7 @@
             </div>
 
             <!-- Footer Section -->
-            <div class="footer-section">
-                <div class="row">
 
-
-                    <div class="col-md-2">
-                        <label for="remarks">Total Bill</label>
-                        <input type="number" readonly style="font-weight: bold; font-size: 24px;" id="BillAmount" class="form-control">
-                    </div>
-
-
-
-                    <div class="col-md-2">
-                        <label for="remarks">Discount</label>
-                        <select class="form-control" id="discount_id">
-                            <option value="0">Select Discount...</option>
-                            <option value="2">2%</option>
-                            <option value="4">4%</option>
-                            <option value="6">6%</option>
-                            <option value="8">8%</option>
-                            <option value="10">10%</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label for="remarks">Discount Amount</label>
-                        <input type="number" readonly style="font-weight: bold; color:'green'; font-size: 14px;" id="discount_amount" value="0" class="form-control">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="remarks">Net Bill</label>
-                        <input type="number"  id="ReceivedAmount"  disabled style="color:red;font-weight: bold; font-size: 24px;" value="0" class="form-control">
-                    </div>
-                    <div class="col-md-4" style="display: none;">
-                        <label for="remarks">Bill Description</label>
-                        <input type="text" name="BillDiscription" id="BillDiscription" value="-" class="form-control">
-                    </div>
-
-                    <div class="col-md-2" >
-                        <label for="remarks">Received Amount</label>
-                        <input type="number" style="font-weight: bold;font-size: 24px;" name="ReceivedAmountFromCustomer" id="ReceivedAmountFromCustomer" value="0" class="form-control">
-                    </div>
-
-                    <div class="col-md-2" >
-                        <label for="remarks">Return</label>
-                        <input type="number" name="ReturnToCustomer" style="font-weight: bold;font-size: 24px;" id="ReturnToCustomer" value="0" class="form-control">
-                    </div>
-
-
-
-
-
-                </div>
-            </div>
-
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <button class="btn btn-custom me-2" id="save_bill">Save Bill</button>
-                   {{-- <a class="btn btn-custom me-2" target="_blank" >New Bill</a>--}}
-                    {{--<a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red" href="javascript:void(0)">Logout</a>--}}
-
-                </div>
-            </div>
 
         </div>
 
@@ -445,8 +385,7 @@
 
 
                 <h5 style="text-align: center; color:green">{{session('store_name')}}</h5>
-                <hr>
-                <h5 style="text-align: center; color:red">Previous Bills</h5>
+
             <div class="previous-bills">
 
                 <table class="table table-bordered" style="width: 100%" id="previous-bill-table">
@@ -467,6 +406,74 @@
 
             </div>
            
+        </div>
+    </div>
+
+    <div class="footer-section">
+        <div class="row">
+
+
+            <div class="col-md-2">
+                <label for="remarks">Total Bill</label>
+                <input type="number" readonly style="font-weight: bold; font-size: 24px;" id="BillAmount" class="form-control">
+            </div>
+
+
+
+            <div class="col-md-1">
+                <label for="remarks">Discount</label>
+                <select class="form-control" id="discount_id">
+                    <option value="0">Discount...</option>
+                    <option value="2">2%</option>
+                    <option value="4">4%</option>
+                    <option value="6">6%</option>
+                    <option value="8">8%</option>
+                    <option value="10">10%</option>
+                </select>
+            </div>
+
+            <div class="col-md-1">
+                <label for="remarks">Dis Amount</label>
+                <input type="number" readonly style="font-weight: bold; color:'green'; font-size: 14px;" id="discount_amount" value="0" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label for="remarks">Invoice Discount</label>
+                <input type="number"  id="invoice_discount"  style="color:red;font-weight: bold; font-size: 24px;" value="0" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label for="remarks">Net Bill</label>
+                <input type="number"  id="ReceivedAmount"  disabled style="color:red;font-weight: bold; font-size: 24px;" value="0" class="form-control">
+            </div>
+            <div class="col-md-4" style="display: none;">
+                <label for="remarks">Bill Description</label>
+                <input type="text" name="BillDiscription" id="BillDiscription" value="-" class="form-control">
+            </div>
+
+            <div class="col-md-2" >
+                <label for="remarks">Received Amount</label>
+                <input type="number" style="font-weight: bold;font-size: 24px;" name="ReceivedAmountFromCustomer" id="ReceivedAmountFromCustomer" value="0" class="form-control">
+            </div>
+
+            <div class="col-md-2" >
+                <label for="remarks">Return</label>
+                <input type="number" name="ReturnToCustomer" style="font-weight: bold;font-size: 24px;" id="ReturnToCustomer" value="0" class="form-control">
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <button class="btn btn-custom me-2" id="save_bill">Save Bill</button>
+            {{-- <a class="btn btn-custom me-2" target="_blank" >New Bill</a>--}}
+            {{--<a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red" href="javascript:void(0)">Logout</a>--}}
+
         </div>
     </div>
 
@@ -492,8 +499,18 @@
         calculateReturnAmount();
     });
 
+    $("body").on("keyup","#invoice_discount",function () {
+
+
+        reload_table();
+    });
+
     function calculateReturnAmount(){
         var bill_amount = $("#ReceivedAmount").val();
+        var invoice_discount = $("#invoice_discount").val();
+        if(invoice_discount == ''){
+            invoice_discount = 0;
+        }
         var ReceivedAmountFromCustomer = $("#ReceivedAmountFromCustomer").val();
         if(bill_amount == ''){
             bill_amount = 0;
@@ -514,7 +531,7 @@
                     [100, 250, 500, 1000],
                     ['100', '250', '500', '1000']
                 ],
-                pageLength: 50,
+                pageLength: 8,
                 ajax: {
                     url: `{{ route('pos.retail_previous_bills') }}`,
 
@@ -733,6 +750,14 @@
 
         $("body").on("click","#save_bill",function(){
             var count_error_items = $('.horizontal-menu li').length;
+            var invoice_discount = $("#invoice_discount").val();
+            if(invoice_discount == ''){
+                invoice_discount = 0;
+            }
+            if(invoice_discount > 9){
+                alert("Invoice Discount Limit Exceed. Limit Rs:9 only/-");
+                return false;
+            }
 
             var return_amount = $("#ReturnToCustomer").val();
             if(return_amount < 0){
@@ -847,6 +872,7 @@
                     ReceivedAmount,
                     BillDiscription,
                     BillAmount,
+                    invoice_discount,
                     ProductList,
                     "_token": "{{ csrf_token() }}"
                 },
@@ -1194,11 +1220,15 @@
         });
         var bill_discount_percent = $("#discount_id").val();
         var discount_amount = (total_amount * bill_discount_percent) / 100;
+        var invoice_discount = $("#invoice_discount").val();
+        if(invoice_discount == ''){
+            invoice_discount = 0;
+        }
 
 
         $("#discount_amount").val(discount_amount);
         $("#BillAmount").val(Math.ceil(total_amount));
-        $("#ReceivedAmount").val(Math.ceil(total_amount - discount_amount));
+        $("#ReceivedAmount").val(Math.ceil(total_amount - discount_amount - invoice_discount));
 
 
         if(ProductList.length < 15){

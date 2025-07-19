@@ -16,12 +16,14 @@ class FinanceReportController extends Controller
         $debits = DB::table('finance_transactions')
             ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
             ->whereNotNull('finance_vouchers.approved_by')
+            //->where('finance_transactions.reference_type', '!=', 'commission')
             ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
             ->groupBy('debit_head_id');
 
         $credits = DB::table('finance_transactions')
             ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
             ->whereNotNull('finance_vouchers.approved_by')
+           // ->where('finance_transactions.reference_type', '!=', 'commission')
             ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
             ->groupBy('credit_head_id');
 
@@ -43,6 +45,7 @@ class FinanceReportController extends Controller
                 }
                 return $head;
             });
+
 
         return view('Finance.Reports.finance_balance_report', compact('report'));
     }
@@ -449,6 +452,11 @@ class FinanceReportController extends Controller
         $entries = collect();
         $running_balance = 0;
         $head_type = null;
+        if($finance_head_id){
+            $finance_h = FinanceHead::whereId($finance_head_id)->first();
+            $head_type = $finance_h->type ?? "";
+        }
+
 
         $opening = DB::table('finance_transactions as ft')
             ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
@@ -476,13 +484,6 @@ class FinanceReportController extends Controller
 
         if ($finance_head_id) {
             // Get the finance head type
-            $head = DB::table('finance_heads')->where('id', $finance_head_id)->first();
-            $head_type = $head?->type;
-
-                    // Calculate Opening Balance (Before Start Date)
-
-
-        // Initialize running balance with opening
         $running_balance = $opening_balance;
 
         $entries = DB::table('finance_transactions as ft')

@@ -626,4 +626,15 @@ function user_advance($user_id,$start_date,$end_date){
     return $total_advance;
 }
 
+function userRole($user_id=''){
+    if($user_id){
+     $user = \App\Models\User::whereId($user_id)->first();
+     return $user->roles->pluck('name')[0];
+    }else{
+        return auth()->user()->roles->pluck('name')[0];
+    }
+
+
+}
+
 

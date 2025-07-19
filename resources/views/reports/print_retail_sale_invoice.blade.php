@@ -77,12 +77,13 @@
             <tr>
                 <th colspan="3"></th>
                 <th style="font-size: 12px">Discount:</th>
-                <th style="font-size: 12px">{{ round($TotalDiscount) }}</th>
+                <th style="font-size: 12px">{{ round($TotalDiscount + $record->invoice_discount) }}</th>
             </tr>
+
             <tr>
                 <th colspan="3"></th>
                 <th style="font-size: 14px">Amount:</th>
-                <th style="font-size: 14px">{{ ($totalAmount < 1) ? 0 : round($totalAmount - $record->Discount) }}</th>
+                <th style="font-size: 14px">{{ ($totalAmount < 1) ? 0 : round($totalAmount - $record->Discount - $record->invoice_discount) }}</th>
             </tr>
             </tbody>
         </table>

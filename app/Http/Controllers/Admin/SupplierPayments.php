@@ -15,6 +15,7 @@ use App\Models\PaymentType;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -331,6 +332,9 @@ class SupplierPayments extends Controller
         $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
+            })
+            ->when((userRole() != "Super Admin"), function ($q) {
+                return $q->where(["CreatedBy" => auth()->user()->id]);
             })
             ->limit(50);
 

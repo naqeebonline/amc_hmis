@@ -293,12 +293,12 @@ class FinanceController extends Controller
                 ->where("is_posted",0)
                 ->whereIn("admission_status",["Discharged"])
                 ->when($closing_date, function ($query) use ($closing_date) {
-                    return $query->whereDate('admission_date', '<=', date("Y-m-d", strtotime($closing_date)));
+                    return $query->where('admission_date', '<=', date("Y-m-d", strtotime($closing_date)));
                 })
                 ->when($user_id, function ($query) use ($user_id) {
                     return $query->where('discharge_by',$user_id);
                 })->get();
-
+          //  dd($all_admissions);
             foreach ($all_admissions as $key => $value){
                 if($value->consultant_share > 0){
                     $rec = [
@@ -492,7 +492,7 @@ class FinanceController extends Controller
 
     public function cash_payment_voucher()
     {
-        $data['finance_heads'] = FinanceHead::whereIn("type",["asset","expense"])->get();
+        $data['finance_heads'] = FinanceHead::whereIn("type",["asset","expense","liability"])->get();
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability","expense","income"])->get();
         $data['voucher'] = FinanceTransaction::query()
             ->where('reference_type', 'cash_payment_voucher')
@@ -555,7 +555,7 @@ class FinanceController extends Controller
 
     public function cash_receipt_voucher()
     {
-        $data['finance_heads'] = FinanceHead::where(["type"=>"asset"])->get();
+        $data['finance_heads'] = FinanceHead::whereIn("type",["liability","asset"])->get();
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability"])->get();
 
         $data['voucher'] = FinanceTransaction::query()
