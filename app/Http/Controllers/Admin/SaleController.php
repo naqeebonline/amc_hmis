@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\PatientController\PatientAdmissionController;
+use App\Models\Appointments\Appointment;
 use App\Models\Customer;
 use App\Models\GrnDetails;
 use App\Models\Market;
@@ -108,6 +109,12 @@ class SaleController extends Controller
         $data["ward_request"] = $_GET["ward_request"] ?? "";
         $data['patient_id'] = "";
         $data['list_products'] = [];
+
+        $data['appointments'] = Appointment::where('is_active', 1)
+            ->where('created_at', '>=', Carbon::now()->subDay()) // only last 24 hours
+            ->with(['patient'])
+            ->get();
+
 
         $data["title"] = "Retail Sale";
         $data['products'] = Product::orderBy("ProductName", "ASC")
@@ -392,6 +399,7 @@ class SaleController extends Controller
         $Freight = 0;
         $PDate = date("Y-m-d",strtotime(request()->bill_date));
         $Description = request()->BillDiscription;
+        $appointment_id = request()->appointment_id;
         $medicine_type = request()->medicine_type;
         $bill_description = request()->BillDiscription;
         $discount_percentage = request()->discount_percentage ?? 0;
@@ -424,6 +432,7 @@ class SaleController extends Controller
             'patient_id'   => $patient_id,
             'admission_id'   => $admission_id,
             'InvoiceNo' => $Invoice,
+            'appointment_id' => $appointment_id,
             'medicine_type' => $medicine_type,
             'Date'  =>$PDate ,
             'Description'   =>  $CustomerName,

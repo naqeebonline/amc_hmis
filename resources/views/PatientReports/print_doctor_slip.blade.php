@@ -178,13 +178,14 @@
                 <div class="col">
                     <p><strong>{{date('l, F d, Y', strtotime($data->appointment_date))}} <br/> {{date('h:i A', strtotime($data->appointment_date))}}</strong></p>
                     <p><strong>{{ucfirst($data->opd_type->name) ?? ''}}</strong></p>
+                    <p><strong>Appointment#: {{env('BRANCH_CODE')}} {{ $data->appointment_number }}</strong></p>
                 </div>
 
             </div>
         </div>
 
         <div class="patient_detail pb-3">
-            <p class="text-end my-2 me-5 pe-2">{{ucfirst($data->patient->mr_no) ?? ''}}</p>
+            <p class="text-end my-2 me-5 pe-2"> {{env('BRANCH_CODE')}} {{ ucfirst($data->patient->mr_no) ?? ''}}</p>
 
             <div class="row g-0 pt_detail">
                 <div class="name col-6 pe-2 height">

@@ -64,7 +64,6 @@ class FinanceController extends Controller
             return redirect()->back()->with("error","Unapproved transaction exist. approve it and then post next transaction");
         }
 
-
         $user_id = request()->user_id;
 
         $closing_date = request()->closing_date;
@@ -130,6 +129,10 @@ class FinanceController extends Controller
                 make_entry($voucher_id,request()->finance_head_id,$amount,0,"sale",$value->id,$user_id,$remarks);
                 make_entry($voucher_id,financeHeadId('pharmacy_income'),0,$amount,"sale",$value->id,$user_id,$remarks);
 
+                // cash at office debuit   pharmacy_purchase credit
+                make_entry($voucher_id,financeHeadId('cogs'),$amount,0,"sale",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('pharmacy_purchase'),0,$amount,"sale",$value->id,$user_id,$remarks);
+
             }
         }
 
@@ -146,9 +149,14 @@ class FinanceController extends Controller
                 $amount = $value->amount;
                 $remarks = "Pharmacy Return";
 
-                // pharmacy_income debuit   cash at office credit
-                make_entry($voucher_id,financeHeadId('pharmacy_income'),$amount,0,"pharmacy_return",$value->id,$user_id,$remarks);
+                // pharmacy_return debit     cash at office credit
+                make_entry($voucher_id,financeHeadId('pharmacy_return'),$amount,0,"pharmacy_return",$value->id,$user_id,$remarks);
                 make_entry($voucher_id,request()->finance_head_id,0,$amount,"pharmacy_return",$value->id,$user_id,$remarks);
+
+
+                // pharmacy_purchase debit    cogs credit
+                make_entry($voucher_id,financeHeadId('pharmacy_purchase'),$amount,0,"pharmacy_return",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('cogs'),0,$amount,"pharmacy_return",$value->id,$user_id,$remarks);
             }
         }
         if($appointments > 0){

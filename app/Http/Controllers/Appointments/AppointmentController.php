@@ -21,6 +21,7 @@ class AppointmentController extends Controller
 {
     public function appointment()
     {
+
         $data["consultants"] = Consultants::where(["is_active"=>1])->get();
         $data["relations"] = Relation::get();
         $data["district"] = District::get();
@@ -218,19 +219,24 @@ class AppointmentController extends Controller
         return view("appointments.reports.print_all_appointments", $data);
     }
 
-    function generateAppointmentNumber() {
-        $prefix = "A-";
-        $appointment = Appointment::orderBy("id","desc")->first();
-        $number = $appointment ? $appointment->id : 0;
-        $number = ($number + 1);
-        // Calculate the required length (based on the number of digits)
-        $currentLength = strlen((string) $number); // Length of the current number
-        $paddingLength = max(4, $currentLength + 1); // Start with 4 digits, increase dynamically
+    function generateAppointmentNumber()
+    {
+        $year = date('y');  // Last 2 digits of the year, e.g., "25"
+        $month = date('m'); // 2-digit month, e.g., "07"
 
-        // Pad the number to the calculated length
-        $paddedNumber = str_pad($number, $paddingLength, '0', STR_PAD_LEFT);
+        // Get count of appointments for the current year and month
+        $count = Appointment::whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m'))
+            ->count();
 
-        // Combine prefix and padded number
-        return $prefix . $paddedNumber;
+        $sequence = $count + 1;
+
+        // Sequence should start at 2 digits and grow as needed
+        $minLength = 2;
+        $dynamicLength = max($minLength, strlen((string)$sequence));
+        $paddedSequence = str_pad($sequence, $dynamicLength, '0', STR_PAD_LEFT);
+
+        // Combine year, month, and padded sequence
+        return $year . $month . $paddedSequence;
     }
 }

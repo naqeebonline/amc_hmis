@@ -223,23 +223,34 @@
             <input type="text" id="invoice_number" style="pointer-events: none;" required="required" value="{{$invoiceNo ?? ''}}" class="form-control" value="" >
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-2" style="display: none;">
             <label for="date">Medicine Type</label>
             <select class="form-select" id="medicine_type" >
                 <option value="">Select Medicine Type...</option>
                 <option value="Ward" {{($type == "Ward") ? "selected" : ""}}>Ward Medicine</option>
                 <option value="OT" {{($type == "OT") ? "selected" : ""}}>OT Medicine</option>
-                <option value="Home" {{($type == "Home") ? "selected" : ""}}>Home Medicine</option>
+                <option value="Home" selected="selected">Home Medicine</option>
             </select>
         </div>
 
         <div class="col-md-3">
-            <label for="received">Select Patient</label>
+            <label for="received">Appointment Number</label>
+            <select id="appointment_id" name="appointment_id" class="form-control">
+                <option value="">Please Select Appointment...</option>
+                {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
+                <?php foreach($appointments as $key => $value){ ?>
+                     <option  value="<?php echo $value->id; ?>"><?php echo $value->patient->name." | ".env('BRANCH_CODE').$value->appointment_number; ?></option>
+                <?php } ?>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="received">Select Customer</label>
             <select id="SID" name="SID" class="form-control">
                 <option value="">Please Select Patient...</option>
                {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
                 <?php foreach($admitted_patients as $key => $value){ ?>
-                <option data-admission_id="0" value="<?php echo $value->id; ?>" {{($value->patient_type == "walking_customer") ? "selected" : ""}}><?php echo $value->name; ?></option>
+                <option data-admission_id="0" value="<?php echo $value->id; ?>" {{($value->patient_type == "walking_customer") ? "selected" : "selected"}}><?php echo $value->name; ?></option>
                 <?php } ?>
             </select>
         </div>
@@ -615,6 +626,7 @@
     $(document).ready(function(){
         $("#product_id").select2();
         $("#SID").select2();
+        $("#appointment_id").select2();
 
 
 
@@ -777,6 +789,7 @@
             invoice_number = $("#invoice_number").val();
             discount_amount = $("#discount_amount").val();
             medicine_type = $("#medicine_type").val();
+            appointment_id = $("#appointment_id").val();
             currency_type = $("#currency_type").val();
             bill_date = $("#bill_date").val();
             customer_name = $("#customer_name").val();
@@ -863,6 +876,7 @@
                     company_name,
                     invoice_number,
                     medicine_type,
+                    appointment_id,
                     discount_amount,
                     currency_type,
                     bill_date,
