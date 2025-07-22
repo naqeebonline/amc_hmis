@@ -21,15 +21,15 @@
             <!-- Traffic sources -->
             <div class="card">
                 <div class="card-body">
-                    <h5 >Cash Payment Voucher</h5>
-                    <form class=" form-submit-event" method="post" action="{{route('pos.save_cash_payment_voucher')}}" enctype="multipart/form-data">
+                    <h5 >Journal Voucher</h5>
+                    <form class=" form-submit-event" method="post" action="{{route('pos.save_journal_voucher')}}" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">
                             <div class="col-md-6 col-sm-4 mb-3">
                                 <table class="table table-bordered">
                                     <tr>
-                                        <td style="width: 30%">CR:</td>
+                                        <td style="width: 30%">CR Head:</td>
                                         <td style="width: 70%">
                                             <select name="credit_head_id" required id="credit_head_id" class="form-select">
                                                 <option value="">Select Head ----</option>
@@ -41,7 +41,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td>Head</td>
+                                        <td>DR Head:</td>
                                         <td>
                                             <select name="debit_head_id" required id="debit_head_id" class="form-select">
                                                 <option value="">Select Head ----</option>

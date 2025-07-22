@@ -181,16 +181,16 @@ class FinanceController extends Controller
                     $remarks = 'Appointment Hospital shares posted by '.auth()->user()->name;
 
                     // Cash at office debit   Appointment income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('appointment_income'),0,$amount,"appointments",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments_shares",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,financeHeadId('appointment_income'),0,$amount,"appointments_shares",$value->id,$user_id,$remarks);
 
                 }else{
                     $amount = $value->fee;
                     $remarks = 'Appointment Income.';
 
                     // Cash at office debit   Appointment income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('appointment_income'),0,$amount,"appointments",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments_shares",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,financeHeadId('appointment_income'),0,$amount,"appointments_shares",$value->id,$user_id,$remarks);
 
                 }
 
@@ -213,8 +213,8 @@ class FinanceController extends Controller
                 $amount = $value->amount;
                 $remarks =  'Investigation Income posted to cash at office. Posted by '.auth()->user()->name;
                 // Cash at office debit   investigation income credit
-                make_entry($voucher_id,request()->finance_head_id,$amount,0,"patient_investigations_payments",$value->id,$user_id,$remarks);
-                make_entry($voucher_id,financeHeadId('investigation_income'),0,$amount,"patient_investigations_payments",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,request()->finance_head_id,$amount,0,"investigations_income",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('investigation_income'),0,$amount,"investigations_income",$value->id,$user_id,$remarks);
 
             }
         }
@@ -258,11 +258,11 @@ class FinanceController extends Controller
             foreach ($all_admissions as $key => $value){
                 if($value->consultant_share_amount > 0){
                     $amount = $value->consultant_share_amount;
-                    $remarks = 'Consultant procedure share posted to doctor: '.$value->consultant->name ?? "".' account by '.auth()->user()->name;
+                    $remarks = 'Procedure share posted to doctor: '.$value->consultant->name ?? "".' account by '.auth()->user()->name;
 
                     // Cash at office debit   doctor account credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"InPatientAdmission",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,$value->consultant->finance_head_id,0,$amount,"InPatientAdmission",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"procedure_shares",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,$value->consultant->finance_head_id,0,$amount,"procedure_shares",$value->id,$user_id,$remarks);
 
 
 
@@ -270,23 +270,23 @@ class FinanceController extends Controller
                     $remarks = 'Procedure income posted to Procedure Income by '.auth()->user()->name;
 
                     // Cash at office debit   procedure income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"InPatientAdmission",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('procedure_income'),0,$amount,"InPatientAdmission",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"procedure_shares",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,financeHeadId('procedure_income'),0,$amount,"procedure_shares",$value->id,$user_id,$remarks);
 
                 }else{
                     $amount = ($value->consultant_charges);
                     $remarks = 'Procedure income posted by '.auth()->user()->name;
 
                     // Cash at office debit   procedure income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"InPatientAdmission",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('procedure_income'),0,$amount,"InPatientAdmission",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"procedure_shares",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,financeHeadId('procedure_income'),0,$amount,"procedure_shares",$value->id,$user_id,$remarks);
 
                 }
 
             }
         }
 
-        FinanceTransaction::insert($record);
+      //  FinanceTransaction::insert($record);
 
         $remarks = "Closing done by ".auth()->user()->name." on ".date("Y-m-d H:i:s");
         DailyUserClosing::create([
@@ -460,21 +460,8 @@ class FinanceController extends Controller
     {
         $data['finance_heads'] = FinanceHead::whereIn("type",["asset","expense","liability"])->get();
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability","expense","income"])->get();
-        $data['voucher'] = FinanceTransaction::query()
-            ->where('reference_type', 'cash_payment_voucher')
-            ->where(["finance_transactions.is_active"=>1])
-            ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
-            ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
-            ->leftJoin('finance_vouchers as fv', 'finance_transactions.voucher_id', '=', 'fv.id')
-            ->select(
-                'finance_transactions.*',
-                'debit_heads.name as debit_head_name',
-                'credit_heads.name as credit_head_name',
-                'fv.approved_by',
-                'fv.approved_at'
-            )
-            ->orderBy("id","DESC")
-            ->paginate(30);
+        $data['vouchers'] = FinanceVoucher::orderBy("id","DESC")->where("voucher_type","payment")->paginate(30);
+
 
 
 
@@ -484,6 +471,7 @@ class FinanceController extends Controller
 
     public function save_cash_payment_voucher()
     {
+
         $amount = request()->amount;
         $voucher = generateVoucherNumber("Payment",auth()->user()->id);
 
@@ -498,48 +486,24 @@ class FinanceController extends Controller
             "created_at"   => date("Y-m-d H:i:s"),
         ];
         $voucher = FinanceVoucher::create($voucher_data);
+        $voucher_id = $voucher->id;
+
+        $remarks = request()->remarks.". Payment to ".financeHeadName(request()->debit_head_id)." From ".financeHeadName(request()->credit_head_id)." by ".auth()->user()->name;
+        make_entry($voucher_id,request()->debit_head_id,$amount,0,"cash_payment_voucher",NULL,auth()->user()->id,$remarks);
+        make_entry($voucher_id,request()->credit_head_id,0,$amount,"cash_payment_voucher",NULL,auth()->user()->id,$remarks);
 
 
-        if($amount > 0){
-            $record = [
-                'voucher_id' => $voucher->id,
-                'transaction_date' => today(),
-                'amount' => $amount,
-                'credit_head_id' => request()->credit_head_id, // Appointments income
-                'debit_head_id' => request()->debit_head_id,  //cash at office
-                'reference_type' => 'cash_payment_voucher',
-                'reference_id' => NULL,
-                'user_id' => auth()->id(),
-                'remarks' => request()->remarks.". Payment to ".financeHeadName(request()->debit_head_id)." From ".financeHeadName(request()->credit_head_id)." by ".auth()->user()->name,
-                'created_at' => now()
-            ];
-        }
-
-        FinanceTransaction::insert($record);
         return redirect()->back()->with('success', 'Record saved successfully.');
     }
+
+
 
     public function cash_receipt_voucher()
     {
         $data['finance_heads'] = FinanceHead::whereIn("type",["liability","asset"])->get();
         $data['sub_heads'] = FinanceHead::whereIn("type",["liability"])->get();
+        $data['vouchers'] = FinanceVoucher::orderBy("id","DESC")->where("voucher_type","receipt")->paginate(30);
 
-        $data['voucher'] = FinanceTransaction::query()
-            ->where('reference_type', 'cash_receipt_voucher')
-            ->where(["finance_transactions.is_active"=>1])
-            ->leftJoin('finance_heads as debit_heads', 'finance_transactions.debit_head_id', '=', 'debit_heads.id')
-            ->leftJoin('finance_heads as credit_heads', 'finance_transactions.credit_head_id', '=', 'credit_heads.id')
-            ->leftJoin('finance_vouchers as fv', 'finance_transactions.voucher_id', '=', 'fv.id')
-            ->select(
-                'finance_transactions.*',
-                'debit_heads.name as debit_head_name',
-                'credit_heads.name as credit_head_name',
-                'fv.approved_by',
-                'fv.approved_at'
-            )
-
-            ->orderBy("id","DESC")
-            ->paginate(30);
         return view("Finance.cash_receipt_voucher",$data);
     }
 
@@ -560,48 +524,74 @@ class FinanceController extends Controller
         ];
         $voucher = FinanceVoucher::create($voucher_data);
         if($amount > 0){
-            $record = [
-                'voucher_id' => $voucher->id,
-                'transaction_date' => today(),
-                'amount' => $amount,
-                'debit_head_id' => request()->debit_head_id,  //cash at office
-                'credit_head_id' => request()->credit_head_id, // Appointments income
-                'reference_type' => 'cash_receipt_voucher',
-                'reference_id' => NULL,
-                'user_id' => auth()->id(),
-                "remarks"   => request()->remarks."- Received from ".financeHeadName(request()->credit_head_id)." by".auth()->user()->name,
-                'created_at' => now()
-            ];
+            $voucher_id = $voucher->id;
+
+            $remarks = request()->remarks."- Received from ".financeHeadName(request()->credit_head_id)." by".auth()->user()->name;
+            make_entry($voucher_id,request()->debit_head_id,$amount,0,"cash_payment_voucher",NULL,auth()->user()->id,$remarks);
+            make_entry($voucher_id,request()->credit_head_id,0,$amount,"cash_payment_voucher",NULL,auth()->user()->id,$remarks);
         }
 
-        FinanceTransaction::insert($record);
+
+        return redirect()->back()->with('success', 'Record saved successfully.');
+    }
+
+    public function journal_voucher()
+    {
+        $data['finance_heads'] = FinanceHead::get();
+        $data['sub_heads'] = FinanceHead::get();
+        $data['vouchers'] = FinanceVoucher::orderBy("id","DESC")->where("voucher_type","journal_voucher")->paginate(30);
+        return view("Finance.journal_voucher",$data);
+    }
+
+    public function save_journal_voucher()
+    {
+
+        $amount = request()->amount;
+        $voucher = generateVoucherNumber("journal_voucher",auth()->user()->id);
+
+        $voucher_data = [
+            "voucher_number" =>$voucher,
+            "user_id"   =>  auth()->user()->id,
+            "voucher_type"   => "journal_voucher",
+            "voucher_date"   => date("Y-m-d"),
+            "total_amount"   => $amount,
+            "remarks"   =>    request()->remarks.". Paid by ".auth()->user()->name,
+            "created_by"   => auth()->user()->id,
+            "created_at"   => date("Y-m-d H:i:s"),
+        ];
+        $voucher = FinanceVoucher::create($voucher_data);
+        $voucher_id = $voucher->id;
+
+        $remarks = request()->remarks.". Payment to ".financeHeadName(request()->debit_head_id)." From ".financeHeadName(request()->credit_head_id)." by ".auth()->user()->name;
+        make_entry($voucher_id,request()->debit_head_id,$amount,0,"journal_voucher",NULL,auth()->user()->id,$remarks);
+        make_entry($voucher_id,request()->credit_head_id,0,$amount,"journal_voucher",NULL,auth()->user()->id,$remarks);
+
+
         return redirect()->back()->with('success', 'Record saved successfully.');
     }
 
     public function getBalance()
     {
-        $debits = DB::table('finance_transactions')
-            ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
+        $totals = DB::table('finance_transactions')
+            ->select(
+                'head_id',
+                DB::raw('SUM(debit) as total_debit'),
+                DB::raw('SUM(credit) as total_credit')
+            )
+            ->where('is_active', 1)
+            ->groupBy('head_id');
 
-            ->groupBy('debit_head_id');
-
-        // Subquery: Credit totals
-        $credits = DB::table('finance_transactions')
-
-            ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
-            ->groupBy('credit_head_id');
-
-        // Merge into finance_heads
-        $report = FinanceHead::leftJoinSub($debits, 'debits', 'finance_heads.id', '=', 'debits.head_id')
-            ->leftJoinSub($credits, 'credits', 'finance_heads.id', '=', 'credits.head_id')
+        $report = FinanceHead::leftJoinSub($totals, 'totals', 'finance_heads.id', '=', 'totals.head_id')
             ->select(
                 'finance_heads.id',
                 'finance_heads.name',
                 'finance_heads.type',
-                DB::raw('COALESCE(total_debit, 0) as total_debit'),
-                DB::raw('COALESCE(total_credit, 0) as total_credit')
+                DB::raw('COALESCE(totals.total_debit, 0) as total_debit'),
+                DB::raw('COALESCE(totals.total_credit, 0) as total_credit')
             )
-            ->where("id",request()->id)
+            ->when(request()->filled('id'), function ($query) {
+                $query->where('finance_heads.id', request()->id);
+            })
             ->get()
             ->map(function ($head) {
                 if (in_array($head->type, ['asset', 'expense'])) {
@@ -612,7 +602,7 @@ class FinanceController extends Controller
                 return $head;
             });
 
-            return $report[0]['balance'] ?? 0;
+        return $report[0]['balance'] ?? 0;
     }
 
 

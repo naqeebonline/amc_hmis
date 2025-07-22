@@ -99,47 +99,52 @@
                     <div class="row">
                         <div class="col-md-12 col-sm-12 mb-3">
                             <table class="table table-striped">
+                                <thead>
                                 <tr>
                                     <th>S.No</th>
+                                    <th>Voucher Number</th>
+                                    <th>Voucher Type</th>
                                     <th>Date</th>
-                                    <th>Credit Head</th>
-                                    <th>Debit Head</th>
                                     <th>Amount</th>
                                     <th>Remarks</th>
                                     <th>Actions</th>
                                 </tr>
-
-                                @foreach($voucher as $key => $value)
+                                </thead>
+                                <tbody>
+                                @foreach($vouchers as $key => $value)
                                     <tr>
-                                        <td>{{$key + 1}}</td>
-                                        <td>{{date("d-m-Y",strtotime($value->transaction_date))}}</td>
-                                        <td>{{$value->credit_head_name}}</td>
-                                        <td>{{$value->debit_head_name}}</td>
-                                        <td>{{$value->amount}}</td>
-                                        <td>{{$value->remarks}}</td>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{$value->voucher_number ?? ""}}</td>
+                                        <td>{{ $value->voucher_type }}</td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($value->voucher_date)->format('d-m-Y') }}
+                                        </td>
+                                        <td>
+                                            {{ number_format($value->total_amount, 2) }}
+                                        </td>
+                                        <td>{{ $value->remarks }}</td>
                                         <td>
                                             @if(!$value->approved_by)
-                                                <button class="btn btn-sm btn-success approve_entry" record-id="{{$value->voucher_id}}" title="Approve">
-                                                    <i class="fas fa-check-circle "></i>
+                                                <button class="btn btn-sm btn-success approve_entry" record-id="{{ $value->id }}" title="Approve">
+                                                    <i class="fas fa-check-circle"></i>
                                                 </button>
 
-                                                <!-- Delete button -->
-                                                <button class="btn btn-sm btn-danger delete_entry" record-id="{{$value->voucher_id}}" title="Delete">
-                                                    <i class="fas fa-times "></i>
+                                                <button class="btn btn-sm btn-danger delete_entry" record-id="{{ $value->id }}" title="Delete">
+                                                    <i class="fas fa-times"></i>
                                                 </button>
                                             @endif
 
-                                                <a href="{{ route('pos.printDailyClosingVoucher', $value->voucher_id) }}" target="_blank" class="btn btn-sm btn-primary">
-                                                    <i class="fa fa-print"></i>
-                                                </a>
+                                            <a href="{{ route('pos.printDailyClosingVoucher', $value->id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fa fa-print"></i>
+                                            </a>
                                         </td>
                                     </tr>
-
                                 @endforeach
+                                </tbody>
                             </table>
 
                             <div class="d-flex justify-content-center mt-2">
-                                {!! $voucher->links() !!}
+                                {!! $vouchers->links() !!}
                             </div>
                         </div>
                     </div>

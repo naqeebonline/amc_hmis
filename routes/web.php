@@ -402,6 +402,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/approve_transaction_entry', [\App\Http\Controllers\Finance\FinanceController::class, 'approve_transaction_entry'])->name('pos.approve_transaction_entry');
     Route::post('delete_transaction_entry', [\App\Http\Controllers\Finance\FinanceController::class, 'delete_transaction_entry'])->name('pos.delete_transaction_entry');
 
+    Route::get('/journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'journal_voucher'])->name('pos.journal_voucher');
+    Route::post('/save_journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'save_journal_voucher'])->name('pos.save_journal_voucher');
 
 
     //--------------   in/out patient for hospital  --------------------//
