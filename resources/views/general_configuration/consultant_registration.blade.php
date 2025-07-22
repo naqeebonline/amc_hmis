@@ -87,6 +87,10 @@
                                    class="form-control" placeholder="" autocomplete="off">
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label for="nameBasic" class="form-label">PMDC #<span class="asterisk">*</span></label>
+                            <input type="text"  id="pmdc_number" name="pmdc_number" class="form-control" placeholder="" autocomplete="off">
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label for="nameBasic" class="form-label">Speciality<span
                                         class="asterisk">*</span></label>
                             <select name="consultant_speciality_id" id="consultant_speciality_id" class="form-select">
@@ -204,6 +208,7 @@
             $("#id").val(0);
             $("#name").val('');
             $("#consultant_speciality_id").val('');
+            $("#pmdc_number").val('');
             $("#consultant_department_id").val('');
             $("#consultant_type_id").val('');
             $("#cnic").val('');
@@ -225,6 +230,7 @@
             $("#id").val(details.id);
             $("#name").val(details.name);
             $("#consultant_speciality_id").val(details.consultant_speciality_id);
+            $("#pmdc_number").val(details.pmdc_number);
             $("#consultant_department_id").val(details.consultant_department_id);
             $("#consultant_type_id").val(details.consultant_type_id);
             $("#cnic").val(details.cnic);

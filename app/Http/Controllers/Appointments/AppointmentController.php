@@ -33,7 +33,7 @@ class AppointmentController extends Controller
     public function print_appointment($id)
     {
 
-        $appointment = Appointment::with(["patient","opd_type","consultant","created_by"])->where(["is_active"=>1])
+        $appointment = Appointment::with(["patient","opd_type","consultant","created_by","location"])->where(["is_active"=>1])
           ->where("id",$id)
             ->first();
         $data["data"] = $appointment;

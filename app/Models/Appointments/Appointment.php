@@ -4,6 +4,7 @@ namespace App\Models\Appointments;
 
 use App\Models\Configuration\Consultants;
 use App\Models\Patient\Patient;
+use App\Models\Patient\PatientLocation;
 use App\Models\User;
 use App\Models\Users;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,6 +31,11 @@ class Appointment extends Model
     public function consultant()
     {
         return $this->belongsTo(Consultants::class, 'consultant_id');
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(PatientLocation::class, 'location_id');
     }
 
     public function created_by()

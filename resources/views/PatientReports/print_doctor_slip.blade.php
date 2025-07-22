@@ -91,8 +91,11 @@
         .main {
             padding: 30px 20px;
             width: 100%;
-            height: 825px;
+            height: 720px;
             margin-top: 10px;
+        }
+        .height{
+            height: 30px !important;
         }
 
         .side {
@@ -143,7 +146,7 @@
             bottom: calc(100% + 10px);
         }
         .ft-sign p{
-            padding-right: 10px;
+            padding-right: 40px;
             font-size: 14px;
             margin-bottom: 5px !important;
         }
@@ -158,6 +161,7 @@
             <div class="row">
                 <div class="col-4">
                     <img class="logo" width="100%" src="{{asset('')}}amc.jpeg" alt="">
+                    <h4 style="text-align: center">City Branch</h4>
                 </div>
 
                 <div class="col-4">
@@ -166,6 +170,7 @@
                     <ul class="list-unstyled">
                         <li>{{ucfirst($data->consultant->consultant_speciality->name) ?? ""}}</li>
                         <li>{{ucfirst($data->consultant->consultant_type->name) ?? ""}}</li>
+                        <li>PMDC# {{$data->consultant->pmdc_number ?? ""}}</li>
 
                     </ul>
                 </div>
@@ -179,18 +184,18 @@
         </div>
 
         <div class="patient_detail pb-3">
-            <p class="text-end my-2 me-5 pe-2">AMC-34534534</p>
+            <p class="text-end my-2 me-5 pe-2">{{ucfirst($data->patient->mr_no) ?? ''}}</p>
 
             <div class="row g-0 pt_detail">
-                <div class="name col-6 pe-2">
+                <div class="name col-6 pe-2 height">
                     <p class=""><strong style="width: 100px; white-space: nowrap;">Patient Name:</strong> <span
                                 style="width: 95%; text-align: center;font-weight: bold">{{ucfirst($data->patient->name) ?? ''}}</span></p>
                 </div>
 
-                <div class="gender col-3 pe-2">
+                <div class="gender col-3 pe-2 height">
                     <p><strong>Gender:</strong> <span style="width: 100%; text-align: center;font-weight: bold">{{ucfirst($data->patient->gender) ?? ''}}</span></p>
                 </div>
-                <div class="age col-3 ">
+                <div class="age col-3 height">
                     <p><strong>Age:</strong> <span style="width: 95%; text-align: center;font-weight: bold">
                             @if($data->patient->age !="" && $data->patient->age != 0)
                                 {{($data->patient->age)}} Years
@@ -200,6 +205,28 @@
                                 {{($data->patient->days)}} days
                             @endif
                         </span></p>
+                </div>
+
+
+
+                <div class="gender col-4 pe-2 height">
+                    <p><strong>Weight (KG)</strong> <span style="width: 100%; text-align: center;font-weight: bold"></span></p>
+                </div>
+                <div class="name col-4 pe-2 height">
+                    <p class=""><strong style="width: 100px; white-space: nowrap;">Contact No</strong> <span
+                                style="width: 95%; text-align: center;font-weight: bold">{{$data->patient->contact_no ?? ''}}</span></p>
+                </div>
+
+                <div class="gender col-4 pe-2 height">
+                    <p><strong>Address</strong> <span style="width: 100%; text-align: center;font-weight: bold">{{$data->patient->location->name ?? ''}}</span></p>
+                </div>
+
+                <div class="gender col-12 pe-2 height">
+                    <p><strong>Allergies</strong> <span style="width: 100%; text-align: center;font-weight: bold"></span></p>
+                </div>
+
+                <div class="gender col-12 pe-2 height">
+                    <p><strong>Provisional / Diagnosis</strong> <span style="width: 100%; text-align: center;font-weight: bold"></span></p>
                 </div>
 
             </div>
@@ -212,15 +239,45 @@
         <div class="row h-100 ">
             <div class="col-3 side border-end position-relative">
                 <img class="rx-logo" src="{{asset('')}}rx.png" alt="">
+                <p style="font-weight: bold">HX/Complaints</p>
+                <div style="margin-top: 300px !important;">
+                    <p>O/E</p>
+                    <p>BP ____________</p>
+                    <p>Temp ____________</p>
+                    <p>Pulse ____________</p>
+                    <p>R/R ____________</p>
+                    <p>Investigations</p>
+                </div>
             </div>
-            <div class="col-9"></div>
+            <div class="col-9">
+                <div class="row g-0 pt_detail">
+                    <div class="name col-4  height mt-4">
+                        <p class=""><strong style="width: 100px; "></strong> <span
+                                    style="width: 100%;font-weight: bold">Medicine</span></p>
+                    </div>
+
+                    <div class="gender col-3  height mt-4">
+                        <p><strong></strong> <span style="width: 100%;font-weight: bold">Dose</span></p>
+                    </div>
+                    <div class="gender col-3  height mt-4">
+                        <p><strong></strong> <span style="width: 100%;font-weight: bold">Route</span></p>
+                    </div>
+                    <div class="gender col-2 pe-2 height mt-4">
+                        <p><strong></strong> <span style="width: 100%;font-weight: bold">Days</span></p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 500px; font-weight: bold;">Adv:</p>
+            </div>
         </div>
     </div>
 
 
 
     <footer class="footer">
+
         <div class="text-end ft-sign">
+
             <p class="m-0"><strong>Sign & Stamp</strong></p>
             <p class="m-0"><strong>Not Valid For Court Purpose</strong></p>
         </div>
@@ -246,8 +303,8 @@
     window.onload = function() {
         window.print(); // Automatically triggers the print dialog
     };
-    window.onafterprint = function() {
+   /* window.onafterprint = function() {
         window.close(); // Close the window after printing
-    };
+    };*/
 </script>
 </html>

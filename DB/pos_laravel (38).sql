@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 22, 2025 at 09:36 AM
+-- Generation Time: Jul 22, 2025 at 11:05 AM
 -- Server version: 8.3.0
 -- PHP Version: 8.1.28
 
@@ -227,6 +227,7 @@ CREATE TABLE IF NOT EXISTS `consultants` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `finance_head_id` int DEFAULT '0',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `pmdc_number` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `consultant_department_id` int DEFAULT NULL,
   `consultant_speciality_id` int DEFAULT NULL,
   `cnic` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -247,9 +248,9 @@ CREATE TABLE IF NOT EXISTS `consultants` (
 -- Dumping data for table `consultants`
 --
 
-INSERT INTO `consultants` (`id`, `finance_head_id`, `name`, `consultant_department_id`, `consultant_speciality_id`, `cnic`, `joining_date`, `consultant_type_id`, `share_percentage`, `in_patient_share`, `general_opd_fee`, `consultant_opd_fee`, `hospital_share`, `consultant_share`, `lab_percentage`, `is_active`) VALUES
-(1, 26, 'Dr Ishaq khan', 3, 1, '1620241383099', '2025-07-05', 1, 30.00, 20.00, 700.00, 700.00, 400.00, 300.00, 0, 1),
-(2, 33, 'Dr Toheed Khan', 4, 6, '2342342342333', '2025-07-08', 1, 0.00, 20.00, 700.00, 700.00, 400.00, 300.00, 0, 1);
+INSERT INTO `consultants` (`id`, `finance_head_id`, `name`, `pmdc_number`, `consultant_department_id`, `consultant_speciality_id`, `cnic`, `joining_date`, `consultant_type_id`, `share_percentage`, `in_patient_share`, `general_opd_fee`, `consultant_opd_fee`, `hospital_share`, `consultant_share`, `lab_percentage`, `is_active`) VALUES
+(1, 26, 'Dr Ishaq khan', NULL, 3, 1, '1620241383099', '2025-07-05', 1, 30.00, 20.00, 700.00, 700.00, 400.00, 300.00, 0, 1),
+(2, 33, 'Dr Toheed Khan', NULL, 4, 6, '2342342342333', '2025-07-08', 1, 0.00, 20.00, 700.00, 700.00, 400.00, 300.00, 0, 1);
 
 -- --------------------------------------------------------
 
