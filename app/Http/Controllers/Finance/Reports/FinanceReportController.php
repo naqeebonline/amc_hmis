@@ -13,41 +13,29 @@ class FinanceReportController extends Controller
 {
     public function balanceReport()
     {
-        $debits = DB::table('finance_transactions')
-            ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
-            ->whereNotNull('finance_vouchers.approved_by')
-            //->where('finance_transactions.reference_type', '!=', 'commission')
-            ->select('debit_head_id as head_id', DB::raw('SUM(amount) as total_debit'))
-            ->groupBy('debit_head_id');
-
-        $credits = DB::table('finance_transactions')
-            ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
-            ->whereNotNull('finance_vouchers.approved_by')
-           // ->where('finance_transactions.reference_type', '!=', 'commission')
-            ->select('credit_head_id as head_id', DB::raw('SUM(amount) as total_credit'))
-            ->groupBy('credit_head_id');
-
-        $report = FinanceHead::leftJoinSub($debits, 'debits', 'finance_heads.id', '=', 'debits.head_id')
-            ->leftJoinSub($credits, 'credits', 'finance_heads.id', '=', 'credits.head_id')
+        $report = DB::table('finance_heads as fh')
+            ->leftJoin('finance_transactions as ft', 'fh.id', '=', 'ft.head_id')
             ->select(
-                'finance_heads.id',
-                'finance_heads.name',
-                'finance_heads.type',
-                DB::raw('COALESCE(total_debit, 0) as total_debit'),
-                DB::raw('COALESCE(total_credit, 0) as total_credit')
+                'fh.id',
+                'fh.name as head_name',
+                'fh.type as head_type',
+                DB::raw('SUM(ft.debit) as total_debit'),
+                DB::raw('SUM(ft.credit) as total_credit'),
+                DB::raw('
+                CASE 
+                    WHEN fh.type IN ("asset", "expense") THEN SUM(ft.debit) - SUM(ft.credit)
+                    WHEN fh.type IN ("income", "liability") THEN SUM(ft.credit) - SUM(ft.debit)
+                    ELSE 0
+                END as balance
+            ')
             )
-            ->get()
-            ->map(function ($head) {
-                if (in_array($head->type, ['asset', 'expense'])) {
-                    $head->balance = $head->total_debit - $head->total_credit;
-                } else {
-                    $head->balance = $head->total_credit - $head->total_debit;
-                }
-                return $head;
-            });
-
+            ->groupBy('fh.id', 'fh.name', 'fh.type')
+            ->orderBy('fh.name')
+            ->get();
 
         return view('Finance.Reports.finance_balance_report', compact('report'));
+
+
     }
 
     public function profitAndLossReport(Request $request)
@@ -177,58 +165,49 @@ class FinanceReportController extends Controller
 
     public function printDailyClosingVoucher($voucher_id)
     {
-        $voucher = FinanceVoucher::with([
-            'transactions' => function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNull('reference_type')
-                        ->orWhere('reference_type', '!=', 'commission');
-                })->with(['debitHead', 'creditHead']);
-            },
-            'createdBy',
-            'approvedBy',
-            'transactions.debitHead',
-            'transactions.creditHead'
-        ])->findOrFail($voucher_id);
+        $voucher = FinanceVoucher::with(['createdBy', 'approvedBy'])
+            ->findOrFail($voucher_id);
 
+        // Get transactions related to the voucher, excluding commissions
+        $transactions = DB::table('finance_transactions as ft')
+            ->join('finance_heads as fh', 'fh.id', '=', 'ft.head_id')
+            ->select(
+                'fh.head_code',
+                'fh.name as head_title',
+                'ft.debit',
+                'ft.credit'
+            )
+            ->where('ft.voucher_id', $voucher_id)
+            ->where(function ($q) {
+                $q->whereNull('ft.reference_type')
+                    ->orWhere('ft.reference_type', '!=', 'commission');
+            })
+            ->where('ft.is_active', 1)
+            ->get();
+
+        // Map and prepare rows
         $rows = collect();
-
-        foreach ($voucher->transactions as $transaction) {
-            // Debit entries
-            if ($transaction->debit_head_id && $transaction->debitHead) {
-                $rows->push([
-                    'type' => 'debit',
-                    'head_code' => $transaction->debitHead->head_code,
-                    'head_title' => $transaction->debitHead->name,
-                    'debit' => $transaction->amount,
-                    'credit' => 0,
-                    'balance' => $transaction->amount
-                ]);
-            }
-
-            // Credit entries
-            if ($transaction->credit_head_id && $transaction->creditHead) {
-                $rows->push([
-                    'type' => 'credit',
-                    'head_code' => $transaction->creditHead->head_code,
-                    'head_title' => $transaction->creditHead->name,
-                    'debit' => 0,
-                    'credit' => $transaction->amount,
-                    'balance' =>  $transaction->amount
-                ]);
-            }
+        foreach ($transactions as $t) {
+            $rows->push([
+                'head_code' => $t->head_code,
+                'head_title' => $t->head_title,
+                'debit' => $t->debit,
+                'credit' => $t->credit,
+                'balance' => $t->debit > 0 ? $t->debit : $t->credit,
+                'type' => $t->debit > 0 ? 'debit' : 'credit',
+            ]);
         }
 
-        // Sort so that debit entries come first
-        $sortedRows = $rows->sortBy(function ($item) {
-            return $item['type'] === 'debit' ? 0 : 1;
-        })->values();
+        // Sort debit first
+        $sortedRows = $rows->sortBy(fn($item) => $item['type'] === 'debit' ? 0 : 1)->values();
 
-        $totalDebit = $sortedRows->sum('debit');
-        $totalCredit = $sortedRows->sum('credit');
-        return view('Finance.Reports.print_daily_closing_voucher', compact('voucher', 'sortedRows', 'totalDebit', 'totalCredit'));
-       // return view('Finance.Reports.print_daily_closing_voucher', compact('voucher', 'rows', 'totalDebit', 'totalCredit'));
-    }
+    $totalDebit = $sortedRows->sum('debit');
+    $totalCredit = $sortedRows->sum('credit');
 
+    return view('Finance.Reports.print_daily_closing_voucher', compact(
+        'voucher', 'sortedRows', 'totalDebit', 'totalCredit'
+    ));
+}
 
     function get_user_base_daily_closing_report(){
         $start_date = date("Y-m-d");
@@ -259,53 +238,50 @@ class FinanceReportController extends Controller
     }
 
 
-    function get_user_base_daily_closing_report2(){
+    public function get_user_base_daily_closing_report2()
+    {
         $start_date = request()->start_date ?? date('Y-m-d');
         $end_date = request()->end_date ?? date('Y-m-d');
 
-        $rawReport = DB::table('finance_transactions as ft')
-            ->join('finance_heads as fh', 'fh.id', '=', 'ft.credit_head_id')
+        $transactions = DB::table('finance_transactions as ft')
             ->join('users as user', 'ft.user_id', '=', 'user.id')
-            ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
-            ->whereNotNull('finance_vouchers.approved_by')
+            ->leftJoin('finance_heads as fh', 'ft.head_id', '=', 'fh.id')
+            ->whereBetween('ft.transaction_date', [$start_date, $end_date])
+            ->where('ft.is_active', 1)
+            ->where(function ($q) {
+                $q->whereNull('ft.reference_type')
+                    ->orWhere('ft.reference_type', '!=', 'commission');
+            })
             ->select(
                 'ft.transaction_date',
                 'ft.user_id',
                 'user.name as user_name',
                 'fh.name as head_name',
                 'ft.reference_type',
-                DB::raw('COUNT(ft.reference_type) as total_count'),
-                DB::raw('SUM(ft.amount) as total_amount')
+                DB::raw("SUM(ft.debit) as total_debit"),
+                DB::raw("SUM(ft.credit) as total_credit"),
+                DB::raw("COUNT(ft.id) as total_count")
             )
-            ->whereBetween('ft.transaction_date', [$start_date, $end_date])
-            ->where('ft.is_active', 1)
-            ->where('ft.reference_type', '!=', 'commission')
-            ->groupBy(
-                'ft.transaction_date',
-                'ft.user_id',
-                'user.name',
-                'ft.reference_type',
-                'fh.name'
-            )
+            ->groupBy('ft.transaction_date', 'ft.user_id', 'user.name', 'fh.name', 'ft.reference_type')
             ->orderBy('ft.transaction_date')
             ->orderBy('ft.user_id')
             ->get()
             ->groupBy('transaction_date');
 
-        // Build day-wise report
         $finalReport = [];
 
-        foreach ($rawReport as $date => $dayGroup) {
-            $users = $dayGroup->groupBy('user_id')->map(function ($transactions, $userId) use ($date) {
-                $userName = $transactions->first()->user_name;
-                $advance = user_advance($userId, $date, $date); // daily advance
+        foreach ($transactions as $date => $dayGroup) {
+            $users = $dayGroup->groupBy('user_id')->map(function ($txns, $userId) use ($date) {
+                $userName = $txns->first()->user_name;
+                $advance = user_advance($userId, $date, $date);
 
-                $txns = $transactions->map(function ($t) {
+                $rows = $txns->map(function ($t) {
                     return [
                         'head_name'      => $t->head_name,
                         'reference_type' => $t->reference_type,
                         'total_count'    => $t->total_count,
-                        'total_amount'   => $t->total_amount,
+                        'total_debit'    => $t->total_debit,
+                        'total_credit'   => $t->total_credit,
                     ];
                 });
 
@@ -313,80 +289,45 @@ class FinanceReportController extends Controller
                     'user_id'      => $userId,
                     'name'         => $userName,
                     'user_advance' => $advance,
-                    'transactions' => $txns,
+                    'transactions' => $rows,
                 ];
-            })->values();
+            });
 
             $finalReport[$date] = [
                 'date' => $date,
-                'users' => $users
+                'users' => $users->values()
             ];
         }
 
         return view('Finance.Reports.user_base_closing_report2', compact('start_date', 'end_date', 'finalReport'));
-        //return view('Finance.Reports.user_base_closing_report2',compact('start_date', 'end_date', 'finalReport'));
     }
-
 
     public function trail_balance_report(Request $request)
     {
-        $start_date = request()->start_date ?? date('Y-m-d');
-        $end_date = request()->end_date ?? date('Y-m-d');
+        $start_date = $request->start_date ?? date('Y-m-d');
+        $end_date = $request->end_date ?? date('Y-m-d');
 
-        // Get all debit amounts grouped by head
-        $debits = DB::table('finance_transactions as ft')
-            ->join('finance_heads as fh', 'ft.debit_head_id', '=', 'fh.id')
+        $final_balance = DB::table('finance_transactions as ft')
+            ->join('finance_heads as fh', 'ft.head_id', '=', 'fh.id')
             ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
             ->whereNotNull('finance_vouchers.approved_by')
             ->whereBetween('ft.transaction_date', [$start_date, $end_date])
-            ->select('fh.id', 'fh.name', DB::raw('SUM(ft.amount) as total_debit'))
+            ->select(
+                'fh.id as head_id',
+                'fh.name as head_name',
+                DB::raw('SUM(ft.debit) as total_debit'),
+                DB::raw('SUM(ft.credit) as total_credit')
+            )
             ->groupBy('fh.id', 'fh.name')
             ->get();
 
-        // Get all credit amounts grouped by head
-        $credits = DB::table('finance_transactions as ft')
-            ->join('finance_heads as fh', 'ft.credit_head_id', '=', 'fh.id')
-            ->whereBetween('ft.transaction_date', [$start_date, $end_date])
-            ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
-            ->whereNotNull('finance_vouchers.approved_by')
-            ->select('fh.id', 'fh.name', DB::raw('SUM(ft.amount) as total_credit'))
-            ->groupBy('fh.id', 'fh.name')
-            ->get();
-
-        // Merge both results using head_id
-        $final_balance = [];
-
-        foreach ($debits as $row) {
-            $final_balance[$row->id] = [
-                'head_name' => $row->name,
-                'debit' => $row->total_debit,
-                'credit' => 0,
-            ];
-        }
-
-        foreach ($credits as $row) {
-            if (isset($final_balance[$row->id])) {
-                $final_balance[$row->id]['credit'] = $row->total_credit;
-            } else {
-                $final_balance[$row->id] = [
-                    'head_name' => $row->name,
-                    'debit' => 0,
-                    'credit' => $row->total_credit,
-                ];
-            }
-        }
-
-        // Totals
-        $total_debit = array_sum(array_column($final_balance, 'debit'));
-        $total_credit = array_sum(array_column($final_balance, 'credit'));
+        $total_debit = $final_balance->sum('total_debit');
+        $total_credit = $final_balance->sum('total_credit');
         $is_balanced = ($total_debit == $total_credit);
 
         return view('Finance.Reports.trail_balance_report', compact(
-            'final_balance', 'total_debit', 'total_credit', 'is_balanced',
-            'start_date', 'end_date'
+            'final_balance', 'total_debit', 'total_credit', 'is_balanced', 'start_date', 'end_date'
         ));
-
-        return view('Finance.Reports.trail_balance_report', compact('final_balance', 'total_debit', 'total_credit', 'is_balanced', 'start_date', 'end_date'));
     }
 
     public function finance_vouchers_report()
@@ -445,32 +386,25 @@ class FinanceReportController extends Controller
         $start_date = request()->start_date ?? date('Y-m-01');
         $end_date = request()->end_date ?? date('Y-m-d');
 
-        // All finance heads for dropdown
         $finance_heads = DB::table('finance_heads')->orderBy('name')->get();
-
 
         $entries = collect();
         $running_balance = 0;
         $head_type = null;
-        if($finance_head_id){
-            $finance_h = FinanceHead::whereId($finance_head_id)->first();
-            $head_type = $finance_h->type ?? "";
+
+        if ($finance_head_id) {
+            $finance_h = DB::table('finance_heads')->where('id', $finance_head_id)->first();
+            $head_type = $finance_h->type ?? null;
         }
 
-
-        $opening = DB::table('finance_transactions as ft')
-            ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
-            ->whereNotNull('finance_vouchers.approved_by')
-            ->where('ft.transaction_date', '<', $start_date)
-
-            ->where(function ($query) use ($finance_head_id) {
-                $query->where('ft.debit_head_id', $finance_head_id)
-                    ->orWhere('ft.credit_head_id', $finance_head_id);
-            })
-            ->selectRaw("
-                SUM(CASE WHEN ft.debit_head_id = ? THEN ft.amount ELSE 0 END) as total_debit,
-                SUM(CASE WHEN ft.credit_head_id = ? THEN ft.amount ELSE 0 END) as total_credit
-            ", [$finance_head_id, $finance_head_id])
+        // Calculate opening balance
+        $opening = DB::table('finance_transactions')
+            ->where('transaction_date', '<', $start_date)
+            ->where('head_id', $finance_head_id)
+            ->selectRaw('
+            SUM(debit) as total_debit,
+            SUM(credit) as total_credit
+        ')
             ->first();
 
         $total_debit = $opening->total_debit ?? 0;
@@ -482,46 +416,34 @@ class FinanceReportController extends Controller
             $opening_balance = $total_credit - $total_debit;
         }
 
-        if ($finance_head_id) {
-            // Get the finance head type
         $running_balance = $opening_balance;
 
-        $entries = DB::table('finance_transactions as ft')
+        if ($finance_head_id) {
+            $entries = DB::table('finance_transactions as ft')
+                ->leftJoin('users', 'users.id', '=', 'ft.user_id')
+                ->where('ft.head_id', $finance_head_id)
+                ->whereBetween('ft.transaction_date', [$start_date, $end_date])
+                ->orderBy('ft.transaction_date')
+                ->orderBy('ft.id')
+                ->select(
+                    'ft.transaction_date',
+                    'ft.debit',
+                    'ft.credit',
+                    'ft.remarks',
+                    'users.name as user_name'
+                )
+                ->get()
+                ->map(function ($row) use ($head_type, &$running_balance) {
+                    if (in_array($head_type, ['asset', 'expense'])) {
+                        $running_balance += $row->debit - $row->credit;
+                    } else {
+                        $running_balance += $row->credit - $row->debit;
+                    }
 
-            ->leftJoin('users', 'users.id', '=', 'ft.user_id')
-            ->leftJoin('finance_vouchers', 'ft.voucher_id', '=', 'finance_vouchers.id')
-            ->whereNotNull('finance_vouchers.approved_by')
-            ->whereBetween('ft.transaction_date', [$start_date, $end_date])
-            ->where(function ($query) use ($finance_head_id) {
-                $query->where('ft.debit_head_id', $finance_head_id)
-                    ->orWhere('ft.credit_head_id', $finance_head_id);
-            })
-            ->orderBy('ft.transaction_date')
-            ->orderBy('ft.id')
-            ->select(
-                'ft.transaction_date',
-                'ft.amount',
-                'ft.debit_head_id',
-                'ft.credit_head_id',
-                'ft.remarks',
-                'users.name as user_name'
-            )
-            ->get()
-            ->map(function ($row) use ($finance_head_id, $head_type, &$running_balance) {
-                $row->debit = $row->debit_head_id == $finance_head_id ? $row->amount : 0;
-                $row->credit = $row->credit_head_id == $finance_head_id ? $row->amount : 0;
-
-                // Calculate running balance based on head type
-                if (in_array($head_type, ['asset', 'expense'])) {
-                    $running_balance += $row->debit - $row->credit;
-                } else {
-                    $running_balance += $row->credit - $row->debit;
-                }
-
-                $row->running_balance = $running_balance;
-                return $row;
-            });
-    }
+                    $row->running_balance = $running_balance;
+                    return $row;
+                });
+        }
 
         return view('Finance.Reports.finance_ledger_report', compact(
             'finance_heads',
@@ -532,7 +454,6 @@ class FinanceReportController extends Controller
             'opening_balance'
         ));
     }
-
     public function outstanding_balances_report()
     {
         $heads = DB::table('finance_heads')
@@ -542,32 +463,28 @@ class FinanceReportController extends Controller
             ->get();
 
         foreach ($heads as $head) {
-            $totals = DB::table('finance_transactions')
-                ->join('finance_vouchers', 'finance_transactions.voucher_id', '=', 'finance_vouchers.id')
-                ->whereNotNull('finance_vouchers.approved_by')
+            $totals = DB::table('finance_transactions as ft')
+                ->join('finance_vouchers as fv', 'ft.voucher_id', '=', 'fv.id')
+                ->whereNotNull('fv.approved_by')
+                ->where('ft.head_id', $head->id)
                 ->selectRaw("
-                SUM(CASE WHEN debit_head_id = ? THEN amount ELSE 0 END) as total_debit,
-                SUM(CASE WHEN credit_head_id = ? THEN amount ELSE 0 END) as total_credit
-            ", [$head->id, $head->id])
+                SUM(ft.debit) as total_debit,
+                SUM(ft.credit) as total_credit
+            ")
                 ->first();
 
             $head->total_debit = $totals->total_debit ?? 0;
             $head->total_credit = $totals->total_credit ?? 0;
 
+            // Calculate balance based on head type
             if ($head->type === 'asset') {
                 $head->balance = $head->total_debit - $head->total_credit;
+                $head->status = $head->balance >= 0 ? 'Receivable' : 'Overpaid';
             } else { // liability
                 $head->balance = $head->total_credit - $head->total_debit;
-            }
-
-            // Optional: Add status label
-            if ($head->type === 'asset') {
-                $head->status = $head->balance >= 0 ? 'Receivable' : 'Overpaid';
-            } else {
                 $head->status = $head->balance >= 0 ? 'Payable' : 'Advance';
             }
         }
-
 
         return view('Finance.Reports.outstanding_balances_report', compact('heads'));
     }

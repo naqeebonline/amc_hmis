@@ -94,8 +94,13 @@
                                     </tr>
 
                                     <tr>
+                                        <td>Consultant Charges</td>
+                                        <td>{{$consultant_charges ?? 0}}</td>
+                                    </tr>
+
+                                    <tr>
                                         <td><strong>Total</strong></td>
-                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand) + ($service_charges) - ($pharmacy_return)}}</strong></td>
+                                        <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand) + ($service_charges) + ($consultant_charges) - ($pharmacy_return)}}</strong></td>
                                     </tr>
                                     <tr>
                                         <td>Cash Closing</td>

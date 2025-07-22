@@ -34,7 +34,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Contracts\DataTable;
 use Yajra\DataTables\Facades\DataTables;
-
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 class PatientAdmissionController extends Controller
 {
 
@@ -736,7 +737,85 @@ class PatientAdmissionController extends Controller
         $data['total'] = $total;
         $data['discount_percentage'] = $discount_percentage;
         $data['discount_amount'] = $discount_amount;
+        $this->printInvestigationReceipt($data['data'],$data['total'],$data['discount_amount'],$data['discount_percentage']);
         return view("reports.print_hospital_lab_invoice", $data);
+    }
+
+    public function printInvestigationReceipt($data, $total, $discountAmount = 0, $discountPercent = 0)
+    {
+        try {
+            $connector = new WindowsPrintConnector(env("THERMAL_PRINTER_NAME"));
+            $printer = new Printer($connector);
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->setEmphasis(true); // Bold ON
+            $printer->text(env('COMPANY_NAME') . "\n");
+            $printer->setEmphasis(false); // Bold OFF
+            $printer->text(date("d-m-Y h:i A") . "\n");
+            $printer->text("------------------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $invoice = $data[0]->invoice_no ?? "";
+            $name = $data[0]->patient->name ?? "";
+            $age = $data[0]->patient->age ?? "";
+            $gender = $data[0]->patient->gender ?? "";
+
+            $printer->text("Invoice: $invoice\n");
+            $printer->text("Patient: $name\n");
+            $printer->text("Age/Gender: $age / $gender\n");
+            $printer->text(str_repeat("-", 48) . "\n");
+
+            $printer->text(str_pad("#", 8) . str_pad("Test Name", 30) . str_pad("Amount", 10, " ", STR_PAD_LEFT) . "\n");
+            $printer->text(str_repeat("-", 48) . "\n");
+
+            $runningTotal = 0;
+            $qrTestDetails = "";
+
+            foreach ($data as $key => $value) {
+                $testName = $value->investigation->name ?? 'N/A';
+                $amount = number_format($value->sale_price ?? 0, 2);
+                $runningTotal += $value->sale_price ?? 0;
+
+                $shortName = strlen($testName) > 29 ? substr($testName, 0, 26) . '...' : $testName;
+
+                $printer->text(
+                    str_pad(($key + 1) . ".", 8) .
+                    str_pad($shortName, 30) .
+                    str_pad($amount, 10, ' ', STR_PAD_LEFT) .
+                    "\n"
+                );
+
+
+                $printer->text(str_repeat("-", 48) . "\n");
+
+                $netAmount = round($total - $discountAmount);
+
+                $printer->text(str_pad("Total:", 38) . str_pad(number_format($total, 2), 10, ' ', STR_PAD_LEFT) . "\n");
+                $printer->text(str_pad("Discount:", 30) . "Rs: $discountAmount ($discountPercent%)\n");
+                $printer->text(str_pad("Net Amount:", 38) . str_pad(number_format($netAmount, 2), 10, ' ', STR_PAD_LEFT) . "\n");
+
+                $printer->feed(2);
+                $printer->setJustification(Printer::JUSTIFY_CENTER);
+                $printer->text("Thank you for visiting!\n");
+
+                // 👉 Full QR Code Content
+                $qrContent = "http://127.0.0.1:8000/print_hospital_lab_invoice/1752813420210";
+
+                $printer->feed(1);
+                // $printer->qrCode($qrContent, Printer::QR_ECLEVEL_L, 6); // Size 6
+                $printer->feed(1);
+                $printer->text("Scan for Details\n");
+
+                $printer->feed(3);
+                $printer->cut();
+                $printer->close();
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::error("Print failed: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function get_ward_investigations($admission_id)
@@ -1304,6 +1383,7 @@ class PatientAdmissionController extends Controller
         $consultant = Consultants::where(["id"=>request()->consultant_id])->first();
         $data['consultant_share'] = $consultant_procedure_id->consultant_share_percentage;
         $data['consultant_share_amount'] = $consultant_procedure_id->consultant_share_amount;
+        $data['consultant_charges'] = $consultant_procedure_id->consultant_charges;
         $data['procedure_rate'] = request()->procedure_rate;
 
 
@@ -1496,7 +1576,7 @@ class PatientAdmissionController extends Controller
                 $total_service_charges = ($total_service_charges) + ($consultant_charges);
             }
         }
-        $data['total_service_charges'] = $total_service_charges;
+        $data['total_service_charges'] = $total_service_charges + ($admission->consultant_charges);
         $data['investigation'] = $this->patientInvestigationBalance($admission->patient_id,$admission_id);
         $data['pharmacy'] = $this->totalMedicineCost($admission->patient_id,$admission_id);
         $data['total_received_payment'] = $this->totalReceivedPayment($admission->patient_id,$admission_id);

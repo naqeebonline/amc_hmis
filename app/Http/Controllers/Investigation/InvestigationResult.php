@@ -105,7 +105,7 @@ class InvestigationResult extends Controller
             }
         }
 
-        $current_investigation =  PatientInvestigation::with(['consultant'])->where("id",request()->inv_id)->first();
+       /* $current_investigation =  PatientInvestigation::with(['consultant'])->where("id",request()->inv_id)->first();
         if($current_investigation && $current_investigation->status == 0 && $current_investigation->consultant_share_amount > 0){
             $voucher = generateVoucherNumber("investigation_shares",auth()->user()->id);
             $voucher_data = [
@@ -137,7 +137,7 @@ class InvestigationResult extends Controller
                 'created_at' => now()
             ];
             FinanceTransaction::insert($rec);
-        }
+        }*/
 
 
         $investigation->status = 1;

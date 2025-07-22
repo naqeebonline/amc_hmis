@@ -214,25 +214,21 @@
 
 
     <section class="items">
-
-
-
         <table class="table table-bordered">
             <tr>
                 <td style="font-weight: bold;width: 20%">Voucher Date</td>
                 <td style="width: 40%">{{ \Carbon\Carbon::parse($voucher->voucher_date)->format('l F d Y') }}</td>
                 <td style="font-weight: bold">Voucher Number</td>
-                <td>{{$voucher->voucher_number}}</td>
-
+                <td>{{ $voucher->voucher_number }}</td>
             </tr>
-
             <tr>
-                <td style="font-weight: bold; ">Ref#</td>
-                <td >{{$voucher->remarks}}</td>
+                <td style="font-weight: bold;">Ref#</td>
+                <td>{{ $voucher->remarks }}</td>
                 <td></td>
                 <td></td>
             </tr>
         </table>
+
         <table class="table table-bordered">
             <thead>
             <tr>
@@ -245,32 +241,31 @@
             </thead>
             <tbody>
             @foreach ($sortedRows as $index => $row)
-                @if($row['debit'] == 0 && $row['credit'] > 0)
+                @if($row['credit'] > 0)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $row['head_code'] }} - {{ $row['head_title'] }}</td>
                     <td>{{ number_format($row['debit'], 0) }}</td>
                     <td>{{ number_format($row['credit'], 0) }}</td>
-                    @if($row['credit'] > 0)
-                        <td>({{ number_format($row['balance'], 0) }})</td>
-                    @else
-                    <td>{{ number_format($row['balance'], 0) }}</td>
-                    @endif
+                    <td>
+                        @if ($row['type'] === 'credit')
+                            ({{ number_format($row['balance'], 0) }})
+                        @else
+                            {{ number_format($row['balance'], 0) }}
+                        @endif
+                    </td>
                 </tr>
                 @endif
             @endforeach
             <tr>
-                <td colspan="2"><strong>Total in Words: {{numberToWords($totalDebit)}}</strong></td>
-                <td><strong>{{--{{ number_format($totalDebit, 0) }}--}}</strong></td>
+                <td colspan="2"><strong>Total in Words: {{ numberToWords($totalDebit) }}</strong></td>
+                <td><strong></strong></td>
                 <td><strong>{{ number_format($totalCredit, 0) }}</strong></td>
                 <td></td>
             </tr>
             </tbody>
         </table>
-
     </section>
-
-
 
 
 </div>

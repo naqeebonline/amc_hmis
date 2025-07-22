@@ -20,6 +20,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
+use Mike42\Escpos\Printer;
+use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 
 class SupplierPayments extends Controller
 {
@@ -311,7 +313,81 @@ class SupplierPayments extends Controller
 
         $data['customer'] = Customer::where("SCID", $customer_id)->get();
 
+        $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+
+
         return view('reports/print_retail_sale_invoice', $data);
+    }
+
+    public function printFormattedReceipt($data, $record, $patient, $TotalDiscount)
+    {
+        try {
+            $connector = new WindowsPrintConnector(env("THERMAL_PRINTER_NAME"));
+            $printer = new Printer($connector);
+
+            $printer->setJustification(Printer::JUSTIFY_CENTER);
+            $printer->text(env('COMPANY_NAME')."\n");
+            $printer->text(date("d-m-Y h:i A") . "\n");
+            $printer->text("------------------------------------------\n");
+
+            $printer->setJustification(Printer::JUSTIFY_LEFT);
+            $printer->text("Name: " . ($patient->name ?? '') . "\n");
+            $printer->text("Printed By: " . (auth()->user()->name ?? '') . "\n");
+            $printer->text("------------------------------------------\n");
+
+            // Table Header
+            $printer->text(
+                str_pad("No", 4) .
+                str_pad("Item", 18) .
+                str_pad("Qty", 5, ' ', STR_PAD_LEFT) .
+                str_pad("Price", 7, ' ', STR_PAD_LEFT) .
+                str_pad("Amt", 8, ' ', STR_PAD_LEFT) . "\n"
+            );
+            $printer->text("------------------------------------------\n");
+
+            $i = 1;
+            $totalAmount = 0;
+
+            foreach ($data as $d) {
+                $qty = $d->Quantity - $d->ReturnQuantity;
+                $name = substr($d->product->ProductName, 0, 18); // truncate if too long
+                $price = number_format($d->UnitePrice, 0);
+                $amount = number_format($d->totalAmount, 0);
+                $totalAmount += $d->totalAmount;
+
+                $printer->text(
+                    str_pad($i++, 4) .
+                    str_pad($name, 18) .
+                    str_pad($qty, 5, ' ', STR_PAD_LEFT) .
+                    str_pad($price, 7, ' ', STR_PAD_LEFT) .
+                    str_pad($amount, 8, ' ', STR_PAD_LEFT) . "\n"
+                );
+
+                if ($d->ReturnQuantity > 0) {
+                    $printer->text("     (Return: {$d->ReturnQuantity})\n");
+                }
+            }
+
+            $printer->text("------------------------------------------\n");
+
+            $discount = round($TotalDiscount + $record->invoice_discount);
+            $finalAmount = max(0, round($totalAmount - $record->Discount - $record->invoice_discount));
+
+            $printer->text(str_pad("Total:", 34) . str_pad(number_format($totalAmount, 0), 8, ' ', STR_PAD_LEFT) . "\n");
+            $printer->text(str_pad("Discount:", 34) . str_pad(number_format($discount, 0), 8, ' ', STR_PAD_LEFT) . "\n");
+            $printer->text(str_pad("Amount Due:", 34) . str_pad(number_format($finalAmount, 0), 8, ' ', STR_PAD_LEFT) . "\n");
+
+            $printer->text("\nThank you for visiting!\n");
+            $printer->text("\n\n\n");
+            $printer->cut();
+            $printer->close();
+
+            return response("Printed successfully");
+
+        } catch (\Exception $e) {
+            return response("Print failed: " . $e->getMessage(), 500);
+        }
     }
 
     public function previous_bills(){
@@ -369,6 +445,9 @@ class SupplierPayments extends Controller
         // return $data;
         return view('reports/print_purchase', $data);
     }
+
+
+
     
     
 }

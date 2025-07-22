@@ -20,7 +20,10 @@ Route::get('/testData', function () {
 
 Route::get("/", [\App\Http\Controllers\HomeController::class, 'index'])->name('app.landing-screen');
 Route::get("dashboardAnalytics", [\App\Http\Controllers\HomeController::class, 'dashboardAnalytics'])->name('app.dashboardAnalytics');
-
+Route::get('/printReceipt', [\App\Http\Controllers\ThermalPrintController::class, 'printReceipt']);
+Route::get('/printReceipt2', [\App\Http\Controllers\ThermalPrintController::class, 'printReceipt2']);
+Route::post('/syncLiveDataFromLocal', [\App\Http\Controllers\DataSyncController::class, 'syncLiveDataFromLocal']);
+Route::get('/sendDataToLive', [\App\Http\Controllers\DataSyncController::class, 'sendDataToLive']);
 
 
 Route::get('/testQue', [App\Http\Controllers\HomeController::class, 'testQue']);

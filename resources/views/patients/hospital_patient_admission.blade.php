@@ -410,7 +410,7 @@
                     $select.empty(); // Clear existing options
                     $select.append(`<option value="" data-net_rate=""></option>`);
                     $.each(res.data, function(index, value) {
-                        let option = `<option data-net_rate="${value.amount}" value="${value.id}">
+                        let option = `<option data-net_rate="${value.amount}"  value="${value.id}">
                             ${value.procedure_name} (Rs: ${value.amount})
                           </option>`;
                         $select.append(option);

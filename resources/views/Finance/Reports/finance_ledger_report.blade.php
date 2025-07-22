@@ -229,31 +229,27 @@
 
 
     <section class="items">
-
         <div class="container">
-
-
-            <form method="GET" action="{{route('pos.finance_ledger_report')}}" class="mb-3">
+            <form method="GET" action="{{ route('pos.finance_ledger_report') }}" class="mb-3">
                 <table class="table table-bordered table-striped">
                     <thead>
                     <tr>
                         <th>Start Date: <input type="date" name="start_date" class="form-control" value="{{ $start_date }}"></th>
                         <th class="text-end">End Date: <input type="date" name="end_date" class="form-control" value="{{ $end_date }}"></th>
-                        <th class="text-end">Type:
-                        <select name="finance_head_id">
-                            <option value="">All</option>
-                            @foreach($finance_heads as $key => $value)
-                                <option value="{{$value->id}}" {{ $value->id == $finance_head_id ? "selected" : "" }}>{{ ucfirst($value->name) }}</option>
-                            @endforeach
-                        </select>
+                        <th class="text-end">Head:
+                            <select name="finance_head_id" class="form-control">
+                                <option value="">All</option>
+                                @foreach($finance_heads as $value)
+                                    <option value="{{ $value->id }}" {{ $value->id == $finance_head_id ? 'selected' : '' }}>{{ $value->name }}</option>
+                                @endforeach
+                            </select>
                         </th>
-                        <th class="text-end" style="width: 15%;">
+                        <th class="text-end">
                             <button type="submit" class="btn btn-primary">Filter</button>
                         </th>
                     </tr>
                     </thead>
                 </table>
-
             </form>
 
             @if($entries->isNotEmpty() || $opening_balance > 0)
@@ -270,46 +266,37 @@
                     </thead>
                     <tbody>
                     <tr>
-
                         <td colspan="5"><strong style="float: right; font-size: 12px;">Opening Balance (Before {{ $start_date }})</strong></td>
-                        <td><strong style=" font-size: 14px;">{{ number_format($opening_balance, 2) }}</strong></td>
+                        <td><strong style="font-size: 14px;">{{ number_format($opening_balance, 2) }}</strong></td>
                     </tr>
-                    <?php $running_balance = 0; $total_cr = 0; $total_dr=0; ?>
+                    <?php $running_balance = 0; $total_cr = 0; $total_dr = 0; ?>
                     @foreach($entries as $entry)
-                        <?php $running_balance = $entry->running_balance;
-                        $total_cr = ($total_cr) + ($entry->credit);
-                        $total_dr = ($total_dr) + ($entry->debit);
+                        <?php
+                        $running_balance = $entry->running_balance;
+                        $total_cr += $entry->credit;
+                        $total_dr += $entry->debit;
                         ?>
                         <tr>
                             <td>{{ $entry->transaction_date }}</td>
-
                             <td>{{ $entry->remarks }}</td>
                             <td>{{ $entry->user_name }}</td>
-                            <td class="text-end">{{ $entry->debit ? number_format($entry->debit, 2) : '0' }}</td>
-                            <td class="text-end">{{ $entry->credit ? number_format($entry->credit, 2) : '0' }}</td>
+                            <td class="text-end">{{ number_format($entry->debit, 2) }}</td>
+                            <td class="text-end">{{ number_format($entry->credit, 2) }}</td>
                             <td class="text-end fw-bold">{{ number_format($entry->running_balance, 2) }}</td>
                         </tr>
                     @endforeach
-
                     <tr>
-                        <td></td>
-
-                        <td></td>
-                        <td></td>
-                        <td class="text-end fw-bold" style="font-weight: bold">DR : {{ number_format($total_dr, 2)}}</td>
-                        <td class="text-end fw-bold" style="font-weight: bold">CR : {{ number_format($total_cr, 2)}}</td>
-                        <td class="text-end fw-bold" style="font-weight: bold; background: lightgrey">{{ number_format($running_balance, 2)}}</td>
-
+                        <td colspan="3"></td>
+                        <td class="text-end fw-bold">DR: {{ number_format($total_dr, 2) }}</td>
+                        <td class="text-end fw-bold">CR: {{ number_format($total_cr, 2) }}</td>
+                        <td class="text-end fw-bold" style="background: lightgrey">{{ number_format($running_balance, 2) }}</td>
                     </tr>
                     </tbody>
                 </table>
             @elseif($finance_head_id)
                 <div class="alert alert-warning">No transactions found for the selected head and date range.</div>
             @endif
-
-
         </div>
-
     </section>
 
 

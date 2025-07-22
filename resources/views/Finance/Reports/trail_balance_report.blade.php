@@ -227,21 +227,27 @@
 
 
     <section class="items">
-
         <div class="container">
             <h4 style="text-align: center;">Trial Balance Report</h4>
 
-            <form method="GET" action="{{route('pos.trail_balance_report')}}" class="mb-3">
+            <form method="GET" action="{{ route('pos.trail_balance_report') }}" class="mb-3">
                 <table class="table table-bordered table-striped">
                     <thead>
                     <tr>
-                        <th>Start Date: <input type="date" name="start_date" class="form-control" value="{{ $start_date }}"></th>
-                        <th class="text-end">End Date: <input type="date" name="end_date" class="form-control" value="{{ $end_date }}"></th>
-                        <th class="text-end" style="width: 15%;"><button type="submit" class="btn btn-primary">Filter</button></th>
+                        <th>
+                            Start Date:
+                            <input type="date" name="start_date" class="form-control" value="{{ $start_date }}">
+                        </th>
+                        <th class="text-end">
+                            End Date:
+                            <input type="date" name="end_date" class="form-control" value="{{ $end_date }}">
+                        </th>
+                        <th class="text-end" style="width: 15%;">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </th>
                     </tr>
                     </thead>
                 </table>
-
             </form>
 
             <table class="table table-bordered table-striped">
@@ -255,9 +261,9 @@
                 <tbody>
                 @foreach($final_balance as $row)
                     <tr>
-                        <td>{{ $row['head_name'] }}</td>
-                        <td class="text-end">{{ number_format($row['debit'], 2) }}</td>
-                        <td class="text-end">{{ number_format($row['credit'], 2) }}</td>
+                        <td>{{ $row->head_name }}</td>
+                        <td class="text-end">{{ number_format($row->total_debit, 2) }}</td>
+                        <td class="text-end">{{ number_format($row->total_credit, 2) }}</td>
                     </tr>
                 @endforeach
                 </tbody>
@@ -277,9 +283,7 @@
                 </tfoot>
             </table>
         </div>
-
     </section>
-
 
 
 

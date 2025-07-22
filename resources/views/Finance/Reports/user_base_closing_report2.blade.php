@@ -226,27 +226,31 @@
 
 
     <section class="items">
-        <form method="GET" action="{{route('pos.get_user_base_daily_closing_report2')}}" class="mb-3">
+        <form method="GET" action="{{ route('pos.get_user_base_daily_closing_report2') }}" class="mb-3">
             <table class="table table-bordered table-striped">
                 <thead>
                 <tr>
-                    <th>Start Date: <input type="date" name="start_date" class="form-control" value="{{ $start_date }}"></th>
-                    <th class="text-end">End Date: <input type="date" name="end_date" class="form-control" value="{{ $end_date }}"></th>
-                    <th class="text-end" style="width: 15% !important;"><button type="submit" class="btn btn-primary">Filter</button></th>
+                    <th>Start Date:
+                        <input type="date" name="start_date" class="form-control" value="{{ $start_date }}">
+                    </th>
+                    <th class="text-end">End Date:
+                        <input type="date" name="end_date" class="form-control" value="{{ $end_date }}">
+                    </th>
+                    <th class="text-end" style="width: 15% !important;">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </th>
                 </tr>
                 </thead>
             </table>
-
         </form>
 
         @foreach($finalReport as $date => $reportData)
             <div class="mt-2">
                 <hr>
-                <p class="border-bottom pb-1 " style="font-weight: bold; background-color: #B2BBC3 !important; text-align: center;font-size: 14px;">Date: {{ $date }}</p>
-                <?php $total = 0; ?>
+                <p class="border-bottom pb-1" style="font-weight: bold; background-color: #B2BBC3; text-align: center; font-size: 14px;">
+                    Date: {{ $date }}
+                </p>
                 @foreach($reportData['users'] as $user)
-                    <?php //$total = $total + $user['user_advance']; ?>
-
                     <div class="card mt-3">
                         <div class="card-header">
                             <strong style="font-size: 12px">User: {{ $user['name'] }}</strong><br>
@@ -256,28 +260,34 @@
                             <table class="table table-sm table-bordered">
                                 <thead class="table-light">
                                 <tr>
-                                    <th style="width: 10%">#</th>
-                                    <th style="width: 35%">Head Name</th>
-                                    <th style="width: 30%">Reference Type</th>
-                                    <th style="width: 10%">Total Count</th>
-                                    <th style="width: 15%">Total Amount (Rs.)</th>
+                                    <th>#</th>
+                                    <th>Head Name</th>
+                                    <th>Reference Type</th>
+                                    <th>Total Count</th>
+                                    <th>Debit (Rs.)</th>
+                                    <th>Credit (Rs.)</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($user['transactions'] as $index => $txn)
+                                    @if($txn['total_credit'] > 0)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $txn['head_name'] }}</td>
                                         <td>{{ $txn['reference_type'] }}</td>
                                         <td>{{ $txn['total_count'] }}</td>
-                                        <td>{{ number_format($txn['total_amount'], 2) }}</td>
+                                        <td>{{ number_format($txn['total_debit'], 2) }}</td>
+                                        <td>{{ number_format($txn['total_credit'], 2) }}</td>
                                     </tr>
+                                    @endif
                                 @endforeach
                                 <tr class="table-secondary">
                                     <th colspan="4" class="text-end">User Total</th>
                                     <th>
-                                        <?php $total = ($total) + (collect($user['transactions'])->sum('total_amount')); ?>
-                                        Rs. {{ number_format((collect($user['transactions'])->sum('total_amount')), 2) }}
+                                        Rs. {{ number_format(collect($user['transactions'])->sum('total_debit'), 2) }}
+                                    </th>
+                                    <th>
+                                        Rs. {{ number_format(collect($user['transactions'])->sum('total_credit'), 2) }}
                                     </th>
                                 </tr>
                                 </tbody>
@@ -285,13 +295,13 @@
                         </div>
                     </div>
                 @endforeach
-
-                <p class="border-bottom mt-2" style="font-weight: bold; background-color: #B2BBC3; !important; text-align: center;font-size: 14px">Date: {{ $date }}</p>
+                <p class="border-bottom mt-2" style="font-weight: bold; background-color: #B2BBC3; text-align: center; font-size: 14px">
+                    Date: {{ $date }}
+                </p>
             </div>
         @endforeach
-
-
     </section>
+
 
 
 

@@ -180,6 +180,13 @@
                                                 @endif
                                             </th>
                                         </tr>
+
+                                        <tr>
+                                            <th width="50%" >Consultant Charges</th>
+                                            <th width="50%">
+                                                <input type="text"  id="consultant_charges" style="height: 30px !important;" name="consultant_charges" value="{{$admission->consultant_charges}}" class="form-control" placeholder="" autocomplete="off">
+                                            </th>
+                                        </tr>
                                         @foreach($service_type as $key => $value)
 
 
@@ -220,7 +227,7 @@
                                         <tr>
                                             <td width="50%" style="border-top: 2px solid black;font-weight: bold" >Total</td>
                                             <td width="50%" style="border-top: 2px solid black; font-weight: bold">
-                                                {{ $total = ($total_service_charges) + ($investigation['total']) + ($pharmacy['total']) }}
+                                                {{ $total = ($total_service_charges) + ($investigation['total']) + ($pharmacy['total'])  }}
                                             </td>
                                         </tr>
 

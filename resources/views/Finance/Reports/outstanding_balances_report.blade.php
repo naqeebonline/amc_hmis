@@ -219,13 +219,16 @@
 
 
     <section class="items">
-        <p style="font-weight: bold; font-size: 14px;text-align: center">Outstanding Balance Report</p>
-        <table class="table">
+        <p style="font-weight: bold; font-size: 14px; text-align: center;">
+            Outstanding Balance Report
+        </p>
+
+        <table class="table table-bordered">
             <thead>
             <tr>
                 <th>Head</th>
                 <th>Type</th>
-                <th>Balance</th>
+                <th class="text-end">Balance</th>
                 <th>Status</th>
             </tr>
             </thead>
@@ -234,15 +237,13 @@
                 <tr>
                     <td>{{ $head->name }}</td>
                     <td>{{ ucfirst($head->type) }}</td>
-                    <td>{{ number_format($head->balance, 2) }}</td>
+                    <td class="text-end">{{ number_format($head->balance, 2) }}</td>
                     <td>{{ $head->status }}</td>
                 </tr>
             @endforeach
             </tbody>
         </table>
-
     </section>
-
 
 
 

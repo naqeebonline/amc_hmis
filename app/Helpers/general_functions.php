@@ -637,4 +637,23 @@ function userRole($user_id=''){
 
 }
 
+function make_entry($voucher_id,$head_id,$debit=0,$credit=0,$reference_type,$reference_id,$user_id,$remarks){
+    $data = [
+
+        'voucher_id' => $voucher_id,
+        'head_id' => $head_id,
+        'debit' => ($debit),
+        'credit' => ($credit),
+        'reference_type' => $reference_type,
+        'reference_id' => $reference_id,
+        'user_id' => $user_id,
+        'created_by' => auth()->user()->id,
+        'remarks' => $remarks,
+        'created_at' => now(),
+        'transaction_date' => today(),
+    ];
+    \App\Models\Finance\FinanceTransaction::insert($data);
+    return true;
+}
+
 

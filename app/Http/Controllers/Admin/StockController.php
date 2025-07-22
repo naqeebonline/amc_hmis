@@ -475,12 +475,14 @@ class StockController extends Controller
 
 
         $grn = GrnRequest::where(["GRNID"=>request()->id])->first()->toArray();
+
          unset($grn['GRNID']);
          unset($grn['bill_json_form']);
          unset($grn['bill_status']);
          $grn['grn_request_id'] = request()->id;
         $grn = Grn::create($grn);
         $grn_id = $grn->GRNID;
+        $supplier_id =$grn->SCID;
         $grn_request_details = GrnRequestDetails::where(["GRNID"=>request()->id])->get()->toArray();
         foreach ($grn_request_details as &$item) {
             $item['GRNID'] = $grn_id;
@@ -510,20 +512,15 @@ class StockController extends Controller
             "approved_at"   => date("Y-m-d H:i:s"),
         ];
         $voucher = FinanceVoucher::create($voucher_data);
+        $voucher_id = $voucher->id;
 
-        FinanceTransaction::insert([
-            'voucher_id' => $voucher->id,
-            'transaction_date' => today(),
-            'amount' => $grn['TotalPurchase'],
-            'debit_head_id' => financeHeadId('pharmacy_purchase'),  //because cash will be paid from cash at office
-            'credit_head_id' => $grn->supplier->finance_head_id, //
-            'reference_type' => 'grn',
-            'reference_id' => $grn->GRNID,
-            'user_id' => $grn->CreatedBy,
-            'created_by' => auth()->user()->id,
-            'remarks' => 'Pharmacy product purchased from supplier. grn_request approved by '.auth()->user()->name,
-            'created_at' => now()
-        ]);
+        $amount = ($grn['TotalPurchase']);
+        $remarks = 'Pharmacy product purchased from supplier. grn_request approved by '.auth()->user()->name;
+
+        // pharmacy purchase debit   Supplier account credit
+        make_entry($voucher_id,financeHeadId('pharmacy_purchase'),$amount,0,"grn",$grn->GRNID,$grn->CreatedBy,$remarks);
+        make_entry($voucher_id,$grn->supplier->finance_head_id,0,$amount,"grn",$grn->GRNID,$grn->CreatedBy,$remarks);
+
         //-------    end of finance voucher  -------------//
 
         return response()->json(["status"=>true,"message"=>"done"]);

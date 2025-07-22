@@ -98,7 +98,7 @@ class FinanceController extends Controller
 
         $voucher = generateVoucherNumber("closing",$user_id);
 
-        $voucher_data = [
+       /* $voucher_data = [
             "voucher_number" =>$voucher,
             "voucher_type"   => "closing",
             'user_id' => $user_id,
@@ -109,8 +109,7 @@ class FinanceController extends Controller
             "created_by"   => auth()->user()->id,
             "created_at"   => date("Y-m-d H:i:s"),
         ];
-        $voucher = FinanceVoucher::create($voucher_data);
-        $voucher_id = $voucher->id;
+        $voucher = FinanceVoucher::create($voucher_data);*/
 
         $record = [];
 
@@ -125,11 +124,22 @@ class FinanceController extends Controller
 
             foreach ($query as $key => $value){
                 $amount = $value->amount;
-                $remarks = "Pharamacy Income";
                 // cash at office debuit   pharmacy income credit
-                make_entry($voucher_id,request()->finance_head_id,$amount,0,"sale",$value->id,$user_id,$remarks);
-                make_entry($voucher_id,financeHeadId('pharmacy_income'),0,$amount,"sale",$value->id,$user_id,$remarks);
-
+                make_entry(1,request()->finance_head_id,$amount,0,"sale",$value->id,$user_id,"Pharamacy Income");
+                make_entry(1,financeHeadId('pharmacy_income'),0,$amount,"sale",$value->id,$user_id,"Pharamacy Income");
+                /*array_push($record,[
+                    'transaction_date' => today(),
+                    'voucher_id' => $voucher->id,
+                    'amount' => ($value->amount),
+                    'debit_head_id' => request()->finance_head_id,  //cash at office
+                    'credit_head_id' => financeHeadId('pharmacy_income'), // pharmacy income
+                    'reference_type' => 'sale_payments',
+                    'reference_id' => $value->id,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
+                    'remarks' => 'Pharmacy Sale posted by '.auth()->user()->name,
+                    'created_at' => now()
+                ]);*/
             }
         }
 
@@ -143,13 +153,22 @@ class FinanceController extends Controller
                     return $query->where('created_by',$user_id);
                 })->get();
             foreach ($return as $key => $value){
-                $amount = $value->amount;
-                $remarks = "Pharmacy Return";
-
-                // pharmacy_income debuit   cash at office credit
-                make_entry($voucher_id,financeHeadId('pharmacy_income'),$amount,0,"pharmacy_return",$value->id,$user_id,$remarks);
-                make_entry($voucher_id,request()->finance_head_id,0,$amount,"pharmacy_return",$value->id,$user_id,$remarks);
+                array_push($record,[
+                    'voucher_id' => $voucher->id,
+                    'transaction_date' => today(),
+                    'amount' => $value->amount, // return amount
+                    'debit_head_id' => financeHeadId('pharmacy_income'), // reduce income
+                    'credit_head_id' => request()->finance_head_id, // reduce cash
+                    'reference_type' => 'pharmacy_return',
+                    'reference_id' => $value->id,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
+                    'remarks' => 'Pharmacy return (cash refunded)',
+                    'created_at' => now()
+                ]);
             }
+
+
         }
         if($appointments > 0){
 
@@ -169,29 +188,52 @@ class FinanceController extends Controller
 
                 //-- after posting cash to cashAtOffice here the docotro commision will post to doctor account  ---//
                 if($value->consultant_share > 0){
-                    $amount = $value->consultant_share;
-                    $remarks = 'Appointment Share posted to Doctor: '.$value->consultant->name ?? "".' Account. posted by '.auth()->user()->name;
 
-                    // Cash at office debit   doctor account credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments_shares",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,$value->consultant->finance_head_id,0,$amount,"appointments_shares",$value->id,$user_id,$remarks);
-
-
-                    $amount = $value->hospital_share;
-                    $remarks = 'Appointment Hospital shares posted by '.auth()->user()->name;
-
-                    // Cash at office debit   Appointment income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('appointment_income'),0,$amount,"appointments",$value->id,$user_id,$remarks);
-
+                    $rec = [
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => $value->consultant_share,
+                        //'debit_head_id' => financeHeadId('doctor_share'),  // Doctor commision expense
+                        'debit_head_id' => request()->finance_head_id,  // cash at office
+                        'credit_head_id' => $value->consultant->finance_head_id,// Dr. Naqeeb Ahmad (Liability)
+                        'reference_type' => 'appointments',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Appointment Share posted to Doctor: '.$value->consultant->name ?? "".' Account. posted by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
+                    $rec = [
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => $value->hospital_share,
+                        //'debit_head_id' => financeHeadId('doctor_share'),  // Doctor commision expense
+                        'debit_head_id' => request()->finance_head_id,  // cash at office
+                        'credit_head_id' => financeHeadId('appointment_income'), // Appointments income
+                        'reference_type' => 'appointments',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Appointment Share posted to Doctor: '.$value->consultant->name ?? "".' Account. posted by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
                 }else{
-                    $amount = $value->fee;
-                    $remarks = 'Appointment Income.';
-
-                    // Cash at office debit   Appointment income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"appointments",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('appointment_income'),0,$amount,"appointments",$value->id,$user_id,$remarks);
-
+                    $rec = [
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => $value->fee,
+                        'debit_head_id' => request()->finance_head_id,  // cash at office
+                        'credit_head_id' => financeHeadId('appointment_income'), // Appointments income
+                        'reference_type' => 'appointments',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Appointment Share posted to Doctor: '.$value->consultant->name ?? "".' Account. posted by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
                 }
 
             }
@@ -210,12 +252,19 @@ class FinanceController extends Controller
                     return $query->where('created_by',$user_id);
                 })->get();
             foreach ($query as $key => $value){
-                $amount = $value->amount;
-                $remarks =  'Investigation Income posted to cash at office. Posted by '.auth()->user()->name;
-                // Cash at office debit   investigation income credit
-                make_entry($voucher_id,request()->finance_head_id,$amount,0,"patient_investigations_payments",$value->id,$user_id,$remarks);
-                make_entry($voucher_id,financeHeadId('investigation_income'),0,$amount,"patient_investigations_payments",$value->id,$user_id,$remarks);
-
+                array_push($record,[
+                    'voucher_id' => $voucher->id,
+                    'transaction_date' => today(),
+                    'amount' => $value->amount,
+                    'debit_head_id' => request()->finance_head_id,  //cash at office
+                    'credit_head_id' => financeHeadId('investigation_income'), //investigation_income
+                    'reference_type' => 'patient_investigations_payments',
+                    'reference_id' => $value->id,
+                    'user_id' => $user_id,
+                    'created_by' => auth()->user()->id,
+                    'remarks' => 'Investigation Income posted to cash at office. Posted by '.auth()->user()->name,
+                    'created_at' => now()
+                ]);
             }
         }
 
@@ -233,13 +282,20 @@ class FinanceController extends Controller
                 })->get();
             foreach ($query as $key => $value){
               if($value->service_rate > 0){
-                  $amount = $value->service_rate;
-                  $remarks =  $value->service_type->name." Payment Posted to cash at office. posted by ".auth()->user()->name;
-
-                  // Cash at office debit   patient services income credit
-                  make_entry($voucher_id,request()->finance_head_id,$amount,0,"service_charges",$value->id,$user_id,$remarks);
-                  make_entry($voucher_id,$value->service_type->finance_head_id,0,$amount,"service_charges",$value->id,$user_id,$remarks);
-
+                  array_push($record,[
+                      'voucher_id' => $voucher->id,
+                      'transaction_date' => today(),
+                      'amount' => $value->service_rate,
+                      'debit_head_id' => request()->finance_head_id,  //cash at office
+                      'credit_head_id' => $value->service_type->finance_head_id, // service_head id
+                      //'reference_type' => financeHeadCode($value->service_type->finance_head_id),
+                      'reference_type' => financeHeadCode($value->service_type->finance_head_id),
+                      'reference_id' => $value->id,
+                      'user_id' => $user_id,
+                      'created_by' => auth()->user()->id,
+                      'remarks' => $value->service_type->name." Payment Posted to cash at office. posted by ".auth()->user()->name,
+                      'created_at' => now()
+                  ]);
               }
 
             }
@@ -257,30 +313,53 @@ class FinanceController extends Controller
           //  dd($all_admissions);
             foreach ($all_admissions as $key => $value){
                 if($value->consultant_share_amount > 0){
-                    $amount = $value->consultant_share_amount;
-                    $remarks = 'Consultant procedure share posted to doctor: '.$value->consultant->name ?? "".' account by '.auth()->user()->name;
+                    $rec = [
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => $value->consultant_share_amount,
+                        //'debit_head_id' => financeHeadId('doctor_share'),  // Doctor commision expense
+                        'debit_head_id' => request()->finance_head_id,  // cash at office
+                        'credit_head_id' => $value->consultant->finance_head_id, // Dr. Naqeeb Ahmad (Liability)
+                        'reference_type' => 'InPatientAdmission',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Consultant procedure share posted to doctor: '.$value->consultant->name ?? "".' account by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
 
-                    // Cash at office debit   doctor account credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"InPatientAdmission",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,$value->consultant->finance_head_id,0,$amount,"InPatientAdmission",$value->id,$user_id,$remarks);
-
-
-
-                    $amount = ($value->consultant_charges) - ($value->consultant_share_amount);
-                    $remarks = 'Procedure income posted to Procedure Income by '.auth()->user()->name;
-
-                    // Cash at office debit   procedure income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"InPatientAdmission",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('procedure_income'),0,$amount,"InPatientAdmission",$value->id,$user_id,$remarks);
-
+                    $rec = [
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => ($value->consultant_charges) - ($value->consultant_share_amount),
+                        //'debit_head_id' => financeHeadId('doctor_share'),  // Doctor commision expense
+                        'debit_head_id' => request()->finance_head_id,  // cash at office
+                        'credit_head_id' => financeHeadId('procedure_income'), // procedure income
+                        'reference_type' => 'InPatientAdmission',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Procedure income posted to Procedure Income by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
                 }else{
-                    $amount = ($value->consultant_charges);
-                    $remarks = 'Procedure income posted by '.auth()->user()->name;
-
-                    // Cash at office debit   procedure income credit
-                    make_entry($voucher_id,request()->finance_head_id,$amount,0,"InPatientAdmission",$value->id,$user_id,$remarks);
-                    make_entry($voucher_id,financeHeadId('procedure_income'),0,$amount,"InPatientAdmission",$value->id,$user_id,$remarks);
-
+                    $rec = [
+                        'voucher_id' => $voucher->id,
+                        'transaction_date' => today(),
+                        'amount' => ($value->consultant_charges),
+                        //'debit_head_id' => financeHeadId('doctor_share'),  // Doctor commision expense
+                        'debit_head_id' => request()->finance_head_id,  // cash at office
+                        'credit_head_id' => financeHeadId('procedure_income'), // procedure income
+                        'reference_type' => 'InPatientAdmission',
+                        'reference_id' => $value->id,
+                        'user_id' => $user_id,
+                        'created_by' => auth()->user()->id,
+                        'remarks' => 'Consultant procedure share posted to doctor: '.$value->consultant->name ?? "".' account by '.auth()->user()->name,
+                        'created_at' => now()
+                    ];
+                    array_push($record,$rec);
                 }
 
             }

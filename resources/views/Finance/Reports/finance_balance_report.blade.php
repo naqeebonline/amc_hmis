@@ -215,34 +215,36 @@
 
     <section class="items">
 
-
-        <table class="table table-bordered" style="margin-top: 5px">
-            <thead>
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
             <tr>
-                <th>Head Name</th>
+                <th>Head</th>
                 <th>Type</th>
-                <th>Total Debit</th>
-                <th>Total Credit</th>
-                <th>Balance</th>
+                <th class="text-end">Debit</th>
+                <th class="text-end">Credit</th>
+                <th class="text-end">Balance</th>
             </tr>
             </thead>
             <tbody>
-            @foreach($report as $head)
+            @forelse ($report as $row)
                 <tr>
-                    <td>{{ $head->name }}</td>
-                    <td>{{ ucfirst($head->type) }}</td>
-                    <td>{{ number_format($head->total_debit, 2) }}</td>
-                    <td>{{ number_format($head->total_credit, 2) }}</td>
-                    <td>{{ number_format($head->balance, 2) }}</td>
+                    <td>{{ $row->head_name }}</td>
+                    <td>{{ ucfirst($row->head_type) }}</td>
+                    <td class="text-end">{{ number_format($row->total_debit, 2) }}</td>
+                    <td class="text-end">{{ number_format($row->total_credit, 2) }}</td>
+                    <td class="text-end">
+                        @if ($row->balance < 0)
+                            <span class="text-danger">-{{ number_format(abs($row->balance), 2) }}</span>
+                        @else
+                            <span class="text-success">{{ number_format($row->balance, 2) }}</span>
+                        @endif
+                    </td>
                 </tr>
-            @endforeach
-            <tr>
-                <td></td>
-                <td></td>
-                <td>{{ number_format($report->sum('total_debit'), 2) }}</td>
-                <td>{{ number_format($report->sum('total_credit'), 2) }}</td>
-                <td></td>
-            </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">No transactions found.</td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </section>

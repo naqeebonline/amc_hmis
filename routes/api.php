@@ -16,8 +16,9 @@ use App\Http\Controllers\API\LoginController;
 |
 */
 
+Route::get('/sendDataToLive', [\App\Http\Controllers\DataSyncController::class, 'sendDataToLive']);
 Route::prefix('v1')->group(function (){
-
+    Route::post('/syncLiveDataFromLocal', [\App\Http\Controllers\DataSyncController::class, 'syncLiveDataFromLocal']);
 
     Route::post('updatePatient', [\App\Http\Controllers\API\SmsController::class,'updatePatient']);
     Route::post('sendSms', [\App\Http\Controllers\API\SmsController::class,'sendSms']);
