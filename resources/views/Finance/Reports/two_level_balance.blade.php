@@ -194,6 +194,13 @@
         table td{
             font-size: 13px !important;
         }
+
+        .table-borderless td,
+        .table-borderless th,
+        .table-borderless tr,
+        .table-borderless {
+            border: none !important;
+        }
     </style>
 </head>
 
@@ -201,90 +208,51 @@
 <div class="invoice-container">
     <header>
         <div class="company-details">
-            <h1 style="text-align: center;margin-left: 50%;width: 100%;">{{env('COMPANY_NAME')}}</h1>
-
-        </div>
-
-        <div class="invoice-meta header-right">
+            <h1 style="text-align: center;margin-left: 50%;width: 100%;">{{env('COMPANY_NAME')}}</h1><br>
 
 
         </div>
+
+
     </header>
 
 
 
     <section class="items">
-        <h4 class="mb-4" style="text-align: center">Profit and Loss Report</h4>
-        <form method="GET" action="{{ route('pos.profitAndLossReport') }}" class="mb-3">
-            <table class="table table-bordered table-striped">
-                <thead>
+
+        <h4 class="mb-4" style="text-align: center">Chart of Accounts Summary</h4>
+
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th>Head Code</th>
+                <th>Head Name</th>
+                <th>Type</th>
+                <th class="text-end">Total Debit</th>
+                <th class="text-end">Total Credit</th>
+                <th class="text-end">Balance</th>
+            </tr>
+            </thead>
+            <tbody>
+            @forelse($report as $row)
                 <tr>
-                    <th>Start Date: <input type="date" name="start_date" class="form-control" value="{{ $startDate }}"></th>
-                    <th class="text-end">End Date: <input type="date" name="end_date" class="form-control" value="{{ $endDate }}"></th>
-
-                    <th class="text-end">
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                    </th>
+                    <td>{{ $row['head_code'] }}</td>
+                    <td>{{ $row['name'] }}</td>
+                    <td>{{ $row['type'] }}</td>
+                    <td class="text-end">{{ number_format($row['total_debit'], 2) }}</td>
+                    <td class="text-end">{{ number_format($row['total_credit'], 2) }}</td>
+                    <td class="text-end">{{ number_format($row['balance'], 2) }}</td>
                 </tr>
-                </thead>
-            </table>
-        </form>
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center">No data available.</td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
 
 
-        <div class="row">
-            <div class="col-md-6">
-                <h4>Income</h4>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr><th>Head</th><th class="text-end">Amount</th></tr>
-                    </thead>
-                    <tbody>
-                    @foreach($incomeItems as $item)
-                        <tr>
-                            <td>{{ $item['name'] }}</td>
-                            <td class="text-end">{{ number_format($item['amount'], 2) }}</td>
-                        </tr>
-                    @endforeach
-                    <tr class="table-success">
-                        <th>Total Income</th>
-                        <th class="text-end">{{ number_format($totalIncome, 2) }}</th>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="col-md-6">
-                <h4>Expenses</h4>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr><th>Head</th><th class="text-end">Amount</th></tr>
-                    </thead>
-                    <tbody>
-                    @foreach($expenseItems as $item)
-                        <tr>
-                            <td>{{ $item['name'] }}</td>
-                            <td class="text-end">{{ number_format($item['amount'], 2) }}</td>
-                        </tr>
-                    @endforeach
-                    <tr class="table-danger">
-                        <th>Total Expenses</th>
-                        <th class="text-end">{{ number_format($totalExpense, 2) }}</th>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <hr>
-
-        <h4 class="text-center">
-            Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}:
-            <span class="fw-bold {{ $netProfit >= 0 ? 'text-success' : 'text-danger' }}">
-            {{ number_format($netProfit, 2) }}
-        </span>
-        </h4>
     </section>
-
 
 
 

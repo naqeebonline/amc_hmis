@@ -40,29 +40,52 @@ class FinanceReportController extends Controller
 
     public function profitAndLossReport(Request $request)
     {
-        //$investigation_income = FinanceTransaction::where()
+        $startDate = $request->input('start_date') ?? now()->startOfMonth()->toDateString();
+        $endDate = $request->input('end_date') ?? now()->endOfMonth()->toDateString();
 
+        $incomeHeads = FinanceHead::where('type', 'income')->get();
+        $incomeItems = [];
+        $totalIncome = 0;
 
+        foreach ($incomeHeads as $head) {
+            $amount = FinanceTransaction::where('head_id', $head->id)
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->sum('credit') -
+                FinanceTransaction::where('head_id', $head->id)
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->sum('debit');
 
-        // Get total income from credit side (income is credited)
-        $totalIncome = DB::table('finance_transactions as ft')
-            ->join('finance_heads as fh', 'ft.credit_head_id', '=', 'fh.id')
-            ->where('fh.type', 'income')
-           // ->where("fh.id",5)
-            ->sum('ft.amount');
+            $incomeItems[] = [
+                'name' => $head->name,
+                'amount' => $amount
+            ];
+            $totalIncome += $amount;
+        }
 
-        // Get total expenses from debit side (expenses are debited)
-        $totalExpense = DB::table('finance_transactions as ft')
-            ->join('finance_heads as fh', 'ft.debit_head_id', '=', 'fh.id')
-            ->where('fh.type', 'expense')
-           // ->where("fh.id",11)
-            ->sum('ft.amount');
+        $expenseHeads = FinanceHead::where('type', 'expense')->get();
+        $expenseItems = [];
+        $totalExpense = 0;
 
-        // Calculate net profit/loss
+        foreach ($expenseHeads as $head) {
+            $amount = FinanceTransaction::where('head_id', $head->id)
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->sum('debit') -
+                FinanceTransaction::where('head_id', $head->id)
+                    ->whereBetween('transaction_date', [$startDate, $endDate])
+                    ->sum('credit');
+
+            $expenseItems[] = [
+                'name' => $head->name,
+                'amount' => $amount
+            ];
+            $totalExpense += $amount;
+        }
+
         $netProfit = $totalIncome - $totalExpense;
 
-        return view('Finance.Reports.profit_and_lost_report', compact('totalIncome', 'totalExpense', 'netProfit'));
-
+        return view('Finance.Reports.profit_and_lost_report', compact(
+            'incomeItems', 'expenseItems', 'totalIncome', 'totalExpense', 'netProfit', 'startDate', 'endDate'
+        ));
 
     }
 
@@ -488,6 +511,50 @@ class FinanceReportController extends Controller
         }
 
         return view('Finance.Reports.outstanding_balances_report', compact('heads'));
+    }
+
+
+    public function twoLevelBalanceReport()
+    {
+        $level2Heads = FinanceHead::where('level', 2)->get();
+
+        $report = [];
+
+        foreach ($level2Heads as $level2) {
+            // Get level-3 child heads
+            $children = FinanceHead::where('parent_id', $level2->id)->pluck('id');
+
+            // Sum debit/credit for children
+            $totals = FinanceTransaction::select(
+                DB::raw('SUM(debit) as total_debit'),
+                DB::raw('SUM(credit) as total_credit')
+            )
+                ->whereIn('head_id', $children)
+                ->first();
+
+            $total_debit = $totals->total_debit ?? 0;
+            $total_credit = $totals->total_credit ?? 0;
+
+            // Determine balance logic based on account type
+            if (in_array($level2->type, ['asset', 'expense'])) {
+                $balance = $total_debit - $total_credit;
+            } elseif (in_array($level2->type, ['liability', 'income', 'capital'])) {
+                $balance = $total_credit - $total_debit;
+            } else {
+                $balance = 0;
+            }
+
+            $report[] = [
+                'head_code' => $level2->head_code,
+                'name' => $level2->name,
+                'type' => ucfirst($level2->type),
+                'total_debit' => $total_debit,
+                'total_credit' => $total_credit,
+                'balance' => $balance,
+            ];
+        }
+
+        return view('Finance.Reports.two_level_balance', compact('report'));
     }
 
 }
