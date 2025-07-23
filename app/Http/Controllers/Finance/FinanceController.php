@@ -15,6 +15,7 @@ use App\Models\Patient\PatientInvestigationPayment;
 use App\Models\Patient\PatientServiceCharges;
 use App\Models\PharmacyRetrun;
 use App\Models\Sale;
+use App\Models\SaleDetails;
 use App\Models\SalePayment;
 use App\Models\Users;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class FinanceController extends Controller
 {
     public function daily_closing()
     {
+
         $closing_date = $_GET['closing_date'] ?? date("Y-m-d");
         $user_id = $_GET['user_id'] ?? 0;
         $data['user_id'] = $user_id;
@@ -110,6 +112,7 @@ class FinanceController extends Controller
         ];
         $voucher = FinanceVoucher::create($voucher_data);
         $voucher_id = $voucher->id;
+        //$voucher_id = 1;
 
         $record = [];
 
@@ -122,16 +125,25 @@ class FinanceController extends Controller
                     return $query->where('created_by',$user_id);
                 })->get();
 
+            //naqeeb
+
             foreach ($query as $key => $value){
+                if($value->sale_id){
+                    $cogs_amount = $this->cogs_purchase($value->sale_id);
+                }else{
+                    $cogs_amount = $this->cogs_purchase_in_patient($value->admission_id);
+                }
+
                 $amount = $value->amount;
                 $remarks = "Pharamacy Income";
                 // cash at office debuit   pharmacy income credit
                 make_entry($voucher_id,request()->finance_head_id,$amount,0,"sale",$value->id,$user_id,$remarks);
                 make_entry($voucher_id,financeHeadId('pharmacy_income'),0,$amount,"sale",$value->id,$user_id,$remarks);
 
+                $remarks = "pharmacy_sale_cogs";
                 // cash at office debuit   pharmacy_purchase credit
-                make_entry($voucher_id,financeHeadId('cogs'),$amount,0,"sale",$value->id,$user_id,$remarks);
-                make_entry($voucher_id,financeHeadId('pharmacy_purchase'),0,$amount,"sale",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('cogs'),$cogs_amount,0,"pharmacy_sale_cogs",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('pharmacy_purchase'),0,$cogs_amount,"pharmacy_sale_cogs",$value->id,$user_id,$remarks);
 
             }
         }
@@ -153,10 +165,10 @@ class FinanceController extends Controller
                 make_entry($voucher_id,financeHeadId('pharmacy_return'),$amount,0,"pharmacy_return",$value->id,$user_id,$remarks);
                 make_entry($voucher_id,request()->finance_head_id,0,$amount,"pharmacy_return",$value->id,$user_id,$remarks);
 
-
+                $cost_of_good_sales_of_return_item = $this->cogs_after_return($value->id);
                 // pharmacy_purchase debit    cogs credit
-                make_entry($voucher_id,financeHeadId('pharmacy_purchase'),$amount,0,"pharmacy_return",$value->id,$user_id,$remarks);
-                make_entry($voucher_id,financeHeadId('cogs'),0,$amount,"pharmacy_return",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('pharmacy_purchase'),$cost_of_good_sales_of_return_item,0,"cogs_pharmacy_sale_return",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('cogs'),0,$cost_of_good_sales_of_return_item,"cogs_pharmacy_sale_return",$value->id,$user_id,$remarks);
             }
         }
         if($appointments > 0){
@@ -616,20 +628,16 @@ class FinanceController extends Controller
 
     public function in_patient_sale($closing_date='',$user_id='')
     {
-
-
         $query = Sale::where("is_posted",0)->when($closing_date, function ($query) use ($closing_date) {
                 return $query->whereDate('CreatedAt', '<=', date("Y-m-d", strtotime($closing_date)));
             })
+            ->where('admission_id',"!=",0)
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('CreatedBy',$user_id);
             });
 
         $totals = $query->selectRaw('SUM(TotalSale)-SUM(Discount) as in_patient_sale')->first();
-
         return $totals->in_patient_sale ?? 0;
-
-
     }
 
     public function consultant_charges($closing_date='',$user_id='')
@@ -670,6 +678,42 @@ class FinanceController extends Controller
         FinanceVoucher::where(["id"=>request()->id])->delete();
         FinanceTransaction::where(["voucher_id"=>request()->id])->delete();
         return ["status"=>true,"message"=>"record approved successfully"];
+    }
+
+    public function cogs_purchase($sale_id)
+    {
+        $cogs = DB::table('sale_details')
+            ->selectRaw('SaleID, SUM((Quantity - ReturnQuantity) * PurchasePrice) as cogs')
+            ->where('SaleID', $sale_id)
+            ->groupBy('SaleID')
+            ->first();
+        return $cogs->cogs ?? 0;
+    }
+
+
+
+    public function cogs_purchase_in_patient($admission_id)
+    {
+        $sale_ids = Sale::where("admission_id",$admission_id)->pluck('SaleID');
+        $cogs = DB::table('sale_details')
+            ->selectRaw('SaleID, SUM((Quantity - ReturnQuantity) * PurchasePrice) as cogs')
+            ->whereIn('SaleID', $sale_ids)
+            ->groupBy('SaleID')
+            ->first();
+        return $cogs->cogs ?? 0;
+    }
+
+    public function cogs_after_return($pharmacy_return_id)
+    {
+        $return = PharmacyRetrun::where("id",$pharmacy_return_id)->first();
+        $return_qty = $return->quantity;
+        $cogs = DB::table('sale_details')
+            ->where('SaleID', $return->sale_id)
+            ->where('ProductID', $return->product_id)
+            ->first();
+
+        return ($return_qty ?? 0) * ($cogs->PurchasePrice ?? 0);
+
     }
 
 

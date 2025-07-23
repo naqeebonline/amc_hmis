@@ -80,7 +80,7 @@
 
                                     <tr>
                                         <td>Pharmacy Sale</td>
-                                        <td>{{$data->received_amount ?? 0}} &nbsp;&nbsp;&nbsp; <span style="color: red">In Patient Sale ({{ ($in_patient_sale) - ($data->received_amount ?? 0) }})</span></td>
+                                        <td>{{$data->received_amount ?? 0}} &nbsp;&nbsp;&nbsp; <span style="color: red">In Patient Sale ({{ ($in_patient_sale) }})</span></td>
                                     </tr>
 
                                     <tr>

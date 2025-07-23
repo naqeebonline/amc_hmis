@@ -796,6 +796,9 @@ class SaleController extends Controller
         $sale = Sale::where(["SaleID"=>$sale_details->SaleID])->first();
 
         $admission_id = $sale->admission_id;
+        $sale_id = $sale->SaleID;
+
+        $admission_id = $sale->admission_id;
 
         $is_admitted_patient = "no";
 
@@ -820,18 +823,19 @@ class SaleController extends Controller
 
         $total_sale_amount = ($sale->TotalSale) - ((request()->return_amount) + (request()->return_discount_amount));
 
-        $received_amount = ($sale->received_amount) - (request()->return_amount);
-
 
         //---- check if patient is admitt then correct the bill otherwise make entry in pharmacy_return_items table for user closing balance.---//
         //--- close balance will adjust from pharmacy return table only amount will be minus from total sale amount of user during closing  ---//
 
-        if($is_admitted_patient == "yes" && $sale->received_amount == 0){
+
+        if(($is_admitted_patient == "yes" && $sale->received_amount == 0) || $sale->is_posted == 0){
             //dd(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            if($sale->admission_id == 0){  // if walking customer sale then also make changes in salepayment table
+                SalePayment::where(["sale_id"=>$sale_details->SaleID])->update(["amount"=>$total_sale_amount]);
+            }
             Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
         }else{
-
             PharmacyRetrun::create([
                 "sale_id" => $sale_details->SaleID,
                 "sale_detail_id" => request()->SDID,
@@ -841,7 +845,15 @@ class SaleController extends Controller
                 "created_by" => auth()->user()->id,
                 "created_at" => date("Y-m-d H:i:s"),
             ]);
+
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+            if($admission_id != 0){
+                SalePayment::where(["admission_id"=>$admission_id])->update(["amount"=>$total_sale_amount]);
+            }else{
+                SalePayment::where(["sale_id"=>$sale_details->SaleID])->update(["amount"=>$total_sale_amount]);
+            }
+
         }
         //-------- end of check  ------//
 

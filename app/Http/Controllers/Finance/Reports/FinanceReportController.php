@@ -178,6 +178,7 @@ class FinanceReportController extends Controller
                 'ft.credit'
             )
             ->where('ft.voucher_id', $voucher_id)
+            ->where('fh.type', "!=","asset")
             ->where(function ($q) {
                 $q->whereNull('ft.reference_type')
                     ->orWhere('ft.reference_type', '!=', 'commission');
