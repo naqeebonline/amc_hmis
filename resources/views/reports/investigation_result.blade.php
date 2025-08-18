@@ -263,7 +263,7 @@
             <div class="right-side col-5 ms-auto">
                 <div class="d-flex justify-content-between">
                     <p class="w-50 fw-bold">Refered By:</p>
-                    <p class="w-50">{{ $result->admission->consultant->name ?? "" }}</p>
+                    <p class="w-50">{{ $result->consultant->name ?? "" }}</p>
                 </div>
 
                 <div class="d-flex justify-content-between">
@@ -399,9 +399,7 @@
                 the domain of negligence.
             </p>
 
-            <p class="footer-note mt-2">
-                <strong>Note: All tests free of cost under Sehat Sahulat Program.</strong>
-            </p>
+
         </section>
 
 

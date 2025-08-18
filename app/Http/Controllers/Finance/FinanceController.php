@@ -30,7 +30,12 @@ class FinanceController extends Controller
         $user_id = $_GET['user_id'] ?? 0;
         $data['user_id'] = $user_id;
         $data['closing_date'] = $closing_date;
-        $data['users'] = Users::where("status",1)->get();
+        $data['users'] = Users::where("status",1)
+            ->when((getUserRole() != 'Super Admin' && getUserRole() != 'Finance'), function ($query) use ($user_id) {
+                return $query->where('id',auth()->user()->id);
+            })
+            ->get();
+
         $data['finance_heads'] = FinanceHead::get();
 
         $query = SalePayment::where("is_posted",0)

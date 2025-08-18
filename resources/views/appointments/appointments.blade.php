@@ -563,9 +563,9 @@
                 },
 
                 {
-                    data: 'created_by.name',
-                    name: 'created_by.name',
-                    searchable: true
+                    data: 'created_by_user.name',
+                    name: 'created_by_user.name',
+                    searchable: false
                 },
 
 

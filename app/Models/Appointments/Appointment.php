@@ -40,7 +40,12 @@ class Appointment extends Model
 
     public function created_by()
     {
-        return $this->belongsTo(Users::class, 'created_by');
+        return $this->belongsTo(Users::class, 'created_by','id');
+    }
+
+    public function created_by_user()
+    {
+        return $this->belongsTo(Users::class, 'created_by','id');
     }
 
     public function getAppointmentDateAttribute($value)

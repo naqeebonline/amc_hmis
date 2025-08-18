@@ -173,6 +173,13 @@
                             <input type="number" class="form-control" value="0" name="lab_percentage" id="lab_percentage">
                         </div>
 
+                        <div class="col-md-12 mb-3">
+                            <label for="nameBasic" class="form-label">Lab Percentage<span
+                                        class="asterisk">*</span></label>
+                            <textarea name="description" rows="6" id="description" class="form-control"
+                                      placeholder="e.g. FCPS Part 2<br>FCPS Cardiology"></textarea>
+                        </div>
+
 
 
 
@@ -219,6 +226,7 @@
             $("#hospital_share").val(0);
             $("#consultant_share").val(0);
             $("#lab_percentage").val(0);
+            $("#description").val('');
             $("#add_new_record_model").modal("show");
 
         });
@@ -241,6 +249,7 @@
             $("#hospital_share").val(details.hospital_share);
             $("#consultant_share").val(details.consultant_share);
             $("#lab_percentage").val(details.lab_percentage);
+            $("#description").val(details.description);
             $("#add_new_record_model").modal("show");
         });
 

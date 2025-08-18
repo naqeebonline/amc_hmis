@@ -637,7 +637,7 @@ function userRole($user_id=''){
 
 }
 
-function make_entry($voucher_id,$head_id,$debit=0,$credit=0,$reference_type,$reference_id,$user_id,$remarks){
+function make_entry($voucher_id=0,$head_id=0,$debit=0,$credit=0,$reference_type=0,$reference_id=0,$user_id=0,$remarks=0){
     $data = [
 
         'voucher_id' => $voucher_id,

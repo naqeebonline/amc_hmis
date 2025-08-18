@@ -43,7 +43,7 @@ class AppointmentController extends Controller
 
     public function list_appointments()
     {
-        $res = Appointment::with(["patient","opd_type","consultant","created_by"])->where(["is_active"=>1])
+        $res = Appointment::with(["patient","opd_type","consultant","created_by_user"])->where(["is_active"=>1])
         ->when(request()->from_date,function ($q){
            // dd("here");
             $q->whereDate("appointment_date",">=",request()->from_date);
@@ -57,7 +57,7 @@ class AppointmentController extends Controller
             ->when(request()->consultant_id,function ($q){
                 $q->where("consultant_id",request()->consultant_id);
             })
-        ;
+        ->orderBy("id","desc");
 
         return DataTables::of($res)
             ->addColumn('actions', function($cert) {
@@ -122,6 +122,11 @@ class AppointmentController extends Controller
 
         if(request()->opd_type_id == 3){
             $fees = 0;
+            $hospital_share = 0;
+            $consultant_share = 0;
+        }
+        if(request()->opd_type_id == 4){
+            $fees = $opd_type->fees;
             $hospital_share = 0;
             $consultant_share = 0;
         }

@@ -738,6 +738,7 @@ class PatientAdmissionController extends Controller
         $data['discount_percentage'] = $discount_percentage;
         $data['discount_amount'] = $discount_amount;
         $this->printInvestigationReceipt($data['data'],$data['total'],$data['discount_amount'],$data['discount_percentage']);
+        $this->printInvestigationReceipt($data['data'],$data['total'],$data['discount_amount'],$data['discount_percentage']);
         return view("reports.print_hospital_lab_invoice", $data);
     }
 

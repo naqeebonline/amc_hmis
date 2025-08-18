@@ -69,6 +69,7 @@ class CustomerController extends Controller
             $create_head = [
                 "name" => "Supplier- ".request()->Name,
                 "type"  => $type,
+                "parent_id"  => 44, // finanace head parent id consultant payable
                 "description" => request()->ContactNo
             ];
             $finance_head = FinanceHead::create($create_head);

@@ -161,21 +161,24 @@
             <div class="row">
                 <div class="col-4">
                     <img class="logo" width="100%" src="{{asset('')}}amc.jpeg" alt="">
-                    <h4 style="text-align: center">City Branch</h4>
+                    <h4 style="text-align: center">{{env('Branch_Name')}}</h4>
                 </div>
 
                 <div class="col-4">
-                    <h4>{{$data->consultant->name ?? ""}}</h4>
+                    <h4 style="text-align: center; font-weight: bold;">{{$data->consultant->name ?? ""}}</h4>
 
                     <ul class="list-unstyled">
-                        <li>{{ucfirst($data->consultant->consultant_speciality->name) ?? ""}}</li>
+                        <li style="text-align: center;">{!! $data->consultant->description !!}</li>
+
+                        {{--<li>{{ucfirst($data->consultant->consultant_speciality->name) ?? ""}}</li>
                         <li>{{ucfirst($data->consultant->consultant_type->name) ?? ""}}</li>
-                        <li>PMDC# {{$data->consultant->pmdc_number ?? ""}}</li>
+                        <li>PMDC# {{$data->consultant->pmdc_number ?? ""}}</li>--}}
 
                     </ul>
+                    <p style="text-align: center;"><b>PMDC#{!! $data->consultant->pmdc_number !!} </b></p>
                 </div>
 
-                <div class="col">
+                <div class="col-4">
                     <p><strong>{{date('l, F d, Y', strtotime($data->appointment_date))}} <br/> {{date('h:i A', strtotime($data->appointment_date))}}</strong></p>
                     <p><strong>{{ucfirst($data->opd_type->name) ?? ''}}</strong></p>
                     <p><strong>Appointment#: {{env('BRANCH_CODE')}} {{ $data->appointment_number }}</strong></p>

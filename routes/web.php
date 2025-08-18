@@ -73,7 +73,7 @@ Route::get('/psw-generate', function () {
 Route::group(['middleware' => 'auth'], function () {
     Route::get("sehatCardDashboard", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatCardDashboard"])->name("pos.sehatCardDashboard")->middleware('store.selected');
     Route::get('pharmacy_dashboard', [\App\Http\Controllers\HomeController::class, 'pharmacy_dashboard'])->name('user.pharmacy_dashboard')->middleware('store.selected');
-    Route::get('/retail-dashboard', [App\Http\Controllers\Dashboard\DashboardController::class, 'retailPharmacyDashboard'])->name('pos.retailPharmacyDashboard')->middleware('store.selected');
+    Route::get('/retail-dashboard', [App\Http\Controllers\Dashboard\DashboardController::class, 'retailPharmacyDashboard'])->name('pos.retailPharmacyDashboard');
     Route::get('user-dashboard', [\App\Http\Controllers\HomeController::class, 'userDashboard'])->name('user.dashboard');
     Route::get('view-history', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'index'])->name('view-history');
     Route::get('list-sms', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'listSms'])->name('list-sms');

@@ -63,12 +63,14 @@ class ConsultantController extends Controller
             $create_head = [
                 "name" => "Doctor- ".request()->name,
                 "type"  => $type,
+                "parent_id"  => 45, // finanace head parent id consultant payable
                 "description" => request()->cnic
             ];
             $finance_head = FinanceHead::create($create_head);
             $finance_head_id = $finance_head->id;
         }
         $data = request()->except(["id","_token"]);
+        //dd($data);
         $data['finance_head_id'] = $finance_head_id;
 
 
@@ -222,6 +224,15 @@ class ConsultantController extends Controller
             return 0;
         }
 
+    }
+
+    public function save_consultant_type()
+    {
+        ConsultantType::updateOrCreate(
+            ["id"=>request()->id],
+            request()->except(["id","_token"])
+        );
+        return ["status"=>true,"message"=>"Record saved successfully"];
     }
 
 

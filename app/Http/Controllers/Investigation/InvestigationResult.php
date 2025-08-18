@@ -155,7 +155,8 @@ class InvestigationResult extends Controller
 
     public function print_inv_result($inv_id)
     {
-        $data["result"] = PatientInvestigation::where("id", $inv_id)->where("status", 1)->with("patient", "subCategory.main_category", "investigationResult.parameter", "admission.consultant")->first();
+        $data["result"] = PatientInvestigation::where("id", $inv_id)->where("status", 1)->with("patient", "subCategory.main_category", "investigationResult.parameter", "admission.consultant","consultant")->first();
+
         $data['inv_sub_category'] = InvestigationSubCategory::where(['id'=>$data["result"]->investigation_sub_category_id])->first();
         foreach ($data["result"]->investigationResult as $key => $value){
             $value->parameter_heading = $value->parameter->parameter_heading->name ?? '';

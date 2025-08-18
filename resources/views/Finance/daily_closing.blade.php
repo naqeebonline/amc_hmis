@@ -102,6 +102,7 @@
                                         <td><strong>Total</strong></td>
                                         <td><strong>{{($appointments->total_fees) + ($data->received_amount) + ($investigations->cash_in_hand) + ($service_charges) + ($consultant_charges) - ($pharmacy_return)}}</strong></td>
                                     </tr>
+                                    @if(getUserRole() == 'Super Admin' || getUserRole() == 'Finance')
                                     <tr>
                                         <td>Cash Closing</td>
                                         <td>
@@ -118,6 +119,7 @@
                                         <td></td>
                                         <td><button class="form-control btn btn-primary" type="submit">Post</button></td>
                                     </tr>
+                                        @endif
                                 </table>
 
 
@@ -177,7 +179,7 @@
 
 
                                                 <a href="{{ route('pos.printDailyClosingVoucher', $value->id) }}" target="_blank" class="btn btn-sm btn-primary">
-                                                    <i class="fa fa-print"></i> Clsing report
+                                                    <i class="fa fa-print"></i> Cloing report
                                                 </a>
                                         </td>
                                     </tr>

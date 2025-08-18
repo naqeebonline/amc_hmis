@@ -243,6 +243,7 @@
                                 <th style="display: none">Patient</th>
                                 <th style="width: 15%">Patient</th>
                                 <th>Invoice#</th>
+                                <th style="display: none;">Invoice#</th>
                                 <th>Investigation</th>
 
                                 <th>Amount</th>
@@ -732,6 +733,11 @@
                 },
 
 
+                {
+                    data: 'invoice_no',
+                    name: 'invoice_no',
+                    visible: false
+                },
                 {
                     data: 'print_invoice_number',
                     name: 'print_invoice_number',
