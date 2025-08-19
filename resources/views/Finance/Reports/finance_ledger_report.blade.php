@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
+    <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/select2/select2.css') }}" />
+    <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
@@ -198,10 +201,32 @@
         .table-borderless td,
         .table-borderless th,
         .table-borderless tr,
-        .table-borderless {
-            border: none !important;
+            /* Style the Select2 dropdown to make it visible */
+        .select2-container--default .select2-selection--single {
+            border: 2px solid #1E88E5 !important;   /* blue hospital border */
+            border-radius: 6px !important;
+            height: 38px !important;
+            display: flex;
+            align-items: center;
+            padding: 4px 6px;
+            background-color: #fff;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
         }
 
+        /* On focus (when user clicks) */
+        .select2-container--default .select2-selection--single:focus,
+        .select2-container--default .select2-selection--single:active,
+        .select2-container--open .select2-selection--single {
+            border-color: #43A047 !important;   /* green border on focus */
+            box-shadow: 0 0 6px rgba(30,136,229,0.4);
+        }
+
+        /* Dropdown arrow icon */
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+            right: 8px;
+        }
 
     </style>
     <style>
@@ -236,8 +261,8 @@
                     <tr>
                         <th>Start Date: <input type="date" name="start_date" class="form-control" value="{{ $start_date }}"></th>
                         <th class="text-end">End Date: <input type="date" name="end_date" class="form-control" value="{{ $end_date }}"></th>
-                        <th class="text-end">Head:
-                            <select name="finance_head_id" class="form-control">
+                        <th class="text-end" style="background: white;">
+                            <select name="finance_head_id" class="form-control" style="border: 2px solid black;" id="finance_head_id" class="form-control">
                                 <option value="">All</option>
                                 @foreach($finance_heads as $value)
                                     <option value="{{ $value->id }}" {{ $value->id == $finance_head_id ? 'selected' : '' }}>{{ $value->name }}</option>
@@ -303,6 +328,12 @@
 
 
 </div>
+<script type="text/javascript">
+    $('#finance_head_id').select2({
+        width: '100%',
+        dropdownParent: $('body')
+    });
+</script>
 </body>
 
 </html>
