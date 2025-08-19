@@ -250,7 +250,9 @@
                 <p class="border-bottom pb-1" style="font-weight: bold; background-color: #B2BBC3; text-align: center; font-size: 14px;">
                     Date: {{ $date }}
                 </p>
+                <?php $total = 0; ?>
                 @foreach($reportData['users'] as $user)
+
                     <div class="card mt-3">
                         <div class="card-header">
                             <strong style="font-size: 12px">User: {{ $user['name'] }}</strong><br>
@@ -288,6 +290,7 @@
                                     </th>
                                     <th>
                                         Rs. {{ number_format(collect($user['transactions'])->sum('total_credit'), 2) }}
+                                        <?php $total = ($total) + (collect($user['transactions'])->sum('total_credit')); ?>
                                     </th>
                                 </tr>
                                 </tbody>
@@ -295,6 +298,7 @@
                         </div>
                     </div>
                 @endforeach
+                <p style="text-align: center;font-size: 12px;float: right">Total Amount = {{$total}}</p>
                 <p class="border-bottom mt-2" style="font-weight: bold; background-color: #B2BBC3; text-align: center; font-size: 14px">
                     Date: {{ $date }}
                 </p>
