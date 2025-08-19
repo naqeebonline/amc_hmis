@@ -82,8 +82,23 @@
             height: 100vh;
             background-color: #263c55;
         }
+        .menu-item > a {
+            color: #FFFFFF !important;
+            font-weight: bold;
 
+        }
+        .menu-item.open > a {
+            color: #ffcb02 !important;
+            font-weight: bold;
+        }
 
+        html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner > .menu-item.open:not(.active), .layout-menu-hover.layout-menu-collapsed .bg-menu-theme .menu-inner > .menu-item.open:not(.active) {
+            background-color: #4273a7;
+        }
+
+        .bg-menu-theme .menu-inner-shadow {
+             background: none;
+        }
     </style>
 
     <script>
@@ -349,7 +364,7 @@
                         <li class="menu-item" id="men_item_{{ $menu->id }}" >
                             <a href="javascript:void(0);" class="menu-link menu-toggle">
                                 <i class="menu-icon tf-icons {{ $menu->icon }}"></i>
-                                <span style="color: #FFFFFF">{{ $menu->title }}</span>
+                                <span style="">{{ $menu->title }}</span>
                             </a>
                             <ul class="menu-sub" data-submenu-title="{{ $menu->title }}">
                                 @foreach ($menu->myPermissions as $mp)
@@ -357,7 +372,7 @@
                                         @continue($mp->show_in_menu == 'no')
 
                                         <li class="menu-item @if (\Illuminate\Support\Facades\Route::currentRouteName() == $mpr->route) active @endif">
-                                            <a href="{{ route($mpr->route) }}" style="font-size: 12px !important; font-weight: bold" class="menu-link">
+                                            <a href="{{ route($mpr->route) }}" style="font-size: 15px !important; font-weight: bold" class="menu-link">
                                                 {{ $mpr->title }}
                                             </a>
                                             @php $assignedMenus[$mpr->route] = $mpr->title @endphp
@@ -419,14 +434,14 @@
 
                         <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
                             <!-- Search -->
-                            <div class="navbar-nav align-items-center">
+                            {{--<div class="navbar-nav align-items-center">
                                 <div class="nav-item navbar-search-wrapper mb-0">
                                     <a class="nav-item nav-link search-toggler px-0" href="javascript:void(0);">
                                         <i class="bx bx-search-alt bx-sm"></i>
                                         <span class="d-none d-md-inline-block ">Search (Ctrl+/)</span>
                                     </a>
                                 </div>
-                            </div>
+                            </div>--}}
 
 
                             <!-- /Search -->

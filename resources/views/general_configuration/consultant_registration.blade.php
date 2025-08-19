@@ -143,11 +143,24 @@
                                         class="asterisk">*</span></label>
                             <input type="number" class="form-control" value="0" name="share_percentage" id="share_percentage">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="nameBasic" class="form-label">General OPD Fee<span
                                         class="asterisk">*</span></label>
                             <input type="number" class="form-control" value="0" name="general_opd_fee" id="general_opd_fee">
                         </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="nameBasic" class="form-label">Hospital Share<span
+                                        class="asterisk">*</span></label>
+                            <input type="number" class="form-control" value="0" name="general_opd_hospital_share" id="general_opd_hospital_share">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="nameBasic" class="form-label">Consultant Share<span
+                                        class="asterisk">*</span></label>
+                            <input type="number" class="form-control" value="0" name="general_opd_consultant_share" id="general_opd_consultant_share">
+                        </div>
+
 
                         <div class="col-md-4 mb-3">
                             <label for="nameBasic" class="form-label">Consultant OPD Fee<span
@@ -165,6 +178,24 @@
                             <label for="nameBasic" class="form-label">Consultant Share Rs.<span
                                         class="asterisk">*</span></label>
                             <input type="number" class="form-control" value="0" name="consultant_share" id="consultant_share">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="nameBasic" class="form-label">ER Fee<span
+                                        class="asterisk">*</span></label>
+                            <input type="number" class="form-control" value="0" name="er_fee" id="er_fee">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="nameBasic" class="form-label">ER Hospital Share Rs.<span
+                                        class="asterisk">*</span></label>
+                            <input type="number" class="form-control" value="0" name="er_hospital_share" id="er_hospital_share">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="nameBasic" class="form-label">ER Consultant Share Rs.<span
+                                        class="asterisk">*</span></label>
+                            <input type="number" class="form-control" value="0" name="er_consultant_share" id="er_consultant_share">
                         </div>
 
                         <div class="col-md-4 mb-3">
@@ -222,9 +253,15 @@
             $("#joining_date").val('');
             $("#share_percentage").val('');
             $("#general_opd_fee").val(0);
+            $("#general_opd_hospital_share").val(0);
+            $("#general_opd_consultant_share").val(0);
             $("#consultant_opd_fee").val(0);
             $("#hospital_share").val(0);
             $("#consultant_share").val(0);
+
+            $("#er_fee").val(0);
+            $("#er_hospital_share").val(0);
+            $("#er_consultant_share").val(0);
             $("#lab_percentage").val(0);
             $("#description").val('');
             $("#add_new_record_model").modal("show");
@@ -245,9 +282,14 @@
             $("#joining_date").val(details.joining_date);
             $("#share_percentage").val(details.share_percentage);
             $("#general_opd_fee").val(details.general_opd_fee);
+            $("#general_opd_hospital_share").val(details.general_opd_hospital_share);
+            $("#general_opd_consultant_share").val(details.general_opd_consultant_share);
             $("#consultant_opd_fee").val(details.consultant_opd_fee);
             $("#hospital_share").val(details.hospital_share);
             $("#consultant_share").val(details.consultant_share);
+            $("#er_fee").val(details.er_fee);
+            $("#er_hospital_share").val(details.er_hospital_share);
+            $("#er_consultant_share").val(details.er_consultant_share);
             $("#lab_percentage").val(details.lab_percentage);
             $("#description").val(details.description);
             $("#add_new_record_model").modal("show");

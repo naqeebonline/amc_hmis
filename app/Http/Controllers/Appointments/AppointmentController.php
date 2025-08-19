@@ -43,7 +43,10 @@ class AppointmentController extends Controller
 
     public function list_appointments()
     {
+
         $res = Appointment::with(["patient","opd_type","consultant","created_by_user"])->where(["is_active"=>1])
+            ->select('appointments.*')
+            ->leftJoin('users', 'appointments.created_by', '=', 'users.id')
         ->when(request()->from_date,function ($q){
            // dd("here");
             $q->whereDate("appointment_date",">=",request()->from_date);
@@ -63,16 +66,25 @@ class AppointmentController extends Controller
             ->addColumn('actions', function($cert) {
                 $details = json_encode($cert);
                 //if(in_array(auth()->user()->roles->pluck('name')[0],["Super Admin","District Super Admin"])){
-                    $html = '<a href="javascript:void(0)" data-details=\''.$details.'\' class="btn btn-warning btn-icon btn-sm edit_record" data-name="'.$cert->name.'" data-id="'.$cert->id.'"><i class="tf-icons bx bx-pencil"></i></a>';
-                    $html .= '<a target="_blank" href="'.route('pos.print_appointment',[$cert->id]).'" class="btn btn-success btn-icon btn-sm" data-id="'.$cert->id.'" type="submit"><i class="bx bx-printer tf-icons"></i></a>';
-                    $html .= '<button class="btn btn-danger btn-icon btn-sm delete_record" data-id="'.$cert->id.'" type="submit"><i class="bx bx-trash tf-icons"></i></button>';
+                $html = "";
+                $html .= '<a target="_blank" href="'.route('pos.print_appointment',[$cert->id]).'" class="btn btn-success btn-icon btn-sm" data-id="'.$cert->id.'" type="submit"><i class="bx bx-printer tf-icons"></i></a>&nbsp;&nbsp;';
+                    if((getUserRole() == 'Super Admin' || getUserRole() == 'Finance')){
+                        $html .= '<a href="javascript:void(0)" data-details=\''.$details.'\' class="btn btn-warning btn-icon btn-sm edit_record" data-name="'.$cert->name.'" data-id="'.$cert->id.'"><i class="tf-icons bx bx-pencil"></i></a>&nbsp;&nbsp;';
+                        $html .= '<button class="btn btn-danger btn-icon btn-sm delete_record" data-id="'.$cert->id.'" type="submit"><i class="bx bx-trash tf-icons"></i></button>&nbsp;&nbsp;';
+                    }
+
+
+
                 /*}else{
                     $html = "";
                 }*/
                 return $html;
             })
+            ->addColumn('created_by_user', function($row) {
+                return $row->created_by_user->name ?? '';
+            })
             ->addIndexColumn()
-            ->rawColumns(["actions"])
+            ->rawColumns(["actions","created_by_user"])
             ->make(true);
     }
 
@@ -107,7 +119,7 @@ class AppointmentController extends Controller
 
         $consultant = Consultants::where(["id"=>request()->consultant_id])->first();
         $opd_type = OpdType::where(["id"=>request()->opd_type_id])->first();
-        if(request()->opd_type_id == 1){
+        /*if(request()->opd_type_id == 1){
             $fees = $consultant->general_opd_fee;
             $hospital_share = $consultant->general_opd_fee;
             $consultant_share = 0;
@@ -129,6 +141,30 @@ class AppointmentController extends Controller
             $fees = $opd_type->fees;
             $hospital_share = 0;
             $consultant_share = 0;
+        }*/
+        switch (request()->opd_type_id) {
+            case 1:
+                $fees = $consultant->general_opd_fee;
+                $hospital_share = $consultant->general_opd_hospital_share;
+                $consultant_share = $consultant->general_opd_consultant_share;
+                break;
+
+            case 2:
+                $fees = $consultant->consultant_opd_fee;
+                $hospital_share = $consultant->hospital_share;
+                $consultant_share = $consultant->consultant_share;
+                break;
+            case 4:
+                $fees = $consultant->er_fee;
+                $hospital_share = $consultant->er_hospital_share;
+                $consultant_share = $consultant->er_consultant_share;
+                break;
+
+            default:
+                $fees = $opd_type->fees;
+                $hospital_share = $opd_type->fees;
+                $consultant_share = 0;
+                break;
         }
 
         //$patients = Appointment::orderBy("id","desc")->first();
@@ -162,22 +198,45 @@ class AppointmentController extends Controller
         $fees = 0;
         $hospital_share = 0;
         $consultant_share = 0;
-        if(request()->opd_type_id == 1){
+        /*if(request()->opd_type_id == 1){
             $fees = $opd_type->fees;
             $hospital_share = $opd_type->fees;
             $consultant_share = 0;
-        }
-
-        if(request()->opd_type_id == 2){
+        } else if(request()->opd_type_id == 2){
             $fees = $consultant->consultant_opd_fee;
             $hospital_share = $consultant->hospital_share;
             $consultant_share = $consultant->consultant_share;
-        }
-
-        if(request()->opd_type_id == 3){
+        } else if(request()->opd_type_id == 3){
             $fees = 0;
             $hospital_share = 0;
             $consultant_share = 0;
+        } else(request()->opd_type_id == 4){
+            $fees = $opd_type->fees;
+            $hospital_share = 0;
+            $consultant_share = 0;
+        }*/
+        switch (request()->opd_type_id) {
+            case 1:
+                $fees = $consultant->general_opd_fee;
+                $hospital_share = $consultant->general_opd_hospital_share;
+                $consultant_share = $consultant->general_opd_consultant_share;
+                break;
+
+            case 2:
+                $fees = $consultant->consultant_opd_fee;
+                $hospital_share = $consultant->hospital_share;
+                $consultant_share = $consultant->consultant_share;
+                break;
+            case 4:
+                $fees = $consultant->er_fee;
+                $hospital_share = $consultant->er_hospital_share;
+                $consultant_share = $consultant->er_consultant_share;
+                break;
+            default:
+                $fees = $opd_type->fees;
+                $hospital_share = $opd_type->fees;
+                $consultant_share = 0;
+                break;
         }
 
         $data = [
