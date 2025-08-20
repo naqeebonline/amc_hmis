@@ -686,7 +686,7 @@
             $("#months").val('');
             $("#days").val('');
             $("#gender").val('');
-            $("#id").val('');
+
             $("#location_id").val('').trigger("change");
             $("#cnic").val('');
             $("#cnic").val('');
