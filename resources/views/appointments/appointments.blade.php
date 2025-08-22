@@ -22,6 +22,10 @@
                 <div class="card-body">
                     <form class=" form-submit-event" id="patient_register">
                         <div class="row" style="background-color: lightgrey; padding: 5px">
+
+                            <div class="col-md-2 col-sm-2 mt-1">
+                                <input  type="text" style="background: #eafaff" id="mr_number" value=""  class="form-control" placeholder="MR.No" autocomplete="off">
+                            </div>
                             <div class="col-md-3 col-sm-4 mt-1">
                                 <select name="opd_type_id" required id="opd_type_id" class="form-control select2">
                                     <option value="">OPD Type</option>
@@ -486,6 +490,51 @@
             }
         });
 
+        $("body").on("blur", "#mr_number", function() {
+            var mr_number = $("#mr_number").val();
+
+
+            var id = $("#id").val();
+            if ((mr_number.length > 3 || contact_no.length > 8)) {
+                $.ajax({
+                    type: 'post',
+                    url: "{{ route('pos.get_patient_by_cnic') }}",
+                    data: {
+                        mr_number: mr_number,
+
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(res) {
+                        // console.log(res);
+                        if (res.status) {
+
+                            $("#prev_patients").html('');
+                            registered_patients = res.data;
+                            if(registered_patients.length > 0){
+                                $.each(registered_patients, function(index, value) {
+                                    var html = `<tr>
+                                            <td>${index + 1}</td>
+                                            <td>${value.name}</td>
+                                            <td>${value.father_husband_name}</td>
+                                            <td><div class="btn btn-success select_patient" data-id='${index}' >Select</div></td>
+
+                                            `;
+                                    $("#prev_patients").append(html);
+
+                                });
+                                $("#add_new_record_model").modal("show");
+                            }
+                        }else{
+                            registered_patients = [];
+                            reset_fields();
+                        }
+
+                    }
+                });
+
+            }
+        });
+
         $("body").on("change","#filter_from_date,#filter_to_date,#filter_opd_type_id,#filter_consultant_id",function () {
             user_table.ajax.reload();
         });
@@ -676,6 +725,7 @@
 
         function reset_fields() {
             $("#id").val(0);
+            $("#mr_number").val('');
             $("#contact_no").val('');
             $("#consultant_id").val('').trigger("change");
             $("#district_id").val('').trigger("change");

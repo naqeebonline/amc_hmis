@@ -24,6 +24,7 @@ use App\Models\WardRequest;
 use App\Models\WardRequestDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Yajra\DataTables\Facades\DataTables;
 
 class SaleController extends Controller
@@ -111,17 +112,28 @@ class SaleController extends Controller
         $data['list_products'] = [];
 
         $data['appointments'] = Appointment::where('is_active', 1)
-            ->where('created_at', '>=', Carbon::now()->subDay()) // only last 24 hours
+            ->where('created_at', '>=', Carbon::now()->subDays(5)) // last 5 days
             ->with(['patient'])
             ->get();
 
 
         $data["title"] = "Retail Sale";
-        $data['products'] = Product::orderBy("ProductName", "ASC")
+        /*$data['products'] = Product::orderBy("ProductName", "ASC")
              ->when(session('store_id'),function ($q){
                  $q->where('store_id',session('store_id'));
              })
-            ->get();
+            ->get();*/
+        //Cache::forget('products_store_2');
+        $data["products"] =  Product::with('generic_name')
+        ->when(session('store_id'), function ($q) {
+            $q->where('store_id', session('store_id'));
+        })
+        ->orderBy("ProductName", "ASC")
+        ->where("IsActive", 1)
+        ->where("ProductName", "!=", '')
+        ->where("pack_size", "!=", 0)
+        ->where("pack_price", "!=", 0)
+        ->get();
         foreach ($data['products'] as $key => $value){
             $value->avaliable_qty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');
 

@@ -18,7 +18,7 @@
     </style>
     <script>
         window.onload = function () {
-            window.print(); // Auto-trigger print dialog
+           // window.print(); // Auto-trigger print dialog
         };
     </script>
 </head>
@@ -33,6 +33,9 @@
 
     <div class="main">
         <h6 style="font-size: 14px">Name: {{ $patient->name ?? '' }}</h6>
+        @if($appointment_patient_name !='')
+            <h6 style="font-size: 14px">{{$appointment_patient_name}}</h6>
+        @endif
         <h6 style="font-size: 14px">Printed By: {{ auth()->user()->name ?? "" }}</h6>
 
         <table style="margin-top: 5px">

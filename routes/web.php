@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get("import_all_products_to_bill", [\App\Http\Controllers\Admin\StockController::class, 'import_all_products_to_bill'])->name('pos.import_all_products_to_bill');
 Route::get('/testData', function () {
     $liveData = \Illuminate\Support\Facades\DB::connection('live_mysql')->table('company_levels')->get();
     dd($liveData);
@@ -359,6 +359,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("list_audit", [\App\Http\Controllers\Admin\StockController::class, 'list_audit'])->name('pos.list_audit');
     Route::get("start_pharmacy_audit/{audit_id?}", [\App\Http\Controllers\Admin\StockController::class, 'start_pharmacy_audit'])->name('pos.start_pharmacy_audit');
     Route::post("add_product_to_audit", [\App\Http\Controllers\Admin\StockController::class, 'add_product_to_audit'])->name('pos.add_product_to_audit');
+
     Route::get("delete_product_from_audit/{id?}", [\App\Http\Controllers\Admin\StockController::class, 'delete_product_from_audit'])->name('pos.delete_product_from_audit');
     Route::get("approve_close_audit/{id?}", [\App\Http\Controllers\Admin\StockController::class, 'approve_close_audit'])->name('pos.approve_close_audit');
 

@@ -188,7 +188,7 @@
         </div>
 
         <div class="patient_detail pb-3">
-            <p class="text-end my-2 me-5 pe-2"> {{env('BRANCH_CODE')}} {{ ucfirst($data->patient->mr_no) ?? ''}}</p>
+            <p class="text-end my-2 me-5 pe-2" style="font-weight: bold">MR# {{env('BRANCH_CODE')}} {{ ucfirst($data->patient->mr_no) ?? ''}}</p>
 
             <div class="row g-0 pt_detail">
                 <div class="name col-6 pe-2 height">

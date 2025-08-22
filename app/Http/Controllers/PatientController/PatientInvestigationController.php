@@ -73,7 +73,7 @@ class PatientInvestigationController extends Controller
         $total_inv_amount = 0;
         foreach ($list_investigations as $key => $value){
             $investigation = InvestigationSubCategory::where("id",$value->investigation_id)->first();
-            $investigation_rate_after_discount = ($investigation->sale_price) - ($value->discount_amount);
+            $investigation_rate_after_discount = ($investigation->sale_price * $value->frequency) - ($value->discount_amount);
             $total_inv_amount = ($total_inv_amount) + ($investigation_rate_after_discount);
             $data = [
                 "invoice_no"        => request()->invoice_no,
@@ -83,7 +83,7 @@ class PatientInvestigationController extends Controller
                 "consultant_share_percentage"    => $consultant_share_percentage,
                 "consultant_share_amount"    => ($investigation_rate_after_discount * $consultant_share_percentage)/100,
                 "inv_amount"        => $investigation->price,
-                "sale_price"        => $investigation->sale_price,
+                "sale_price"        => ($investigation->sale_price * $value->frequency),
                 "frequency"         => $value->frequency,
                 "discount_percentage"    => $value->discount_percentage,
                 "discount_amount"    => $value->discount_amount,
@@ -145,6 +145,7 @@ class PatientInvestigationController extends Controller
     public function save_patient_investigation()
     {
         $data = request()->except(['_token', "id"]);
+
         $data['inv_date'] = request()->inv_date . " " . date("h:i:s");
         if (request()->id == 0) {
             $data['created_by'] = auth()->user()->id;

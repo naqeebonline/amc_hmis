@@ -30,7 +30,7 @@ class InvestigationResult extends Controller
 
     public function investigation_result_list()
     {
-        $investigations = PatientInvestigation::whereStatus(0)->with("patient", "admission", "investigation");
+        $investigations = PatientInvestigation::whereStatus(0)->where(["is_active"=>1])->with("patient", "admission", "investigation");
 
         return DataTables::of($investigations)
             ->editColumn('status', function ($row) {
@@ -92,17 +92,20 @@ class InvestigationResult extends Controller
                 "updated_by" => auth()->user()->id,
             ]);
         }else{
-            foreach (request()->parameter_id as $key => $paramenter) {
-                PatientInvestigationResult::create([
-                    "patient_investigation_id" => request()->inv_id,
-                    "parameter_id" => $paramenter,
-                    "result_value" => request()->result[$key],
-                    "result_text_value" => request()->result_text_value[$key],
-                    "result_entry_date" => Carbon::now(),
-                    "created_by" => auth()->user()->id,
-                    "updated_by" => auth()->user()->id,
-                ]);
-            }
+
+                foreach (request()->parameter_id as $key => $paramenter) {
+                    PatientInvestigationResult::create([
+                        "patient_investigation_id" => request()->inv_id,
+                        "parameter_id" => $paramenter,
+                        "result_value" => request()->result[$key],
+                        "result_text_value" => request()->result_text_value[$key],
+                        "result_entry_date" => Carbon::now(),
+                        "created_by" => auth()->user()->id,
+                        "updated_by" => auth()->user()->id,
+                    ]);
+                }
+
+
         }
 
        /* $current_investigation =  PatientInvestigation::with(['consultant'])->where("id",request()->inv_id)->first();

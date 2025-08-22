@@ -110,7 +110,7 @@
 
                             <div class="col-md-2">
                                 <label for="">Batch No.</label>
-                                <input type="text" required name="batch_no" id="batch_no" class="form-control" placeholder="Batch No">
+                                <input type="text" required name="batch_no" id="batch_no" value="opening-001" class="form-control" placeholder="Batch No">
                             </div>
                             <div class="col-md-2">
                                 <label for="">Expiry</label>
@@ -178,10 +178,13 @@
                             $grantPerItemTotalDiscount = 0;
                         @endphp
                         <tbody>
+
                         @foreach ($purchase as $key => $item)
                             @php
                                 $gstTotalAmount += $item->gst_tax_amount;
+
                                 $qty = $item->Quantity / $item->pack_size;
+
                                // $totalAmount = $qty * $item->pack_price;
                                $totalAmount = $item->Quantity * $item->UnitPrice;
                                 $grantTotalAmount += $totalAmount;
@@ -189,6 +192,7 @@
                                 $advanceTaxTotalAmount += $item->advance_tax_amount;
 
                                 $item_dicount = ($item->discount) / 100;
+
                                $per_item_discount = ($totalAmount) * $item_dicount;
                                 $grantPerItemTotalDiscount += $per_item_discount;
 
@@ -196,6 +200,7 @@
                             <tr >
                                 <form method="post" action="{{ route('pos.update_grn') }}">
                                     @csrf
+                                    <input type="hidden" name="page" value="{{ $_GET['page'] ?? 1; }}">
                                     <input type="hidden" name="GRNID" value="{{ $id }}">
                                     <td>{{ $key + 1 }}</td>
                                     <td>
@@ -212,6 +217,7 @@
 
                                     <td><input type="number" step="0.01" name="pack_price[]" value="{{ $item->pack_price }}"> <span style="color: red;font-size: 9px;">U.Price: {{$item->UnitPrice}}</span>
                                     </td>
+
                                     <td>{{ $totalAmount }}</td>
                                     <td>{{ $item->gst_tax_amount }}</td>
                                     <td>{{ $item->advance_tax_amount }}</td>
@@ -254,6 +260,10 @@
                         </tr>
                         </tfoot>
                     </table>
+
+                    <div>
+                        {{ $purchase->links() }}
+                    </div>
 
                 </div>
             </div>

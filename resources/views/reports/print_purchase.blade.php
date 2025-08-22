@@ -68,9 +68,11 @@
             <div class="col-md-6 mx-auto">
                 <div class="row">
                     <div class="col-12 text-cente">
+                        <p class="m-0">Invoice#: {{ $grn_request->InvoiceNo }}</p>
                         <h4 class="mb-1">{{ $supplier->Name }}</h4>
                     </div>
                     <div class="col-6">
+
                         <p class="m-0">Contact #: {{ $supplier->ContactNo }}</p>
                         <p class="m-0">Email #: {{ $supplier->Email }}</p>
                     </div>
@@ -202,6 +204,8 @@
 
 
                         </table>
+
+
 
                     </div>
                 </div>

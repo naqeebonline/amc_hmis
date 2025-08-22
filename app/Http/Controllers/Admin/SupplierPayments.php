@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointments\Appointment;
 use App\Models\Customer;
 use App\Models\Grn;
 use App\Models\GrnDetails;
@@ -19,6 +20,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Yajra\DataTables\Facades\DataTables;
 use Mike42\Escpos\Printer;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
@@ -169,13 +171,25 @@ class SupplierPayments extends Controller
     
 
     public function add_bill_items($id){
-        $data["products"]= Product::with('generic_name')
+        /*$data["products"]= Product::with('generic_name')
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
             })
-            ->where("IsActive", 1)->where("pack_size","!=",0)->where("pack_price","!=",0)->get();
+            ->where("IsActive", 1)->where("pack_size","!=",0)->where("pack_price","!=",0)->get();*/
+        //Cache::forget('products_store_2');
+        $data["products"] = Product::with('generic_name')
+            ->when(session('store_id'), function ($q) {
+                $q->where('store_id', session('store_id'));
+            })
+            ->orderBy("ProductName", "ASC")
+            ->where("ProductName", "!=", '')
+            ->where("IsActive", 1)
+            ->where("pack_size", "!=", 0)
+            ->where("pack_price", "!=", 0)
+            ->get();
+        //$data["products"] = [];
         $data['grn'] = GrnRequest::where('GRNID', $id)->with("products")->with('store')->first();
-        $data['purchase'] = GrnRequestDetails::where('GRNID', $id)->with("products")->orderBy("GDID","DESC")->where(["ProductStatus" => 1])->get();
+        $data['purchase'] = GrnRequestDetails::where('GRNID', $id)->with("products")->orderBy("GDID","DESC")->where(["ProductStatus" => 1])->paginate(400);
         $data['id'] = $id;
 
 
@@ -255,6 +269,13 @@ class SupplierPayments extends Controller
 
         $data['record'] = Sale::where(['SaleID' => $SaleID])->first();
         $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
+        $appointments = Appointment::where('is_active', 1)
+            ->where('id', $data['record']->appointment_id) // last 5 days
+            ->with(['patient'])
+            ->first();
+        $data['appointment_patient_name'] = $appointments ? $appointments->patient?->name." | Appointment# ".$appointments->appointment_number : "";
+
+
         $customer_id = $data['record']->SCID;
         $billDate = date("d-m-Y", strtotime($data['record']->Date));
 
@@ -313,8 +334,8 @@ class SupplierPayments extends Controller
 
         $data['customer'] = Customer::where("SCID", $customer_id)->get();
 
-        $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
-        $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+      //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        //$this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
 
 
         return view('reports/print_retail_sale_invoice', $data);
@@ -437,6 +458,7 @@ class SupplierPayments extends Controller
     public function print_purchase_request($SCID, $GRNID){
         $data["supplier"] = Customer::where("Type", 1)->where("SCID", $SCID)->with("market")->first();
         $data["products"]= Product::where("IsActive", 1)->get();
+        $data["grn_request"]= GrnRequest::where("GRNID", $GRNID)->first();
         $data['purchase'] = GrnRequestDetails::where('GRNID', $GRNID)->with("products")->orderBy("GDID","DESC")->where(["GRNID" => $GRNID])->get();
 
 

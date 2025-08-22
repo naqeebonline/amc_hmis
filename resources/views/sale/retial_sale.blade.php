@@ -245,7 +245,7 @@
         </div>
 
         <div class="col-md-3">
-            <label for="received">Select Customer</label>
+            <label for="received">Select Patient</label>
             <select id="SID" name="SID" class="form-control">
                 <option value="">Please Select Patient...</option>
                {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
@@ -1118,7 +1118,7 @@
         $("#product_id").val(null).trigger('change');
         $("#product_id").focus();
         $("#product_id").select2('open');
-        $("#dose_type").val('');
+        $("#dose_type").val('-');
         taxPercentage = 0;
         currentAvailableQuantity = 0;
 

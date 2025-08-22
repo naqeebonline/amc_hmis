@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\ProductKit;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -62,9 +63,10 @@ class ProductController extends Controller
         //dd(request()->all());
         $data = request()->except(["id","_token"]);
         $data['store_id'] = session('store_id');
+        Cache::forget('products_store_2');
         Product::updateOrCreate(
             ["ProductID"=>request()->id],
-            request()->except(["id","_token"])
+            $data
         );
         return ["status"=>true,"message"=>"Record saved successfully"];
     }

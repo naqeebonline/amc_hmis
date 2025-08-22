@@ -346,6 +346,7 @@
     <script>
         registered_patients = [];
         list_investigation = [];
+        time = "";
         setTimeout(function() {
             $(".select2").select2();
             $("#district_id").select2();
@@ -356,7 +357,7 @@
             $("#edit_consultant_id").select2({dropdownParent: $('.my_modal')});
             $("#edit_opd_type_id").select2({dropdownParent: $('.my_modal')});
 
-            let time = Date.now();
+             time = Date.now();
             $("#invoice_no").val(time);
         }, 1000);
 
@@ -857,8 +858,12 @@
                         //window.open(url, '_blank');
 
                         reset_fields();
+                        $("#mr_number").val("");
                         //window.location.reload();
                         user_table.ajax.reload();
+
+                        //var url = "{{route('pos.print_hospital_lab_invoice')}}/"+time;
+                        //window.open(url, '_blank');
                     },
                     error: function(XMLHttpRequest, textStatus, errorThrown) {
                         //console.log();

@@ -57,7 +57,10 @@ class FinanceController extends Controller
         $data['service_charges'] = $this->serviceCharges($closing_date,$user_id);
         $data['in_patient_sale'] = $this->in_patient_sale($closing_date,$user_id);
         $data['consultant_charges'] = $this->consultant_charges($closing_date,$user_id);
-        $data['voucher'] = FinanceVoucher::where(["created_by"=>auth()->user()->id,"voucher_type"=>"closing"])->with(['user'])->orderBy("id","desc")->paginate(20);
+        $data['voucher'] = FinanceVoucher::when((getUserRole() != 'Super Admin' && getUserRole() != 'Finance'), function ($query) use ($user_id) {
+            return $query->where(["created_by"=>auth()->user()->id,"voucher_type"=>"closing"]);
+        })->with(['user'])->orderBy("id","desc")->paginate(20);
+
 
        return view("Finance.daily_closing",$data);
     }

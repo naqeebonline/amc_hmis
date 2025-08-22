@@ -334,6 +334,7 @@ class StockController extends Controller
         return redirect()->route('pos.add_bill_items', [
             'id' => request()->GRNID,                // Route parameter
             'edit_id' => $id,       // Query string parameter
+            'page' => request()->page,       // Query string parameter
 
         ]);
 
@@ -497,7 +498,7 @@ class StockController extends Controller
 
 
         //--------- finance entry will goes here   --//
-        $voucher = generateVoucherNumber("GRN-PUR",auth()->user()->id);
+        $voucher = generateVoucherNumber("pharmacy_purchase",auth()->user()->id);
 
         $voucher_data = [
             "voucher_number" =>$voucher,
@@ -794,5 +795,38 @@ class StockController extends Controller
             })
             ->update(["avaliable_quantity"=>$qty]);
         return $qty;
+    }
+
+    public function import_all_products_to_bill()
+    {
+        $products = Product::where(["store_id"=>2])->get();
+        foreach ($products as $key => $value){
+            $fields = [
+                'store_id'            => 2,
+                'ProductID'           => $value->ProductID,
+                'GRNID'               => 1,
+                'batch_no'            => 0,
+                'Quantity'            => 0,
+                'Damage'              => 0,
+                'UnitPrice'           => $value->PurchasePrice,
+                'discount'            => 0,
+                'pack_price'          => $value->pack_price,
+                'pack_size'           => $value->pack_size,
+                'taxPercentage'       => 0,
+                'taxAmount'           => 0,
+                'gst_tax_amount'      => 0,
+                'advance_tax_amount'  => 0,
+                'advance_tax'         => 0,
+                'gst_tax'             => 0,
+                'SoldQuantity'        => 0,
+                'TotalReturn'         => 0,
+                'RemainingQuantity'   => 0,
+                'ProductStatus'       => 1,
+                'expiry_date'         => "2026-04-21",
+            ];
+            GrnRequestDetails::create($fields);
+        }
+        return ["status"=>true,"message"=>"All Products added successfully"];
+
     }
 }

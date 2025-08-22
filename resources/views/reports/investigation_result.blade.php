@@ -337,6 +337,7 @@
                                     class="text-center {{ strtolower($item->result_text_value) == 'positive' ? 'fw-bold out-range' : '' }}">
                                 {{ ucfirst($item->result_text_value) }} </td>
                         @else
+                            @if(is_numeric($item->result_value))
                             <td
                                     class="text-center {{ $item->result_value > $range_max_value || $item->result_value < $range_min_value ? 'fw-bold out-range' : '' }}">
 
@@ -350,6 +351,11 @@
 
                                 ?>
                             </td>
+                             @else
+                                <td class="text-center">
+                                    {{$item->result_value}}
+                                </td>
+                             @endif
                         @endif
 
 

@@ -272,6 +272,9 @@ class FinanceReportController extends Controller
             ->leftJoin('finance_heads as fh', 'ft.head_id', '=', 'fh.id')
             ->whereBetween('ft.transaction_date', [$start_date, $end_date])
             ->where('ft.is_active', 1)
+            ->where('ft.reference_type','!=', 'cash_payment_voucher')
+            ->where('ft.reference_type','!=', 'cash_receipt_voucher')
+            ->where('ft.reference_type','!=', 'journal_voucher')
             ->where(function ($q) {
                 $q->whereNull('ft.reference_type')
                     ->orWhere('ft.reference_type', '!=', 'commission');
