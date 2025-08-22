@@ -191,6 +191,7 @@ class FinanceReportController extends Controller
         $voucher = FinanceVoucher::with(['createdBy', 'approvedBy'])
             ->findOrFail($voucher_id);
 
+
         // Get transactions related to the voucher, excluding commissions
         $transactions = DB::table('finance_transactions as ft')
             ->join('finance_heads as fh', 'fh.id', '=', 'ft.head_id')
@@ -209,6 +210,10 @@ class FinanceReportController extends Controller
             ->where('ft.is_active', 1)
             ->get();
 
+      //  dd($transactions);
+
+
+
         // Map and prepare rows
         $rows = collect();
         foreach ($transactions as $t) {
@@ -225,10 +230,67 @@ class FinanceReportController extends Controller
         // Sort debit first
         $sortedRows = $rows->sortBy(fn($item) => $item['type'] === 'debit' ? 0 : 1)->values();
 
+
+
     $totalDebit = $sortedRows->sum('debit');
     $totalCredit = $sortedRows->sum('credit');
+   // dd($totalDebit,$totalCredit);
 
     return view('Finance.Reports.print_daily_closing_voucher', compact(
+        'voucher', 'sortedRows', 'totalDebit', 'totalCredit'
+    ));
+}
+
+    public function printJournalVoucher($voucher_id)
+    {
+        $voucher = FinanceVoucher::with(['createdBy', 'approvedBy'])
+            ->findOrFail($voucher_id);
+
+
+        // Get transactions related to the voucher, excluding commissions
+        $transactions = DB::table('finance_transactions as ft')
+            ->join('finance_heads as fh', 'fh.id', '=', 'ft.head_id')
+            ->select(
+                'fh.head_code',
+                'fh.name as head_title',
+                'ft.debit',
+                'ft.credit'
+            )
+            ->where('ft.voucher_id', $voucher_id)
+            ->where(function ($q) {
+                $q->whereNull('ft.reference_type')
+                    ->orWhere('ft.reference_type', '!=', 'commission');
+            })
+            ->where('ft.is_active', 1)
+            ->get();
+
+        //  dd($transactions);
+
+
+
+        // Map and prepare rows
+        $rows = collect();
+        foreach ($transactions as $t) {
+            $rows->push([
+                'head_code' => $t->head_code,
+                'head_title' => $t->head_title,
+                'debit' => $t->debit,
+                'credit' => $t->credit,
+                'balance' => $t->debit > 0 ? $t->debit : $t->credit,
+                'type' => $t->debit > 0 ? 'debit' : 'credit',
+            ]);
+        }
+
+        // Sort debit first
+        $sortedRows = $rows->sortBy(fn($item) => $item['type'] === 'debit' ? 0 : 1)->values();
+
+
+
+    $totalDebit = $sortedRows->sum('debit');
+    $totalCredit = $sortedRows->sum('credit');
+   // dd($totalDebit,$totalCredit);
+
+    return view('Finance.Reports.print_journal_voucher', compact(
         'voucher', 'sortedRows', 'totalDebit', 'totalCredit'
     ));
 }

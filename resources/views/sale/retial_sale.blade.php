@@ -239,7 +239,7 @@
                 <option value="">Please Select Appointment...</option>
                 {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
                 <?php foreach($appointments as $key => $value){ ?>
-                     <option  value="<?php echo $value->id; ?>"><?php echo $value->patient->name." | ".env('BRANCH_CODE').$value->appointment_number; ?></option>
+                     <option  value="<?php echo $value->id; ?>"><?php echo $value->patient->name." | Appointment# ".$value->appointment_number." | MR#: ".$value->patient->mr_no; ?></option>
                 <?php } ?>
             </select>
         </div>
@@ -626,7 +626,47 @@
     $(document).ready(function(){
         $("#product_id").select2();
         $("#SID").select2();
-        $("#appointment_id").select2();
+       // $("#appointment_id").select2();
+        $('#appointment_id').select2({
+            placeholder: "Please Select Appointment...",
+            allowClear: true,
+            minimumInputLength: 1,
+            ajax: {
+                transport: function (params, success, failure) {
+                    // Check if local options already match
+                    var term = params.data.q ? params.data.q.toLowerCase() : '';
+                    var localMatch = [];
+
+                    $('#appointment_id option').each(function () {
+                        var text = $(this).text().toLowerCase();
+                        if (text.indexOf(term) > -1) {
+                            localMatch.push({
+                                id: $(this).val(),
+                                text: $(this).text()
+                            });
+                        }
+                    });
+
+                    // If found locally → return without ajax
+                    if (localMatch.length > 0) {
+                        success(localMatch);
+                        return;
+                    }
+
+                    // Else → send ajax request
+                    $.ajax(params, success, failure);
+                },
+                url: "{{ route('pos.search_appointment') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term };
+                },
+                processResults: function (data) {
+                    return { results: data };
+                }
+            }
+        });
 
 
 

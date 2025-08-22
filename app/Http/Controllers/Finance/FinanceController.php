@@ -18,6 +18,7 @@ use App\Models\Sale;
 use App\Models\SaleDetails;
 use App\Models\SalePayment;
 use App\Models\Users;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -722,6 +723,70 @@ class FinanceController extends Controller
 
         return ($return_qty ?? 0) * ($cogs->PurchasePrice ?? 0);
 
+    }
+
+    public function create()
+    {
+       // $finance_heads = FinanceHead::whereNotNul('parent_id')->get();
+        $finance_heads = FinanceHead::whereNotNull('parent_id')->get();
+        $vouchers = FinanceVoucher::orderBy("id","DESC")->where("voucher_type","journal_voucher")->paginate(30);
+        return view('Finance.journal_voucher', compact('finance_heads','vouchers'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'entries' => 'required'
+        ]);
+
+        $entries = json_decode($request->entries, true);
+
+        if(empty($entries)){
+            return back()->with('error', 'No entries found.');
+        }
+        $remarks = "";
+        foreach($entries as $entry){
+            $remarks = $remarks.$entry['remarks']." , ";
+        }
+
+        $totalAmount = collect($entries)->where('type', 'credit')->sum('amount');
+       // dd($totalAmount);
+
+
+            $voucher = generateVoucherNumber("journal_voucher",auth()->user()->id);
+
+            $voucher_data = [
+                "voucher_number" =>$voucher,
+                "user_id"   =>  auth()->user()->id,
+                "voucher_type"   => "journal_voucher",
+                "voucher_date"   => date("Y-m-d"),
+                "total_amount"   => $totalAmount,
+                "remarks"   =>    "JV Created by ".auth()->user()->name,
+                "created_by"   => auth()->user()->id,
+                "created_at"   => date("Y-m-d H:i:s"),
+            ];
+            $voucher = FinanceVoucher::create($voucher_data);
+            $voucher_id = $voucher->id;
+
+            foreach($entries as $entry){
+
+                FinanceTransaction::create([
+                    'voucher_id' => $voucher_id,
+                    'transaction_date' => date("Y-m-d"),
+                    'reference_type' => "journal_voucher",
+                    'reference_id' => 0,
+                    'head_id' => $entry['head_id'],
+                    'debit' => $entry['type'] === 'debit' ? $entry['amount'] : 0,
+                    'credit' => $entry['type'] === 'credit' ? $entry['amount'] : 0,
+                    'remarks' => $remarks,
+                    'user_id' => auth()->user()->id,
+                    'created_by' => auth()->user()->id,
+                    'created_at' => date("Y-m-d H:i:s"),
+                ]);
+            }
+
+
+        return redirect()->route('pos.journal_voucher')->with('success', 'Journal Voucher Posted');
     }
 
 

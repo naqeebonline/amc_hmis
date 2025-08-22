@@ -465,7 +465,7 @@
                 if (confirm('Are you sure to delete this record ?')) {
                     $.ajax({
                         type: 'post',
-                        url: "{{ route('pos.delete-table-data') }}",
+                        url: "{{ route('pos.delete_IsActive') }}",
                         data: {
                             id: id,
                             table:"products",
@@ -473,8 +473,8 @@
 
                         },
                         success: function(res) {
-                            //user_table.dataTable.reload();
-                            window.location.reload();
+                            user_table.ajax.reload();
+                           // window.location.reload();
                         }
                     })
                 } else {

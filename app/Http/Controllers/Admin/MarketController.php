@@ -59,4 +59,11 @@ class MarketController extends Controller
         return ["status"=>true,"message"=>"Record saved successfully"];
 
     }
+
+    public function delete_IsActive()
+    {
+        DB::table(request()->table)->where("ProductID",request()->id)->update(["IsActive"=>0]);
+        return ["status"=>true,"message"=>"Record saved successfully"];
+
+    }
 }

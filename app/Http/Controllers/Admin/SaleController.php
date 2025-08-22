@@ -114,6 +114,7 @@ class SaleController extends Controller
         $data['appointments'] = Appointment::where('is_active', 1)
             ->where('created_at', '>=', Carbon::now()->subDays(5)) // last 5 days
             ->with(['patient'])
+            ->orderBy('appointment_date', 'desc')
             ->get();
 
 
@@ -144,6 +145,33 @@ class SaleController extends Controller
         $data['invoiceNo'] = $this->returnInvoiceNumber();
 
         return view("sale.retial_sale", $data);
+    }
+
+    public function search_appointment(Request $request)
+    {
+        $term = $request->get('q');
+
+        $appointments = Appointment::where('is_active', 1)
+            ->when($term, function ($q) use ($term) {
+                $q->whereHas('patient', function ($sub) use ($term) {
+                    $sub->where('name', 'like', "%{$term}%")
+                        ->orWhere('mr_no', 'like', "%{$term}%");
+                })
+                    ->orWhere('appointment_number', 'like', "%{$term}%");
+            })
+            ->with('patient')
+            ->orderBy('appointment_date', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json($appointments->map(function ($a) {
+            return [
+                'id'   => $a->id,
+                'text' => $a->patient->name .
+                    " | Appointment# " . $a->appointment_number .
+                    " | MR#: " . $a->patient->mr_no,
+            ];
+        }));
     }
 
     public function in_patient_pharmacy_sale()

@@ -82,6 +82,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('save-market', [\App\Http\Controllers\Admin\MarketController::class, 'save_market'])->name('pos.save_market');
     Route::post('delete-table-data', [\App\Http\Controllers\Admin\MarketController::class, 'delete_table_data'])->name('pos.delete-table-data');
     Route::post('delete_table_data_2', [\App\Http\Controllers\Admin\MarketController::class, 'delete_table_data_2'])->name('pos.delete_table_data_2');
+    Route::post('delete_IsActive', [\App\Http\Controllers\Admin\MarketController::class, 'delete_IsActive'])->name('pos.delete_IsActive');
 
     Route::get('add_new_product', [\App\Http\Controllers\Admin\ProductController::class, 'add_new_product'])->name('pos.add_new_product')->middleware('store.selected');
     Route::get('grn_request', [\App\Http\Controllers\Admin\StockController::class, 'grn_request'])->name('pos.grn_request')->middleware('store.selected');
@@ -89,6 +90,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('ware-house-stock', [\App\Http\Controllers\Admin\StockController::class, 'ware_house_stock'])->name('pos.ware_house_stock')->middleware('store.selected');
     Route::get('sehat-card-pharmacy-sale', [\App\Http\Controllers\Admin\SaleController::class, 'sehat_card_pharmacy_sale'])->name('pos.add_new_sale')->middleware('store.selected');
     Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale')->middleware('store.selected');
+    Route::get('search_appointment', [\App\Http\Controllers\Admin\SaleController::class, 'search_appointment'])->name('pos.search_appointment');
 
 
     Route::get('list_product', [\App\Http\Controllers\Admin\ProductController::class, 'list_product'])->name('pos.list_product');
@@ -402,8 +404,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/approve_transaction_entry', [\App\Http\Controllers\Finance\FinanceController::class, 'approve_transaction_entry'])->name('pos.approve_transaction_entry');
     Route::post('delete_transaction_entry', [\App\Http\Controllers\Finance\FinanceController::class, 'delete_transaction_entry'])->name('pos.delete_transaction_entry');
 
-    Route::get('/journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'journal_voucher'])->name('pos.journal_voucher');
-    Route::post('/save_journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'save_journal_voucher'])->name('pos.save_journal_voucher');
+   /* Route::get('/journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'journal_voucher'])->name('pos.journal_voucher');
+    Route::post('/save_journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'save_journal_voucher'])->name('pos.save_journal_voucher');*/
+
+
+    Route::get('journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'create'])->name('pos.journal_voucher');
+    Route::post('journal-voucher', [\App\Http\Controllers\Finance\FinanceController::class, 'store'])->name('pos.save_journal_voucher');
 
 
     //--------------   in/out patient for hospital  --------------------//
@@ -421,6 +427,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("in_patient_discharged_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_list"])->name("pos.in_patient_discharged_list");
      //-----         reports   ------//
     Route::get('/printDailyClosingVoucher/{id}', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'printDailyClosingVoucher'])->name('pos.printDailyClosingVoucher');
+    Route::get('/printJournalVoucher/{id}', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'printJournalVoucher'])->name('pos.printJournalVoucher');
     Route::get('/get_user_base_daily_closing_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'get_user_base_daily_closing_report'])->name('pos.get_user_base_daily_closing_report');
     Route::get('/get_user_base_daily_closing_report2', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'get_user_base_daily_closing_report2'])->name('pos.get_user_base_daily_closing_report2');
     Route::get('/trail_balance_report', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'trail_balance_report'])->name('pos.trail_balance_report');

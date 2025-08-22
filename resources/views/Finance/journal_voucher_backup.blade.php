@@ -1,80 +1,97 @@
 @extends('layouts.' . config('settings.active_layout'))
 @php $app_id = config('settings.app_id') @endphp
 
+@push('stylesheets')
+    <style>
+        .table> :not(caption)>*>* {
+            padding: 5px;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
+@endpush
+
 @section('content')
+
     <div class="row mt-2">
         <div class="col-12">
+
+            <!-- Traffic sources -->
             <div class="card">
                 <div class="card-body">
-                    <h5>Journal Voucher</h5>
-                    <form id="jv_form" method="POST" action="{{ route('pos.save_journal_voucher') }}">
+                    <h5 >Journal Voucher</h5>
+                    <form class=" form-submit-event" method="post" action="{{route('pos.save_journal_voucher')}}" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-md-6 col-sm-4 mb-3">
                                 <table class="table table-bordered">
                                     <tr>
-                                        <td style="width: 10%">Head:</td>
-                                        <td style="width: 30%">
-                                            <select id="head_id" class="form-select">
+                                        <td style="width: 30%">CR Head:</td>
+                                        <td style="width: 70%">
+                                            <select name="credit_head_id" required id="credit_head_id" class="form-select">
                                                 <option value="">Select Head ----</option>
-                                                @foreach ($finance_heads as $head)
-                                                    <option value="{{ $head->id }}">{{ strtoupper($head->name) }}</option>
+                                                @foreach ($finance_heads as $key => $value)
+                                                    <option value="{{ $value->id }}">{{ strtoupper($value->name) }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td style="width: 10%">
-                                            <label><input type="radio" name="type" value="debit" checked> Debit</label>
-                                            <label><input type="radio" name="type" value="credit"> Credit</label>
-                                        </td>
-                                        <td style="width: 20%">
-                                            <input type="number" id="amount" class="form-control" placeholder="Amount">
-                                        </td>
-                                        <td style="width: 20%">
-                                            <textarea id="remarks" class="form-control"></textarea>
-                                        </td>
-                                        <td style="width: 10%">
-                                            <button type="button" id="add_entry" class="btn btn-success btn-sm">Add</button>
+                                    </tr>
+
+                                    <tr>
+                                        <td>DR Head:</td>
+                                        <td>
+                                            <select name="debit_head_id" required id="debit_head_id" class="form-select">
+                                                <option value="">Select Head ----</option>
+                                                @foreach ($sub_heads as $key => $value)
+                                                    <option value="{{ $value->id }}">{{ strtoupper($value->name) }}</option>
+                                                @endforeach
+                                            </select>
                                         </td>
                                     </tr>
 
+                                    <tr>
+                                        <td>Amount</td>
+                                        <td>
+                                            <input type="number" class="form-control" id="amount" name="amount">
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Remarks</td>
+                                        <td>
+                                            <textarea name="remarks" id="remarks" class="form-control"></textarea>
+                                        </td>
+                                    </tr>
+
+
+
+
+
+
+                                    <tr>
+                                        <td style="font-weight: bold">Balance: Cr <span id="cr_amount_display">0</span></td>
+                                        <td><button class="form-control btn btn-primary" type="submit">Post</button></td>
+                                    </tr>
                                 </table>
+
+
                             </div>
+
+
+
                         </div>
-
-                        <h6 class="mt-3">JV Entries</h6>
-                        <table class="table table-striped" id="jv_table">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Head</th>
-                                <th>Type</th>
-                                <th>Amount</th>
-                                <th>Remarks</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody></tbody>
-                            <tfoot>
-                            <tr>
-                                <th colspan="3" class="text-end">Total Debit:</th>
-                                <th id="total_debit">0</th>
-                                <th colspan="2"></th>
-                            </tr>
-                            <tr>
-                                <th colspan="3" class="text-end">Total Credit:</th>
-                                <th id="total_credit">0</th>
-                                <th colspan="2"></th>
-                            </tr>
-                            </tfoot>
-                        </table>
-
-                        <input type="hidden" name="entries" id="entries_data">
-                        <button type="submit" id="post_btn" class="btn btn-primary" disabled>Post Voucher</button>
                     </form>
                 </div>
             </div>
+
+
+
         </div>
+
+
     </div>
 
     <div class="row mt-2">
@@ -121,7 +138,7 @@
                                                 </button>
                                             @endif
 
-                                            <a href="{{ route('pos.printJournalVoucher', $value->id) }}" target="_blank" class="btn btn-sm btn-primary">
+                                            <a href="{{ route('pos.printDailyClosingVoucher', $value->id) }}" target="_blank" class="btn btn-sm btn-primary">
                                                 <i class="fa fa-print"></i>
                                             </a>
                                         </td>
@@ -145,77 +162,74 @@
 
 
     </div>
+
+
+
+    <div class="modal fade" id="add_new_record_model" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form class="modal-content form-submit-event" id="from_submit">
+                <input type="hidden" id="id" name="id" value="0">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Patients</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Serial</th>
+                                <th>Name</th>
+                                <th>Father Name</th>
+                                <th></th>
+                            </tr>
+                            <tbody id="prev_patients">
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+
+
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 @endsection
 
-
 @push('scripts')
-    <script>
-        let entries = [];
-        let counter = 1;
-       setTimeout(function () {
-           $("#head_id").select2();
-       },2000);
-        function renderTable() {
-            let tbody = $("#jv_table tbody");
-            tbody.empty();
+    <script src="{{ asset('assets/vendor/libs/datatables/jquery.dataTables.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-responsive/datatables.responsive.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/select2/select2.css') }}" />
+    <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.form.min.js') }}"></script>
 
-            let totalDebit = 0, totalCredit = 0;
+    <script type="text/javascript">
+        setTimeout(function () {
+            $("#credit_head_id").select2();
+            $("#debit_head_id").select2();
+        },1000);
 
-            entries.forEach((entry, index) => {
-                let row = `<tr>
-            <td>${index+1}</td>
-            <td>${entry.head_name}</td>
-            <td>${entry.type.toUpperCase()}</td>
-            <td>${entry.amount}</td>
-            <td>${entry.remarks}</td>
-            <td><button type="button" class="btn btn-danger btn-sm remove_entry" data-index="${index}">X</button></td>
-        </tr>`;
-                tbody.append(row);
+        $("body").on("change","#debit_head_id",function () {
+           var value = $(this).val();
+            $.ajax({
+                type: 'post',
+                url: "{{ route('pos.getBalance') }}",
+                data: {
+                    id: value,
+                    _token: '{{ csrf_token() }}'
 
-                if(entry.type === 'debit') totalDebit += parseFloat(entry.amount);
-                if(entry.type === 'credit') totalCredit += parseFloat(entry.amount);
-            });
-
-            $("#total_debit").text(totalDebit.toFixed(2));
-            $("#total_credit").text(totalCredit.toFixed(2));
-
-            // Enable Post button only if balanced
-            if(totalDebit > 0 && totalDebit === totalCredit){
-                $("#post_btn").prop("disabled", false);
-            } else {
-                $("#post_btn").prop("disabled", true);
-            }
-
-            // update hidden field for Laravel
-            $("#entries_data").val(JSON.stringify(entries));
-        }
-
-        // Add entry
-        $("#add_entry").on("click", function(){
-            let head_id = $("#head_id").val();
-            let head_name = $("#head_id option:selected").text();
-            let type = $("input[name='type']:checked").val();
-            let amount = $("#amount").val();
-            let remarks = $("#remarks").val();
-
-            if(!head_id || !amount){
-                alert("Please select head and enter amount");
-                return;
-            }
-
-            entries.push({head_id, head_name, type, amount, remarks});
-            renderTable();
-
-            // Reset inputs
-            $("#amount").val("");
-            $("#remarks").val("");
-        });
-
-        // Remove entry
-        $(document).on("click", ".remove_entry", function(){
-            let index = $(this).data("index");
-            entries.splice(index, 1);
-            renderTable();
+                },
+                success: function(res) {
+                    $("#cr_amount_display").text(res);
+                }
+            })
         });
 
 
@@ -241,7 +255,7 @@
         });
 
         $("body").on("click",".delete_entry",function () {
-            var value = $(this).attr('record-id');
+           var value = $(this).attr('record-id');
             if (confirm('Are you sure to delete this record ?')) {
                 $.ajax({
                     type: 'post',
