@@ -227,38 +227,49 @@
             <thead>
             <tr>
                 <th style="width: 5%;">S.No</th>
-                <th style="width: 6%; ">Appointment#</th>
+                <th style="width: 6%; ">Invoice#</th>
                 <th style="width: 15%; ">Patient Name</th>
-                <th style="width: 15%;">Consultant</th>
-                <th style="width: 10%;">OPD Type</th>
+                <th style="width: 15%;">Investigation</th>
+                <th style="width: 10%;">Amount</th>
+                <th style="width: 10%;">Frequency</th>
+                <th style="width: 10%;">Total</th>
+                <th style="width: 10%;">Discount</th>
+                <th style="width: 10%;">Created By</th>
+                <th style="width: 10%;">Net Total</th>
 
-                <th style="width: 13%;">Date</th>
-                <th style="width: 8%;">Fees</th>
-                <th style="width: 10%;">Hospital Share</th>
-                <th style="width: 10%;">Consultant Share</th>
 
 
             </tr>
             </thead>
             <tbody>
-            <?php $totalFees =0; $totalHospitalShare=0; $totalConsultantShare = 0; ?>
+            <?php $total_amount = 0; $total_discount=0; $total_after_dicount=0;$total_discount=0 ?>
+
             @foreach($data as $key => $value)
-                <?php $totalFees += $value->fee;
-                $totalHospitalShare += $value->hospital_share;
-                $totalConsultantShare += $value->consultant_share; ?>
+                <?php
+                        $total = ($value->sale_price * ($value->frequency));
+
+                $after_discount = $total - ($value->discount_amount);
+                $total_amount = ($total_amount) + $total;
+
+                 $total_discount = ($total_discount) + ($value->discount_amount);
+                $total_after_dicount = ($total_after_dicount) + ($after_discount);
+
+
+
+
+                 ?>
                 <tr>
                     <td >{{ $key + 1 }}</td>
-                    <td >{{$value->appointment_number ?? ''}}</td>
-                    <td >{{ucfirst($value->patient->name) ?? ''}} <br>
-                    {{$value->patient->mr_no ?? ''}}
-                    </td>
-                    <td >{{$value->consultant->name ?? ''}}</td>
-                    <td >{{$value->opd_type->name ?? ''}}</td>
+                    <td >{{$value->invoice_no ?? ""}} <br>
+                    <td >{{$value->patient->name ?? ''}}</td>
+                    <td>{{$value->investigation->name ?? ''}}</td>
+                    <td>{{$value->sale_price ?? ''}}</td>
+                    <td>{{$value->frequency ?? ''}}</td>
+                    <td>{{$total ?? 0}}</td>
+                    <td>{{$value->discount_amount ?? 0}}</td>
+                    <td>{{$value->created_by_user->name ?? ''}}</td>
+                    <td>{{$after_discount}}</td>
 
-                    <td >{{$value->appointment_date ?? ''}}</td>
-                    <td >{{$value->fee ?? ''}}</td>
-                    <td >{{$value->hospital_share ?? ''}}</td>
-                    <td >{{$value->consultant_share ?? ''}}</td>
 
                 </tr>
             @endforeach
@@ -269,9 +280,11 @@
                 <td ></td>
                 <td ></td>
                 <td ></td>
-                <td style="font-weight: bold" >{{ $totalFees }}</td>
-                <td style="font-weight: bold">{{$totalHospitalShare}}</td>
-                <td style="font-weight: bold">{{$totalConsultantShare}}</td>
+
+                <td style="font-weight: bold" >{{ $total_amount }}</td>
+                <td style="font-weight: bold">{{$total_discount}}</td>
+                <td style="font-weight: bold"></td>
+                <td style="font-weight: bold">{{$total_after_dicount}}</td>
 
             </tr>
             </tbody>

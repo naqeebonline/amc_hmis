@@ -49,6 +49,9 @@ class PatientInvestigation extends Model
         return $this->belongsTo(InvestigationSubCategory::class, "investigation_sub_category_id");
     }
 
+    public function users(){
+        return $this->belongsTo(Users::class, "created_by","id");
+    }
     public function created_by_user(){
         return $this->belongsTo(Users::class, "created_by","id");
     }

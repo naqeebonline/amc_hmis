@@ -224,7 +224,25 @@
                                 <label>To Date</label>
                                 <input type="date" class="form-control" value="{{date("Y-m-d")}}" id="filter_to_date">
                             </div>
+                            <div class="col-md-2">
+                                <label>Investigations</label>
+                                <select class="form-select" id="investigation_sub_category_id">
+                                    <option value="">View--All</option>
+                                    @foreach($investigation_sub_category as $key => $value)
+                                        <option value="{{$value->id}}">{{$value->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
+                            <div class="col-md-2">
+                                <label>Users</label>
+                                <select class="form-select" id="created_by">
+                                    <option value="">View--All</option>
+                                    @foreach($users as $key => $value)
+                                        <option value="{{$value->id}}">{{$value->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
 
                             <div class="col-md-3 mt-4">
@@ -250,6 +268,7 @@
                                 <th>Discount</th>
                                 <th>Net Amount</th>
                                 <th>Date</th>
+                                <th>Created By</th>
                                 <th style="width: 10%">Action</th>
                             </tr>
                             </thead>
@@ -466,21 +485,23 @@
         $("body").on("click", ".print_all_details", function(e) {
             var from_date = $("#filter_from_date").val();
             var to_date = $("#filter_to_date").val();
-            var filter_opd_type_id = $("#filter_opd_type_id").val();
-            var filter_consultant_id = $("#filter_consultant_id").val();
+            var investigation_sub_category_id = $("#investigation_sub_category_id").val();
+            var created_by = $("#created_by").val();
+
             if(from_date == ''){
                 from_date = 'nill';
             }
             if(to_date == ''){
                 to_date = 'nill';
             }
-            if(filter_opd_type_id == ''){
-                filter_opd_type_id = 0;
+            if(investigation_sub_category_id == ''){
+                investigation_sub_category_id = 0;
             }
-            if(filter_consultant_id == ''){
-                filter_consultant_id = 0;
+            if(created_by == ''){
+                created_by = 0;
             }
-            var url = "{{route('pos.print_all_appointments')}}/"+from_date+"/"+to_date+"/"+filter_opd_type_id+"/"+filter_consultant_id;
+            //print_all_investigations
+            var url = "{{route('pos.print_all_investigations')}}/"+from_date+"/"+to_date+"/"+investigation_sub_category_id+"/"+created_by;
             var newWindow = window.open(url, '_blank', 'width=1200,height=800');
             newWindow.focus();
 
@@ -677,7 +698,7 @@
             }
         });
 
-        $("body").on("change","#filter_from_date,#filter_to_date,#filter_opd_type_id,#filter_consultant_id",function () {
+        $("body").on("change","#filter_from_date,#filter_to_date,#investigation_sub_category_id,#created_by",function () {
             user_table.ajax.reload();
         });
         $("body").on("click",".select_patient",function () {
@@ -714,6 +735,8 @@
                      d.to_date = $('#filter_to_date').val();
                      d.opd_type_id = $('#filter_opd_type_id').val();
                      d.consultant_id = $('#filter_consultant_id').val();
+                     d.investigation_sub_category_id = $('#investigation_sub_category_id').val();
+                     d.created_by = $('#created_by').val();
 
                  }
             },
@@ -773,7 +796,11 @@
                     name: 'inv_date',
                     searchable: true
                 },
-
+                {
+                    data: 'created_by_user',
+                    name: 'users.name',
+                    searchable: true
+                },
 
 
 

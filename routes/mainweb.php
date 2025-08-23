@@ -7,13 +7,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('appointment', [\App\Http\Controllers\Appointments\AppointmentController::class, 'appointment'])->name('pos.appointments');
     Route::get('general_patient_investigation', [\App\Http\Controllers\PatientController\PatientInvestigationController::class, 'general_patient_investigation'])->name('pos.general_patient_investigation');
     Route::post('delete_patient_investigation', [\App\Http\Controllers\PatientController\PatientInvestigationController::class, 'delete_patient_investigation'])->name('pos.delete_patient_investigation');
+    Route::post('delete_patient_investigation', [\App\Http\Controllers\PatientController\PatientInvestigationController::class, 'delete_patient_investigation'])->name('pos.delete_patient_investigation');
     Route::get("pharmacy_audit", [\App\Http\Controllers\Admin\StockController::class, 'pharmacy_audit'])->name('pos.pharmacy_audit');
-
+    Route::get('print_all_investigations/{from_date?}/{to_date?}/{investigation_sub_category_id?}/{created_by?}', [\App\Http\Controllers\PatientController\PatientInvestigationController::class, 'print_all_investigations'])->name('pos.print_all_investigations');
 
 
     Route::get('list_appointments', [\App\Http\Controllers\Appointments\AppointmentController::class, 'list_appointments'])->name('pos.list_appointments');
     Route::get('print_appointment/{id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_appointment'])->name('pos.print_appointment');
     Route::get('print_all_appointments/{from_date?}/{to_date?}/{opd_type?}/{consultant_id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_all_appointments'])->name('pos.print_all_appointments');
+
     Route::post('save_appointments', [\App\Http\Controllers\Appointments\AppointmentController::class, 'save_appointments'])->name('pos.save_appointments');
     Route::post('update_appointment', [\App\Http\Controllers\Appointments\AppointmentController::class, 'update_appointment'])->name('pos.update_appointment');
 

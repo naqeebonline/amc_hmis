@@ -59,8 +59,10 @@ class FinanceController extends Controller
         $data['in_patient_sale'] = $this->in_patient_sale($closing_date,$user_id);
         $data['consultant_charges'] = $this->consultant_charges($closing_date,$user_id);
         $data['voucher'] = FinanceVoucher::when((getUserRole() != 'Super Admin' && getUserRole() != 'Finance'), function ($query) use ($user_id) {
-            return $query->where(["created_by"=>auth()->user()->id,"voucher_type"=>"closing"]);
-        })->with(['user'])->orderBy("id","desc")->paginate(20);
+            return $query->where(["created_by"=>auth()->user()->id]);
+        })->with(['user'])->orderBy("id","desc")
+            ->where(["voucher_type"=>"closing"])
+            ->paginate(20);
 
 
        return view("Finance.daily_closing",$data);
@@ -178,6 +180,9 @@ class FinanceController extends Controller
                 // pharmacy_purchase debit    cogs credit
                 make_entry($voucher_id,financeHeadId('pharmacy_purchase'),$cost_of_good_sales_of_return_item,0,"cogs_pharmacy_sale_return",$value->id,$user_id,$remarks);
                 make_entry($voucher_id,financeHeadId('cogs'),0,$cost_of_good_sales_of_return_item,"cogs_pharmacy_sale_return",$value->id,$user_id,$remarks);
+
+
+
             }
         }
         if($appointments > 0){
@@ -234,7 +239,6 @@ class FinanceController extends Controller
                 ->when($closing_date, function ($query) use ($closing_date) {
                     return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
                 })
-                ->where("is_active",1)
                 ->when($user_id, function ($query) use ($user_id) {
                     return $query->where('created_by',$user_id);
                 })->get();
@@ -244,6 +248,36 @@ class FinanceController extends Controller
                 // Cash at office debit   investigation income credit
                 make_entry($voucher_id,request()->finance_head_id,$amount,0,"investigations_income",$value->id,$user_id,$remarks);
                 make_entry($voucher_id,financeHeadId('investigation_income'),0,$amount,"investigations_income",$value->id,$user_id,$remarks);
+            }
+
+            //----------- from investigations we are posting doctor commission to doctor account  -----//
+            $inves = PatientInvestigation::with(['consultant','investigation'])
+                    ->where("is_posted",0)
+                    ->where("is_active",1)
+                ->when($closing_date, function ($query) use ($closing_date) {
+                    return $query->whereDate('inv_date', '<=', date("Y-m-d", strtotime($closing_date)));
+                })
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('created_by',$user_id);
+                })->get();
+
+
+            foreach ($inves as $key => $value){
+                //------- only for out patient ... shares will be generated only for out patient investigations ----//
+                if($value->consultant_share_amount > 0 && $value->admission_id == NULL){
+                    $amount = $value->consultant_share_amount;
+                    $remarks =  $value->investigation->name." Shared posted to Doctor Account. Rs.$amount. Posted By ".auth()->user()->name;
+                    // Doctor Account Credit
+                    make_entry($voucher_id,$value->consultant->finance_head_id,0,$amount,"investigation_shares",$value->id,$user_id,$remarks);
+                    make_entry($voucher_id,financeHeadId('Investigation_Shares'),$amount,0,"investigation_shares",$value->id,$user_id,$remarks);
+                }
+
+                //-------- investigation per kitna kharcha aaya hai vo yaha calculate hota hai .......//
+                $investigation_cost = ($value->investigation->price * $value->frequency) ?? 0;
+                $remarks = $value->investigation->name." cost Rs.$investigation_cost";
+                make_entry($voucher_id,financeHeadId('Laboratory_Purchase'),0,$investigation_cost,"cost_of_lab_consumable",$value->id,$user_id,$remarks);
+                make_entry($voucher_id,financeHeadId('Cost_of_Investigation'),$investigation_cost,0,"cost_of_lab_consumable",$value->id,$user_id,$remarks);
+
 
             }
         }
@@ -487,8 +521,8 @@ class FinanceController extends Controller
 
     public function cash_payment_voucher()
     {
-        $data['finance_heads'] = FinanceHead::whereIn("type",["asset","expense","liability"])->get();
-        $data['sub_heads'] = FinanceHead::whereIn("type",["liability","expense","income"])->get();
+        $data['finance_heads'] = FinanceHead::whereIn("type",["asset","liability","expense","income"])->get();
+        $data['sub_heads'] = FinanceHead::whereIn("type",["asset","liability","expense","income"])->get();
         $data['vouchers'] = FinanceVoucher::orderBy("id","DESC")->where("voucher_type","payment")->paginate(30);
 
 

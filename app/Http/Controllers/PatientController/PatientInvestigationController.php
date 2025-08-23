@@ -17,6 +17,7 @@ use App\Models\Patient\PatientInvestigation;
 use App\Models\Patient\PatientInvestigationPayment;
 use App\Models\Patient\PatientLocation;
 use App\Models\Patient\Relation;
+use App\Models\Users;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
@@ -24,11 +25,17 @@ class PatientInvestigationController extends Controller
 {
     public function general_patient_investigation()
     {
+        $data['users'] = Users::whereHas('roles', function ($q) {
+            $q->where('name', 'Super Admin') ->orWhere('name', 'like', '%Receiption User%');
+        })->get(["id","name"]);
+        //dd($superAdmins);
         $data["title"] = "Patient Investigation";
         $data['investigation'] = InvestigationSubCategory::whereIsActive(1)->get();
         $data['service_type'] = ServiceType::whereIsActive(1)->get();
         $data["relations"] = Relation::get();
         $data["district"] = District::get();
+        $data["investigation_sub_category"] = InvestigationSubCategory::get(["id","name"]);
+
         $data["locations"] = PatientLocation::get();
         $data["consultants"] = Consultants::where(["is_active"=>1])->get();
         return view("investigation.patient_investigation",$data);
@@ -107,13 +114,22 @@ class PatientInvestigationController extends Controller
 
     public function get_list_investigations()
     {
-        $patients = PatientInvestigation::where("is_active", 1)->with("investigation")->with("patient")
+        $patients = PatientInvestigation::where("is_active", 1)->with("investigation")
+            ->with("patient")
+            ->with("users")
+            ->with("created_by_user")
 
             ->when(request()->from_date, function ($query) {
                 $query->whereDate('inv_date','>=',date("Y-m-d",strtotime(request()->from_date)));
             })
             ->when(request()->to_date, function ($query) {
                 $query->whereDate('inv_date','<=',date("Y-m-d",strtotime(request()->to_date)));
+            })
+            ->when(request()->investigation_sub_category_id, function ($query) {
+                $query->where('investigation_sub_category_id','=',request()->investigation_sub_category_id);
+            })
+            ->when(request()->created_by, function ($query) {
+                $query->where('created_by','=',request()->created_by);
             })
             ->where(["patient_type"=>"hospital_patient"])
             ->orderBy("id", "desc");
@@ -136,8 +152,41 @@ class PatientInvestigationController extends Controller
             ->addColumn("print_invoice_number", function ($patient) {
                 return '<a target="_blank" href="' . route('pos.print_hospital_lab_invoice', [$patient->invoice_no]) . '">' . $patient->invoice_no . '</a>';
             })
+            ->addColumn('created_by_user', function($row) {
+                return $row->created_by_user->name ?? '';
+            })
             ->rawColumns(["print_invoice_number","received_amount", "actions"])
             ->make(true);
+    }
+
+    public function print_all_investigations($from_date,$to_date,$investigation_sub_category_id,$created_by)
+    {
+       $res =  PatientInvestigation::where("is_active", 1)->with("investigation")->with("patient")
+           ->select('patient_investigations.*')
+           ->leftJoin('users', 'patient_investigations.created_by', '=', 'users.id')
+            ->when($from_date, function ($query) use($from_date) {
+                $query->whereDate('inv_date','>=',$from_date);
+            })
+            ->when($to_date, function ($query) use ($to_date) {
+                $query->whereDate('inv_date','<=',$to_date);
+            })
+            ->when($investigation_sub_category_id, function ($query) use($investigation_sub_category_id) {
+                $query->where('investigation_sub_category_id','=',$investigation_sub_category_id);
+            })->when($created_by, function ($query) use($created_by) {
+                $query->where('created_by','=',$created_by);
+            })
+
+            ->where(["patient_type"=>"hospital_patient"])
+            ->orderBy("id", "desc")
+            ->get();
+
+
+
+        $data['from_date'] = ($from_date && $from_date !='nill') ? $from_date : "-";
+        $data['to_date'] = ($to_date && $to_date !='nill') ? $to_date : "-";
+        $data['data'] = $res;
+
+        return view("investigation.reports.print_all_investigations", $data);
     }
 
 

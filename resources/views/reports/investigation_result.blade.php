@@ -327,11 +327,11 @@
                     @endphp
                     <?php if(($default_heading != strtolower($item->parameter_heading) || $key == 0) && $default_heading != 'no heading'){ $default_heading =strtolower($item->parameter_heading); ?>
                     <tr>
-                        <td colspan="4" style="font-weight: bold; font-size: 12px">{{strtoupper($default_heading)}}</td>
+                        <td colspan="4" style="font-weight: bold; font-size: 16px; font-style: oblique; text-decoration: underline">{{strtoupper($default_heading)}}</td>
                     </tr>
                     <?php } ?>
                     <tr>
-                        <td>{{ $item->parameter->name ?? '' }}</td>
+                        <td style="margin-left: 20px">{{ $item->parameter->name ?? '' }}</td>
                         @if ($item->result_text_value != '')
                             <td
                                     class="text-center {{ strtolower($item->result_text_value) == 'positive' ? 'fw-bold out-range' : '' }}">
