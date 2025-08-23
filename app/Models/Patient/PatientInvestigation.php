@@ -8,6 +8,7 @@ use App\Models\Configuration\InvestigationSubCategory;
 use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
 
+use App\Models\Users;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -46,6 +47,10 @@ class PatientInvestigation extends Model
     }
     public function subCategory(){
         return $this->belongsTo(InvestigationSubCategory::class, "investigation_sub_category_id");
+    }
+
+    public function created_by_user(){
+        return $this->belongsTo(Users::class, "created_by","id");
     }
 
   /*  public function getInvDateAttribute($value)

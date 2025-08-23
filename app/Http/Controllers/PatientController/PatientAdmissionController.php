@@ -725,7 +725,13 @@ class PatientAdmissionController extends Controller
 
     public function print_hospital_lab_invoice($invoice)
     {
-        $data['data'] = PatientInvestigation::with(["investigation", "patient"])->where(["invoice_no" => $invoice])->whereIsActive(1)->get();
+        $data['data'] = PatientInvestigation::with(["investigation", "patient","created_by_user","consultant"])->where(["invoice_no" => $invoice])->whereIsActive(1)->get();
+         //dd($data['data'][0]->created_by_user->name);
+        $data['consultant_name'] = "";
+        if($data['data'] && $data['data'][0]->consultant){
+            $data['consultant_name'] = $data['data'][0]->consultant->name;
+        }
+
         $total = 0;
         $discount_percentage = 0;
         $discount_amount = 0;

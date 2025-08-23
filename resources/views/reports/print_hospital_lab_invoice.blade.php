@@ -19,6 +19,12 @@
 				<td style="font-weight: bold;font-size: 13px">Invoice</td>
 				<th style="text-align: left;font-size: 13px"> {{$data[0]->invoice_no ?? ""}}</th>
 			</tr>
+			@if($consultant_name !='')
+				<tr>
+					<td style="font-weight: bold;font-size: 13px">Referred By:</td>
+					<th style="text-align: left;font-size: 13px"> {{$consultant_name}}</th>
+				</tr>
+			@endif
 			<tr>
 				<td style="font-weight: bold;font-size: 13px">Patient Name:</td>
 				<th style="text-align: left;font-size: 13px"> {{$data[0]->patient->name ?? ""}}</th>
@@ -27,6 +33,11 @@
 			<tr>
 				<td style="font-weight: bold;font-size: 13px">Age/Gender:</td>
 				<th style="text-align: left;font-size: 13px"> {{$data[0]->patient->age ?? ""}}/{{$data[0]->patient->gender ?? ""}}</th>
+			</tr>
+
+			<tr>
+				<td style="font-weight: bold;font-size: 13px">Printed By:</td>
+				<th style="text-align: left;font-size: 13px"> {{$data[0]->created_by_user?->name ?? ""}}</th>
 			</tr>
 
 		</table>
@@ -67,7 +78,13 @@
 				<td class="left" style="font-weight: bold;font-size: 13px">{{round($total - $discount_amount)}}</td>
 			</tr>
 
+
+
 		</table>
+		<br>
+		<br>
+		 
+		<p style="text-align: center; font-weight: bold">Thank You For Visiting.</p>
 	</div>
 
 </div>
