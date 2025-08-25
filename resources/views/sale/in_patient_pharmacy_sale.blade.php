@@ -19,7 +19,7 @@
             padding: 0;
         }
         body {
-            background-color: #48AF5A42;
+            background-color: #d64b3242;
         }
 
         .ckeditor-full-height .cke_inner {
@@ -49,7 +49,7 @@
             color: black;
         }
         .header-section {
-            background-color: #48af5a;
+            background-color: #d64b32;
             padding: 5px 5px 10px 5px;
         }
         .header-section label {
@@ -67,13 +67,13 @@
             border: 2px solid #0b0b0b;
         }
         .footer-section {
-            background-color: #48af5a;
+            background-color: #d64b32;
             color: white;
             font-weight: bold;
             padding: 10px;
         }
         .btn-custom {
-            background-color: #48af5a;
+            background-color: #d64b32;
             color: white;
             border: none;
         }
@@ -82,7 +82,7 @@
         }
         .sidebar {
             background-color: #e7f2f7;
-            border: 2px solid #48af5a;
+            border: 2px solid #d64b32;
             border-radius: 5px;
             padding: 10px;
         }
@@ -101,22 +101,22 @@
             justify-content: center;
             align-items: center;
             box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-            background-color: #48AF5A42;
+            background-color: #d64b3242;
             animation: anu 2s infinite;
 
         }
 
         @keyframes  anu{
             0%{
-                background-color: #48AF5A42;
+                background-color: #d64b3242;
                 transform: scale(1);
             }
             50%{
-                background-color: #48AF5AFA;
+                background-color: #d64b32FA;
                 transform: scale(1.02);
             }
             100%{
-                background-color: #48AF5A42;
+                background-color: #d64b3242;
                 transform: scale(1);
             }
         }
@@ -401,8 +401,8 @@
             <div class="row mt-3">
                 <div class="col-md-12">
                     <button class="btn btn-custom me-2" id="save_bill">Save Bill</button>
-                    <a class="btn btn-custom me-2" target="_blank" >New Bill</a>
-                    <a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red" href="javascript:void(0)">Logout</a>
+                    <a class="btn btn-custom me-2" href="{{route('pos.in_patient_pharmacy_sale')}}" target="_blank" >New Bill</a>
+                    <a class="btn btn-custom me-2 go_to_home" style="float: right; background-color:green" href="javascript:void(0)">Home</a>
 
                 </div>
             </div>
@@ -576,13 +576,13 @@
 
     },500);
 
-    $(document).on('click', '.logout_btn', function(e) {
+    $(document).on('click', '.go_to_home', function(e) {
         e.preventDefault();
 
         // Show confirm alert
-        if (confirm("Are you sure you want to log out?")) {
+        if (confirm("Are you sure to go back ?")) {
             // Redirect to logout URL if "Yes" is clicked
-            window.location.href = "";
+            window.location.href = "{{route('settings.home')}}";
         }
     });
 
@@ -1062,7 +1062,7 @@
         $("#product_id").val(null).trigger('change');
         $("#product_id").focus();
         $("#product_id").select2('open');
-        $("#dose_type").val('');
+        $("#dose_type").val('-');
         taxPercentage = 0;
         currentAvailableQuantity = 0;
 

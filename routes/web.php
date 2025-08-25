@@ -88,8 +88,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('grn_request', [\App\Http\Controllers\Admin\StockController::class, 'grn_request'])->name('pos.grn_request')->middleware('store.selected');
 
     Route::get('ware-house-stock', [\App\Http\Controllers\Admin\StockController::class, 'ware_house_stock'])->name('pos.ware_house_stock')->middleware('store.selected');
-    Route::get('sehat-card-pharmacy-sale', [\App\Http\Controllers\Admin\SaleController::class, 'sehat_card_pharmacy_sale'])->name('pos.add_new_sale')->middleware('store.selected');
-    Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale')->middleware('store.selected');
+    //Route::get('sehat-card-pharmacy-sale', [\App\Http\Controllers\Admin\SaleController::class, 'sehat_card_pharmacy_sale'])->name('pos.add_new_sale')->middleware('store.selected');
+    Route::get('sehat-card-pharmacy-sale', [\App\Http\Controllers\Admin\SaleController::class, 'sehat_card_pharmacy_sale'])->name('pos.add_new_sale');
+   // Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale')->middleware('store.selected');
+    Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale');
     Route::get('search_appointment', [\App\Http\Controllers\Admin\SaleController::class, 'search_appointment'])->name('pos.search_appointment');
 
 
@@ -293,6 +295,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("view_patient_summary/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "view_patient_summary"])->name("pos.view_patient_summary");
 
 
+
     Route::get("print_lab_invoice/{invoice_no?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_lab_invoice"])->name("pos.print_lab_invoice");
     Route::get("print_hospital_lab_invoice/{invoice_no?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_hospital_lab_invoice"])->name("pos.print_hospital_lab_invoice");
     Route::post("get-ward-investigations/{ward_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_ward_investigations"])->name("pos.get_ward_investigations");
@@ -389,6 +392,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/import-csv', [\App\Http\Controllers\CsvImportController::class, 'import'])->name('pos.import');
     Route::post('/saveSehatCardPayment', [\App\Http\Controllers\CsvImportController::class, 'saveSehatCardPayment'])->name('pos.saveSehatCardPayment');
 
+    //------------------ in patient details   -----------//
+    Route::get("view_in_patient_summary/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "view_in_patient_summary"])->name("pos.view_in_patient_summary");
+    Route::get("get_in_admission_investigations/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_in_admission_investigations"])->name("pos.get_in_admission_investigations");
+    Route::get("in_patient_treatment_chart_report/{patient_id?}/{admission_id?}/{medicine_type_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_treatment_chart_report"])->name("pos.in_patient_treatment_chart_report");
+    Route::post("cancel_in_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "cancel_in_patient_admission"])->name("pos.cancel_in_patient_admission");
 
     Route::get('/daily-closing', [\App\Http\Controllers\Finance\FinanceController::class, 'daily_closing'])->name('pos.daily_closing');
     Route::post('/post_daily_closing', [\App\Http\Controllers\Finance\FinanceController::class, 'post_daily_closing'])->name('pos.post_daily_closing');

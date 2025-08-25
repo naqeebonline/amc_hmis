@@ -927,6 +927,27 @@ class PatientAdmissionController extends Controller
         return view("reports.patient_treatment_chart_report",$data);
     }
 
+    public function in_patient_treatment_chart_report($patient_id, $admission_id,$medicine_type_id='')
+    {
+        $data['admission'] = InPatientAdmission::with('patient')->where(["id"=>$admission_id])->first();
+        //dd($data);
+        $data['data'] = SaleDetails::with("product", "sale")
+            ->when($patient_id, function ($query) use ($patient_id) {
+                $query->where('patient_id', $patient_id);
+            })
+            ->when($admission_id, function ($query) use ($admission_id) {
+                $query->where('admission_id', $admission_id);
+            })
+            ->when($medicine_type_id, function ($query) use($medicine_type_id) {
+                $query->whereHas('sale', function ($q) use($medicine_type_id){
+
+                    $q->where('medicine_type', $medicine_type_id);
+                });
+            })
+            ->get();
+        return view("reports.patient_treatment_chart_report",$data);
+    }
+
     public function cencel_patient_admission()
     {
         $data = request()->except(["_token","id",'']);
@@ -935,6 +956,22 @@ class PatientAdmissionController extends Controller
          $data['discharge_date'] = date("Y-m-d H:i:s");
 
         PatientAdmission::updateOrCreate(
+            ["id" => request()->id],
+            $data
+        );
+        return response()->json(["status" => true, "data" => "done"]);
+    }
+
+    public function cancel_in_patient_admission()
+    {
+        $data = request()->except(["_token","id",'']);
+         $data['admission_status'] = "Canceled";
+         $data['discharge_summary'] = request()->discharge_summary;
+         $data['discharge_date'] = date("Y-m-d H:i:s");
+         $data['updated_by'] = auth()->user()->id;
+         $data['updated_at'] = date("Y-m-d H:i:s");
+
+        InPatientAdmission::updateOrCreate(
             ["id" => request()->id],
             $data
         );
@@ -1157,6 +1194,26 @@ class PatientAdmissionController extends Controller
         return view("patients.view_patient_summary", $data);
     }
 
+    public function view_in_patient_summary($patient_id,$admission_id)
+    {
+        $this->updateInAdmissionDetails($admission_id);
+        $data["patient"] = InPatientAdmission::where(["is_active"=> 1,"admission_status"=>"Admit"])->with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant','sub_consultant')
+            ->where("id", $admission_id)
+            ->first();
+
+        $data['summary'] =  (new PatientExpenseController())->getInAdmissionDetails($admission_id);
+
+
+        $data['investigation'] = InvestigationSubCategory::whereIsActive(1)->get();
+        $data['service_type'] = ServiceType::whereIsActive(1)->get();
+
+
+
+        $data['patient_id'] = $patient_id;
+        $data['admission_id'] = $admission_id;
+        return view("patients.view_in_patient_summary", $data);
+    }
+
     public function updatePatientData($from_id,$to_id)
     {
         $admission = PatientAdmission::where("id",">",$from_id)->where("id","<=",$to_id)->get("id");
@@ -1351,7 +1408,7 @@ class PatientAdmissionController extends Controller
             ->addColumn("actions", function ($patient) {
                 $buttons =  '<a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-warning edit_record"><i class="tf-icons bx bx-pencil"></i></a> 
                         <button data-id="' . $patient->id . '" class="btn btn-danger btn-sm delete_record"><i class="bx bx-trash tf-icons"></i></button>
-                        <a href="' . route('pos.view_patient_summary', [$patient->patient_id, $patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bxs-show tf-icons"></i></a>
+                        <a href="' . route('pos.view_in_patient_summary', [$patient->patient_id, $patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bxs-show tf-icons"></i></a>
                         <a href="' . route('pos.print_in_patient_admission', [$patient->id]) . '" class="btn btn-primary btn-sm "><i class="bx bx-printer tf-icons"></i></a>
                       
                         ';
@@ -1752,8 +1809,151 @@ class PatientAdmissionController extends Controller
     }
 
 
+    public function get_in_admission_investigations($patient_id = '', $admission_id = '')
+    {
+        // dd("here");
+        $patients = PatientInvestigation::where("is_active", 1)->with("investigation")
+            ->when($patient_id, function ($query) use ($patient_id) {
+                $query->where('patient_id', $patient_id);
+            })
+            /*->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })*/
+            ->when($admission_id, function ($query) use ($admission_id) {
+                $query->where('admission_id', $admission_id);
+            })
+            ->orderBy("id", "desc");
+        return DataTables::of($patients)
+            ->addColumn("actions", function ($patient) {
+                $button = '';
+                if ($patient->status == 1) {
+                    $button = $button . '<a target="_blank" href="' . route('pos.print_inv_result', [$patient->id]) . '"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-success print_inv_record"><i class="tf-icons bx bx-printer"></i></a>';
+                }else{
+                  //  $button = $button . '<button data-id="' . $patient->id . '" class="btn btn-danger btn-sm delete_record"><i class="bx bx-trash tf-icons"></i></button>';
+                }
 
 
-    
-    
+                return $button;
+            })
+
+            ->addColumn("print_invoice_number", function ($patient) {
+                return '<a target="_blank" href="' . route('pos.print_hospital_lab_invoice', [$patient->invoice_no]) . '">' . $patient->invoice_no . '</a>';
+            })
+            ->rawColumns(["print_invoice_number", "actions"])
+            ->make(true);
+    }
+
+
+    public function updateInAdmissionDetails($admission_id)
+    {
+
+
+        $admission = InPatientAdmission::with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant','sub_consultant')->where(["id"=>$admission_id])->first();
+        if($admission->patient_type == "hospital_patient"){
+
+        }else{
+
+        }
+        $data['procedure_amount1'] = $admission->procedure_rate ?? 0;
+        $data['procedure_amount'] = $admission->procedure_rate ?? 0;
+        $data["is_medical_case"] = false;
+        $data["daysDifference"] = 0;
+
+        $data['consultant_share'] = $admission->consultant_share_amount ?? 0;
+        // if($admission->procedure_rate == 0){
+        $data['procedure_amount1'] = $admission->procedure_rate ?? 0;
+        $data['procedure_amount'] = $admission->procedure_rate ?? 0;
+        //}
+        /*if($admission->consultant_share == 0){
+            $data['consultant_share'] = $admission->consultant->share_percentage;
+        }*/
+
+        if(($admission) && $admission->consultant_procedure->procedure->type == "Medical"){
+
+            $data["is_medical_case"] = true;
+            $admissionDate = Carbon::parse($admission->admission_date);
+            $dischargeDate = Carbon::parse($admission->discharge_date);
+            if($admission->discharge_date == '' || $admission->discharge_date == NULL){
+
+                $dischargeDate = Carbon::parse(date("Y-m-d")) ;
+            }
+            $daysDifference = $admissionDate->diffInDays($dischargeDate) + 1;
+            $data['procedure_amount'] = ($data['procedure_amount']) * ($daysDifference);
+            $data['daysDifference'] = $daysDifference;
+
+
+        }
+
+
+
+        //----- share percentange ---------//
+        /*$share_amount = 0;
+        if($data['consultant_share'] !='' && $data['consultant_share'] > 0){
+            $percentage = $data['consultant_share']/100;
+            $share_amount = ($data['procedure_amount']) * ($percentage);
+        }*/
+
+
+
+        $data['consultant_share_amount'] = $admission->consultant_share_amount;
+
+        $investigations = PatientInvestigation::with('subCategory')->where(["admission_id"=>$admission_id,"is_active"=>1])->get();
+        $investigationAmount = 0;
+        foreach ($investigations as $key => $value){
+            $investigationAmount += $value->subCategory->sale_price;
+        }
+
+        $data['investigation_amount'] = $investigationAmount;
+        $data['service_charges'] = PatientServiceCharges::where(["admission_id"=>$admission_id,"is_active"=>1])->sum('service_rate');
+        $patient_id = $admission->patient_id ?? 0;
+        $sale_details = SaleDetails::with("product", "sale")
+            ->when($patient_id, function ($query) use ($patient_id) {
+                $query->where('patient_id', $patient_id);
+            })
+            ->when($admission_id, function ($query) use ($admission_id) {
+                $query->where('admission_id', $admission_id);
+            })->get();
+
+
+        $i=1; $taxAmount = 0; $totalAmount = 0;
+        foreach($sale_details as $d) {
+            // dd($d);
+            $quantity = ($d->Quantity);
+            $consumed = $quantity - $d->ReturnQuantity;
+            $amount = ($consumed * $d->UnitePrice);
+            $totalAmount = $totalAmount + $amount;
+        }
+        $data['medicine_amount'] =$totalAmount;
+
+        $total_cost = (($data['consultant_share_amount']) + ($data['investigation_amount']) + ($data['service_charges']) + ($data['medicine_amount']));
+        $balance = ($data['procedure_amount']) - ($total_cost);
+        $data['totalCost'] = $total_cost;
+        $data['balance'] = $balance;
+        $alertBalnce = ($data['procedure_amount']) * (25/100);
+        $data['alert_balance'] = $alertBalnce;
+        $data['alert'] = false;
+        if($balance <= $alertBalnce){
+            $data['alert'] = true;
+        }
+
+        $updateData = [
+            "consultant_share_amount" => $admission->consultant_share_amount,
+            "investigation_cost"        =>$investigationAmount,
+            "service_charges_cost"      =>$data['service_charges'],
+            "medicine_cost"      =>$totalAmount,
+            "totalCost"      =>$total_cost,
+            "balance"      =>$balance,
+        ];
+       // dd($updateData);
+
+        InPatientAdmission::where("id",$admission_id)->update($updateData);
+
+        return $data;
+
+
+    }
+
+
+
+
 }

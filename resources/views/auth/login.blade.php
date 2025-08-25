@@ -49,8 +49,8 @@
 <body>
     <!-- Content -->
 
-    <div class="container-xxl bottom-border-line">
-        <div class="authentication-wrapper authentication-basic container-p-y">
+    <div class="container-xxl bottom-border-line" style='max-width: 100% !important; background: url("{{asset('login_bg.jpg')}}") no-repeat; background-position: center;background-size:100% 100% '>
+        <div class="authentication-wrapper authentication-basic container-p-y" >
             <div class="authentication-inner py-2">
                 <!-- Register -->
                 <div class="card">

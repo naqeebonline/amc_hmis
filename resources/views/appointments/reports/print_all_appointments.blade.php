@@ -236,6 +236,7 @@
                 <th style="width: 8%;">Fees</th>
                 <th style="width: 10%;">Hospital Share</th>
                 <th style="width: 10%;">Consultant Share</th>
+                <th style="width: 10%;">Created By</th>
 
 
             </tr>
@@ -259,6 +260,7 @@
                     <td >{{$value->fee ?? ''}}</td>
                     <td >{{$value->hospital_share ?? ''}}</td>
                     <td >{{$value->consultant_share ?? ''}}</td>
+                    <td >{{$value->created_by_user->name ?? ''}}</td>
 
                 </tr>
             @endforeach
@@ -272,7 +274,7 @@
                 <td style="font-weight: bold" >{{ $totalFees }}</td>
                 <td style="font-weight: bold">{{$totalHospitalShare}}</td>
                 <td style="font-weight: bold">{{$totalConsultantShare}}</td>
-
+                <td ></td>
             </tr>
             </tbody>
 

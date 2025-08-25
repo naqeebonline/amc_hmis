@@ -263,18 +263,20 @@ class SupplierPayments extends Controller
 
     public function print_retail_thermel_purchase_details($SaleID)
     {
-
-
         $date = date("Y-m-d");
-
         $data['record'] = Sale::where(['SaleID' => $SaleID])->first();
-        $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
-        $appointments = Appointment::where('is_active', 1)
-            ->where('id', $data['record']->appointment_id) // last 5 days
-            ->with(['patient'])
-            ->first();
-        $data['appointment_patient_name'] = $appointments ? $appointments->patient?->name." | Appointment# ".$appointments->appointment_number : "";
 
+        $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
+        $data['appointment_patient_name'] = 'Walking Customer';
+        if($data['record']->admission_id){
+            $data['appointment_patient_name'] = $data['patient'] ? "In-Patient <br><br>MR# ".$data['patient']->mr_no." | Name: ".$data['patient']->name : "";
+        }elseif ($data['record']->appointment_id){
+            $appointments = Appointment::where('is_active', 1)
+                ->where('id', $data['record']->appointment_id) // last 5 days
+                ->with(['patient'])
+                ->first();
+            $data['appointment_patient_name'] = $appointments ? "Out Patient <br><br>MR# ".$appointments->patient?->mr_no." | Name: ".$appointments->patient?->name." <br><br>Appointment# ".$appointments->appointment_number : "";
+        }
 
         $customer_id = $data['record']->SCID;
         $billDate = date("d-m-Y", strtotime($data['record']->Date));

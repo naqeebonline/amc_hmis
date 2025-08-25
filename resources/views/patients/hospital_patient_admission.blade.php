@@ -213,6 +213,7 @@
 
                                     <th>Procedure Name</th>
                                     <th>Procedure Type</th>
+                                    <th>Procedure Rate</th>
                                     <th>Ward Name</th>
                                     <th>Bed no.</th>
 
@@ -269,7 +270,7 @@
 
 <div class="modal fade my_modal" id="patient_admission_edit_modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog " role="document">
-        <form class="modal-content form-submit-event" id="cancel_admission_form">
+        <form class="modal-content form-submit-event" id="cancel_admission_forms">
             <input type="hidden" id="cancel_admission_id" name="id" value="0">
 
             <div class="modal-header">
@@ -318,6 +319,15 @@
                         <label for="nameBasic" class="form-label">Patient Advance Payment<span
                                     class="asterisk">*</span></label>
                         <input type="number" class="form-control" id="edit_advance_payment" name="edit_advance_payment">
+                    </div>
+
+                    <div class="col-md-12 col-sm-4 mb-3">
+                        <label for="nameBasic" class="form-label">Is Medicine Include<span class="asterisk">*</span></label>
+                        <select name="edit_included_medicine" required id="edit_included_medicine" class="form-select">
+                            <option value="">Select Relation</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
                     </div>
 
 
@@ -439,7 +449,7 @@
         $("body").on("change","#consultant_procedure_id",function (e) {
             var procedure_rate = $('#consultant_procedure_id').find(':selected').attr('data-net_rate');
             $("#procedure_rate").val(procedure_rate);
-            alert(procedure_rate);
+
         });
 
 
@@ -451,6 +461,7 @@
 
            var edit_procedure_rate =  $("#edit_procedure_rate").val();
            var edit_advance_payment =  $("#edit_advance_payment").val();
+           var edit_included_medicine =  $("#edit_included_medicine").val();
             var admission_id = $('#edit_admission_id').val();
             var consultant_share = $('#edit_consultant_id').find(':selected').attr('date_consultant_share');
 
@@ -473,6 +484,10 @@
                 alert("Please Advance amount. if no advance please enter 0.");
                 return false;
             }
+            if(edit_included_medicine == ''){
+                alert("Please select medicine include or not.");
+                return false;
+            }
 
 
             $.ajax({
@@ -483,6 +498,7 @@
                     consultant_id: consultant_id,
                     procedure_rate: edit_procedure_rate,
                     advance_payment: edit_advance_payment,
+                    included_medicine: edit_included_medicine,
 
                     consultant_procedure_id: consultant_procedure_id,
                     admission_id: admission_id,
@@ -495,6 +511,7 @@
                     $("#consultant_procedure_id").val('').trigger("change");
                     $("#edit_admission_id").val('');
                     $("#edit_advance_payment").val(0);
+                    $("#edit_included_medicine").val('');
 
                     $('#patient_admission_edit_modal').modal("hide");
                     user_table.ajax.reload();
@@ -570,6 +587,11 @@
                 {
                     data: 'consultant_procedure.procedure.type',
                     name: 'consultant_procedure.procedure.type',
+                    searchable: true
+                },
+                {
+                    data: 'procedure_rate',
+                    name: 'procedure_rate',
                     searchable: true
                 },
                 {
@@ -758,19 +780,28 @@
         }
 
         $("body").on("click", ".edit_record", function(e) {
+
             record_id = $(this).attr("data-id");
+
             var details = JSON.parse($(this).attr("data-details"));
             var fullDateTime = details.admission_date;
             let dateOnly = fullDateTime.split(' ')[0];
 
             $('#edit_admission_id').val(details.id);
-            $('#edit_procedure_rate').val(details.procedure_rate);
+
             $('#edit_advance_payment').val(details.advance_payment);
+            $('#edit_included_medicine').val(details.included_medicine);
 
             $('#edit_consultant_id').val(details.consultant_id).trigger('change');
 
             //$('#edit_consultant_procedure_id').val(details.consultant_procedure_id).trigger('change');
             get_edit_procedures(details.consultant_id,details.consultant_procedure_id);
+            $("#update_admission").hide();
+            setTimeout(function () {
+                $('#edit_procedure_rate').val(details.procedure_rate);
+                $("#update_admission").show();
+            },4000);
+
 
             $('#patient_admission_edit_modal').modal("show");
 
@@ -842,7 +873,7 @@
             if (isValid) {
 
                 $("#cancel_admission_form").ajaxSubmit({
-                    url: '{{ route('pos.cencel_patient_admission') }}',
+                    url: '{{ route('pos.cancel_in_patient_admission') }}',
                     type: 'post',
                     data: {
                         _token: '{{ csrf_token() }}'

@@ -402,7 +402,7 @@
                 <table class="table table-bordered" style="width: 100%" id="previous-bill-table">
                     <thead>
                         <tr>
-                            <th>Invioce #</th>
+                            <th>Invoice #</th>
                             <th>Patient</th>
                             <th>Amount</th>
                             <th style="width: 30%">Actions</th>
@@ -482,8 +482,8 @@
     <div class="row mt-3">
         <div class="col-md-12">
             <button class="btn btn-custom me-2" id="save_bill">Save Bill</button>
-            {{-- <a class="btn btn-custom me-2" target="_blank" >New Bill</a>--}}
-            {{--<a class="btn btn-custom me-2 logout_btn" style="float: right; background-color:red" href="javascript:void(0)">Logout</a>--}}
+             <a class="btn btn-custom me-2" href="{{route('pos.retail_pharmacy_sale')}}" target="_blank" >New Bill</a>
+            <a class="btn btn-custom me-2 go_to_home" style="float: right; background-color:green" href="javascript:void(0)">Home</a>
 
         </div>
     </div>
@@ -611,13 +611,13 @@
 
     },500);
 
-    $(document).on('click', '.logout_btn', function(e) {
+    $(document).on('click', '.go_to_home', function(e) {
         e.preventDefault();
 
         // Show confirm alert
-        if (confirm("Are you sure you want to log out?")) {
-            // Redirect to logout URL if "Yes" is clicked
-            window.location.href = "";
+        if (confirm("Are you sure you want to go back ?")) {
+            window.location.href = "{{route('settings.home')}}";
+
         }
     });
 

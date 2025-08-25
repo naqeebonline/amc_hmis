@@ -179,7 +179,7 @@ class PatientInvestigationController extends Controller
             ->where(["patient_type"=>"hospital_patient"])
             ->orderBy("id", "desc")
             ->get();
-       
+
         $data['from_date'] = ($from_date && $from_date !='nill') ? $from_date : "-";
         $data['to_date'] = ($to_date && $to_date !='nill') ? $to_date : "-";
         $data['data'] = $res;

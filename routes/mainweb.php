@@ -14,7 +14,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('list_appointments', [\App\Http\Controllers\Appointments\AppointmentController::class, 'list_appointments'])->name('pos.list_appointments');
     Route::get('print_appointment/{id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_appointment'])->name('pos.print_appointment');
-    Route::get('print_all_appointments/{from_date?}/{to_date?}/{opd_type?}/{consultant_id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_all_appointments'])->name('pos.print_all_appointments');
+    Route::get('print_all_appointments/{from_date?}/{to_date?}/{opd_type?}/{consultant_id?}/{user_id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_all_appointments'])->name('pos.print_all_appointments');
 
     Route::post('save_appointments', [\App\Http\Controllers\Appointments\AppointmentController::class, 'save_appointments'])->name('pos.save_appointments');
     Route::post('update_appointment', [\App\Http\Controllers\Appointments\AppointmentController::class, 'update_appointment'])->name('pos.update_appointment');

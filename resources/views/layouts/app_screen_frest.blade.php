@@ -219,7 +219,7 @@
             top: 0;
             left: 0;
             z-index: -2;
-            background:linear-gradient(-45deg, #1E3C72, #2A5298);
+            background:linear-gradient(-45deg, #033775, #006ded);
             width: 100%;
             height: 200px;
         }
@@ -254,6 +254,17 @@
             cursor: wait; /* Changes cursor to indicate a loading state */
         }
 
+        html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner > .menu-item.open:not(.active), .layout-menu-hover.layout-menu-collapsed .bg-menu-theme .menu-inner > .menu-item.open:not(.active){
+            background: #043a7a !important;
+        }
+        .bg-menu-theme .menu-item.active > .menu-link:not(.menu-toggle){
+            background: #fff !important;
+        }
+
+        .menu-vertical .menu-item .menu-link{
+            font-size: 0.85rem !important;
+        }
+
     </style>
 </head>
 
@@ -272,7 +283,7 @@
             <!-- Menu -->
 
 
-            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" style="background: #082355 !important">
+            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" style="background: #0250ab !important">
                 <div class="app-brand demo">
                     <a href="{{ route('home') }}" class="app-brand-link">
                         <span class="app-brand-text demo menu-text fw-bold ms-2">
@@ -290,7 +301,7 @@
 
                 <div class="menu-inner-shadow"></div>
 
-                <ul class="menu-inner py-1" style="background: #082355">
+                <ul class="menu-inner py-1" style="background: #0250ab;">
 
 
 
@@ -424,7 +435,7 @@
                 <!-- Navbar -->
 
                 <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme"
-                        id="layout-navbar" style="background:linear-gradient(-45deg, #1E3C72, #2A5298)">
+                        id="layout-navbar" style="background:linear-gradient(-45deg, #033775, #006ded)">
                     <div class="container-fluid">
                         <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
                             <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
@@ -767,14 +778,14 @@
         });*/
 
         $(document).ajaxStart(function() {
-            /*$('#screen-blocker').show();
-           $('#loading-icon').show();*/
+            $('#screen-blocker').show();
+           $('#loading-icon').show();
         });
 
 
         $(document).ajaxStop(function() {
-            /*$('#screen-blocker').hide();
-            $('#loading-icon').hide();*/
+            $('#screen-blocker').hide();
+            $('#loading-icon').hide();
         });
 
         //notification_count

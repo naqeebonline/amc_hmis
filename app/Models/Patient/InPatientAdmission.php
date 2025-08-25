@@ -61,5 +61,9 @@ class InPatientAdmission extends Model
     {
         return $this->belongsTo(Relation::class, 'relation_id', "id");
     }
+    public function procedure_type()
+    {
+        return $this->belongsTo(ProcedureType::class, 'procedure_type_id', "id");
+    }
  
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\PatientController;
 
 use App\Http\Controllers\Controller;
+use App\Models\Patient\InPatientAdmission;
 use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientInvestigation;
 use App\Models\Patient\PatientServiceCharges;
@@ -286,6 +287,82 @@ class PatientExpenseController extends Controller
             $percentage = $data['consultant_share']/100;
             $share_amount = ($data['procedure_amount']) * ($percentage);
         }
+
+
+
+        $data['consultant_share_amount'] = $share_amount;
+
+
+
+        $data['investigation_amount'] = $admission->investigation_cost;
+        $data['service_charges'] = $admission->service_charges_cost;
+        $patient_id = $admission->patient_id;
+
+        $data['medicine_amount'] =$admission->medicine_cost;
+
+        $total_cost = (($data['consultant_share_amount']) + ($data['investigation_amount']) + ($data['service_charges']) + ($data['medicine_amount']));
+        $balance = ($data['procedure_amount']) - ($total_cost);
+        $data['totalCost'] = $total_cost;
+        $data['balance'] = $balance;
+        $alertBalnce = ($data['procedure_amount']) * (25/100);
+        $data['alert_balance'] = $alertBalnce;
+        $data['alert'] = false;
+        if($balance <= $alertBalnce){
+            $data['alert'] = true;
+        }
+
+        return $data;
+
+
+    }
+
+
+    public function getInAdmissionDetails($admission_id)
+    {
+       // $admission = PatientAdmission::with('patient','procedure_type','consultant')->where(["id"=>$admission_id])->first();
+        $admission = InPatientAdmission::where(["is_active"=> 1])->with("patient", "ward", "bed", 'consultant_procedure.procedure', 'consultant','sub_consultant')
+            ->where(["id"=>$admission_id])->first();
+
+        $data['procedure_amount1'] = $admission->procedure_rate ?? '';
+        $data['procedure_amount'] = $admission->procedure_rate ?? '';
+        $data["is_medical_case"] = false;
+        $data["daysDifference"] = 0;
+
+        $data['consultant_share'] = $admission->consultant_share_amount;
+        if($admission->procedure_rate == 0){
+            $data['procedure_amount1'] = $admission->procedure_type->net_rate;
+            $data['procedure_amount'] = $admission->procedure_type->net_rate;
+        }
+        /*if($admission->consultant_share == 0){
+            $data['consultant_share'] = $admission->consultant->share_percentage;
+        }*/
+
+        //dd($admission->consultant_procedure->procedure->type);
+
+        if($admission->consultant_procedure->procedure->type == "Medical"){
+            //    dd($admission);
+            $data["is_medical_case"] = true;
+            $admissionDate = Carbon::parse($admission->admission_date);
+            $dischargeDate = Carbon::parse($admission->discharge_date);
+            if($admission->discharge_date == '' || $admission->discharge_date == NULL){
+
+                $dischargeDate = Carbon::parse(date("Y-m-d")) ;
+            }
+            $daysDifference = $admissionDate->diffInDays($dischargeDate) + 1;
+            $data['procedure_amount'] = ($data['procedure_amount']) * ($daysDifference);
+            $data['daysDifference'] = $daysDifference;
+
+
+        }
+
+
+
+        //----- share percentange ---------//
+        $share_amount = $admission->consultant_share_amount;
+        /*if($data['consultant_share'] !='' && $data['consultant_share'] > 0){
+            $percentage = $data['consultant_share']/100;
+            $share_amount = ($data['procedure_amount']) * ($percentage);
+        }*/
 
 
 

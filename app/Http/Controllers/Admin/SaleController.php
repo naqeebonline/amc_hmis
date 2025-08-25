@@ -33,11 +33,14 @@ class SaleController extends Controller
     {
         $store = Store::whereId(env('SEHAT_CARD_PHARMACY_STORE_ID'))->first();
 
-        if($store){
+        session(['store_id' => 1]);
+        session(['store_name' => "Sehat Card Pharmacy Sale"]);
+        session(['is_free' => 1]);
+        /*if($store){
             session(['store_id' => $store->id]);
             session(['store_name' => $store->store_name]);
             session(['is_free' => $store->use_purchase_price_as_sale_price]);
-        }
+        }*/
 
 
         $type = $_GET['type'] ?? "";
@@ -99,11 +102,14 @@ class SaleController extends Controller
     public function retail_pharmacy_sale()
     {
         $store = Store::where("id","!=",env('SEHAT_CARD_PHARMACY_STORE_ID'))->first();
-        if($store){
+        session(['store_id' => 2]);
+        session(['store_name' => "Retail Pharmacy Sale"]);
+        session(['is_free' => 0]);
+        /*if($store){
             session(['store_id' => $store->id]);
             session(['store_name' => $store->store_name]);
             session(['is_free' => $store->use_purchase_price_as_sale_price]);
-        }
+        }*/
 
         $type = $_GET['type'] ?? "Home";
         $data['type'] = $type;
@@ -177,13 +183,16 @@ class SaleController extends Controller
     public function in_patient_pharmacy_sale()
     {
         $store = Store::where("id","!=",env('SEHAT_CARD_PHARMACY_STORE_ID'))->first();
-        if($store){
+        /*if($store){
             session(['store_id' => $store->id]);
             session(['store_name' => $store->store_name]);
             session(['is_free' => $store->use_purchase_price_as_sale_price]);
-        }
+        }*/
+        session(['store_id' => 2]);
+        session(['store_name' => "In Patient Retail Pharmacy Sale"]);
+        session(['is_free' => 0]);
 
-        $type = $_GET['type'] ?? "Home";
+        $type = $_GET['type'] ?? "Ward";
         $data['type'] = $type;
         $data["ward_request"] = $_GET["ward_request"] ?? "";
         $data['patient_id'] = "";
@@ -457,6 +466,16 @@ class SaleController extends Controller
         }else{
             $CustomerName = "Walking Customer";
             $patient_id = 0;
+        }
+
+        if($appointment_id){
+            $app = Appointment::where('is_active', 1)
+                ->with(['patient'])
+                ->where("id",$appointment_id)
+                ->first();
+            $CustomerName = $app->patient->name ?? "";
+            $patient_id = $app->patient_id ?? 0;
+            $admission_id = 0;
         }
 
         /*foreach(request()->ProductList as $row){

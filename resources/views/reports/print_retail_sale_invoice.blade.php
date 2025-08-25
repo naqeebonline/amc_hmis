@@ -32,9 +32,9 @@
     </div>
 
     <div class="main">
-        <h6 style="font-size: 14px">Name: {{ $patient->name ?? '' }}</h6>
+        {{--<h6 style="font-size: 14px">Name: {{ $patient->name ?? '' }}</h6>--}}
         @if($appointment_patient_name !='')
-            <h6 style="font-size: 14px">{{$appointment_patient_name}}</h6>
+            <h6 style="font-size: 14px">{!! $appointment_patient_name !!} </h6>
         @endif
         <h6 style="font-size: 14px">Printed By: {{ auth()->user()->name ?? "" }}</h6>
 
@@ -93,7 +93,7 @@
     </div>
 
     <br><br>
-    <strong style="font-size: 12px; text-align: center !important;"></strong>
+    <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Thank You For Visiting</p>
     <br>
 </div>
 

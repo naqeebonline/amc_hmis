@@ -14,6 +14,7 @@ use App\Models\Patient\Patient;
 use App\Models\Patient\PatientAdmission;
 use App\Models\Patient\PatientLocation;
 use App\Models\Patient\Relation;
+use App\Models\Users;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -21,7 +22,9 @@ class AppointmentController extends Controller
 {
     public function appointment()
     {
-
+        $data['users'] = Users::whereHas('roles', function ($q) {
+            $q->where('name', 'Super Admin') ->orWhere('name', 'like', '%Receiption User%');
+        })->get(["id","name"]);
         $data["consultants"] = Consultants::where(["is_active"=>1])->get();
         $data["relations"] = Relation::get();
         $data["district"] = District::get();
@@ -59,6 +62,9 @@ class AppointmentController extends Controller
             })
             ->when(request()->consultant_id,function ($q){
                 $q->where("consultant_id",request()->consultant_id);
+            })
+            ->when(request()->created_by,function ($q){
+                $q->where("created_by",request()->created_by);
             })
         ->orderBy("id","desc");
 
@@ -259,10 +265,10 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function print_all_appointments($from_date,$to_date,$opd_type_id,$consultant_id)
+    public function print_all_appointments($from_date,$to_date,$opd_type_id,$consultant_id,$user_id)
     {
 
-        $res = Appointment::with(["patient","opd_type","consultant","created_by"])->where(["is_active"=>1])
+        $res = Appointment::with(["patient","opd_type","consultant","created_by_user"])->where(["is_active"=>1])
             ->when(($from_date && $from_date !='nill'),function ($q) use($from_date){
                 // dd("here");
                 $q->whereDate("appointment_date",">=",$from_date);
@@ -276,7 +282,11 @@ class AppointmentController extends Controller
             ->when($consultant_id,function ($q) use($consultant_id){
                 $q->where("consultant_id",$consultant_id);
             })
+            ->when($user_id,function ($q) use($user_id){
+                $q->where("created_by",$user_id);
+            })
         ->get();
+
         $data['from_date'] = ($from_date && $from_date !='nill') ? $from_date : "-";
         $data['to_date'] = ($to_date && $to_date !='nill') ? $to_date : "-";
         $data['data'] = $res;
