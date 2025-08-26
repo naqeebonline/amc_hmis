@@ -46,11 +46,12 @@
                 <div class="col-md-12 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5>Add Service Charges</h5>
+                            <h5>Add In Patient Service Charges</h5>
 
                             <form action="" id="add_service_charges">
                                 <div class="row">
                                     <div class="col-md-3">
+                                        <input type="hidden" name="patient_type" value="in_patient">
                                         <label for="" class="form-label">Select Patient</label>
                                         <select name="" id="admit_patient" class="form-select">
                                             <option value="" disabled selected>Select Patient</option>
@@ -307,7 +308,7 @@
             if (isValid) {
                 $("#save_inv_btn").prop('disabled', true).text("Saving....");
                 $("#add_service_charges").ajaxSubmit({
-                    url: '{{ route('pos.save_patient_service_charges') }}',
+                    url: '{{ route('pos.save_in_patient_service_charges') }}',
                     type: 'post',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -357,7 +358,7 @@
                         d.user_id = $('#attendance_user_filter').val();
                         d.attendance_date_from = $('#attendance_date_from').val();
                         d.attendance_date_to = $('#attendance_date_to').val();
-
+                        d.patient_type = 'in_patient';
 
                     }
 
@@ -408,7 +409,7 @@
             if (confirm('Are you sure to delete this record ?')) {
                 $.ajax({
                     type: 'post',
-                    url: "{{ route('pos.deactivate_record') }}",
+                    url: "{{ route('pos.deactivate_in_patient_service_charges') }}",
                     data: {
                         id: id,
                         admission_id: admission_id,

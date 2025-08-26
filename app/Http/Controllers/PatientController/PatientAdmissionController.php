@@ -429,6 +429,24 @@ class PatientAdmissionController extends Controller
         ]);
     }
 
+    public function save_in_patient_service_charges()
+    {
+        $data = request()->except(['_token', "id"]);
+        $service = ServiceType::where("id",request()->service_type_id)->first();
+        $data['actual_price'] = $service->price;
+        $data['service_date'] = request()->service_date . " " . date("h:i:s");
+        $data['created_by'] = auth()->user()->id;
+        PatientServiceCharges::updateOrCreate(
+            ["id" => request()->id],
+            $data
+        );
+        $this->updateInAdmissionDetails(request()->admission_id);
+        return response()->json([
+            "status" => true,
+            "message" => "Record save successfully."
+        ]);
+    }
+
     public function get_admission_service_charges($patient_id = '', $admission_id = '')
     {
         $patients = PatientServiceCharges::where("is_active", 1)->with("service_type")
@@ -438,11 +456,16 @@ class PatientAdmissionController extends Controller
             ->when($admission_id, function ($query) use ($admission_id) {
                 $query->where('admission_id', $admission_id);
             })
+            ->when(request()->patient_type, function ($query) {
+                $query->where('patient_type', request()->patient_type);
+            })
             ->orderBy("id", "desc");
         return DataTables::of($patients)
             ->addColumn("actions", function ($patient) {
-                return '<a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-warning edit_service_record"><i class="tf-icons bx bx-pencil"></i></a> 
-                        <button data-id="' . $patient->id . '" class="btn btn-danger btn-sm delete_service_record"><i class="bx bx-trash tf-icons"></i></button>
+                $buttons = "";
+                $buttons .= '<a href="javascript:void(0)"  data-details=\'' . $patient . '\'  class="btn btn-sm btn-warning edit_service_record"><i class="tf-icons bx bx-pencil"></i></a>';
+                return ' 
+                       <button data-id="' . $patient->id . '" class="btn btn-danger btn-sm delete_service_record"><i class="bx bx-trash tf-icons"></i></button>
                  
                         ';
             })
@@ -568,10 +591,13 @@ class PatientAdmissionController extends Controller
         $data["patients"] = PatientAdmission::where("admission_status", "Admit")
             ->orWhereDate('discharge_date', '>=', Carbon::now()->subDay(2)->format('Y-m-d H:i:s'))
             ->with("patient", "ward", "bed")->get();
+       // dd($data["patients"]);
         $data['investigation'] = InvestigationSubCategory::whereIsActive(1)->get();
         $data['service_type'] = ServiceType::whereIsActive(1)->get();
         return view("patients.patient_service_charge", $data);
     }
+
+
 
     public function ot_notes()
     {

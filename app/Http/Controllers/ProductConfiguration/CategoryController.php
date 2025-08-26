@@ -219,4 +219,15 @@ class CategoryController extends Controller
         return ["status"=>true,"message"=>"Record saved successfully"];
 
     }
+
+    public function deactivate_in_patient_service_charges()
+    {
+        DB::table(request()->table)->whereId(request()->id)->update(["is_active"=>0]);
+        if(request()->has('admission_id')){
+            (new PatientAdmissionController())->updateInAdmissionDetails(request()->admission_id);
+
+        }
+        return ["status"=>true,"message"=>"Record saved successfully"];
+
+    }
 }

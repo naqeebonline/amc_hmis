@@ -51,6 +51,7 @@
                             <form action="" id="add_service_charges">
                                 <div class="row">
                                     <div class="col-md-3">
+                                        <input type="hidden" name="patient_type" value="sehat_card">
                                         <label for="" class="form-label">Select Patient</label>
                                         <select name="" id="admit_patient" class="form-select">
                                             <option value="" disabled selected>Select Patient</option>
@@ -357,6 +358,7 @@
                         d.user_id = $('#attendance_user_filter').val();
                         d.attendance_date_from = $('#attendance_date_from').val();
                         d.attendance_date_to = $('#attendance_date_to').val();
+                        d.patient_type = 'sehat_card';
 
 
                     }

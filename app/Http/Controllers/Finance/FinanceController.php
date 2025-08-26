@@ -420,6 +420,7 @@ class FinanceController extends Controller
                 return $query->whereDate('patient_service_charges.service_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
             ->where("patient_service_charges.is_active",1)
+            ->where("patient_service_charges.user_type",'in_patient')
             ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered","Canceled"])
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('patient_service_charges.created_by',$user_id);

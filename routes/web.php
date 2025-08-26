@@ -162,6 +162,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("get-daily-sale", [\App\Http\Controllers\HomeController::class, 'getDailySaleData'])->name('pos.getDailySaleData');
 
     Route::post('deactivate_record', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'deactivate_record'])->name('pos.deactivate_record');
+    Route::post('deactivate_in_patient_service_charges', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'deactivate_in_patient_service_charges'])->name('pos.deactivate_in_patient_service_charges');
 
     Route::get('main-category', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'add_main_category'])->name('pos.add_main_category');
     Route::get('list_main_category', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'list_main_category'])->name('pos.list_main_category');
@@ -225,6 +226,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get("get_admission_service_charges/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_admission_service_charges"])->name("pos.get_admission_service_charges");
     Route::post("save_patient_service_charges", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "save_patient_service_charges"])->name("pos.save_patient_service_charges");
+    Route::post("save_in_patient_service_charges", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "save_in_patient_service_charges"])->name("pos.save_in_patient_service_charges");
     Route::get("get_admitted_patient_treatments/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_admitted_patient_treatments"])->name("pos.get_admitted_patient_treatments");
 
     Route::get('add_procedure_type', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'add_procedure_type'])->name('pos.add_procedure_type');
@@ -397,6 +399,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("get_in_admission_investigations/{patient_id?}/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "get_in_admission_investigations"])->name("pos.get_in_admission_investigations");
     Route::get("in_patient_treatment_chart_report/{patient_id?}/{admission_id?}/{medicine_type_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_treatment_chart_report"])->name("pos.in_patient_treatment_chart_report");
     Route::post("cancel_in_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "cancel_in_patient_admission"])->name("pos.cancel_in_patient_admission");
+    Route::get("in_patient_service_charges", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_service_charges"])->name("pos.in_patient_service_charges");
+
+
+
 
     Route::get('/daily-closing', [\App\Http\Controllers\Finance\FinanceController::class, 'daily_closing'])->name('pos.daily_closing');
     Route::post('/post_daily_closing', [\App\Http\Controllers\Finance\FinanceController::class, 'post_daily_closing'])->name('pos.post_daily_closing');
@@ -425,7 +431,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("hospital-patient-admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "hospital_patient_admission"])->name("pos.hospital_patient_admission");
     Route::get("hospital-list-admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "hospital_list_admission"])->name("pos.hospital_list_admission");
     Route::get("in_patient_investigation", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_investigation"])->name("pos.in_patient_investigation");
-    Route::get("in_patient_service_charges", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_service_charges"])->name("pos.in_patient_service_charges");
+
     Route::get("in_patient_payment", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_payment"])->name("pos.in_patient_payment");
     Route::get("in_patient_admission_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_admission_list"])->name("pos.in_patient_admission_list");
     Route::get("primary_discharge/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "primary_discharge"])->name("pos.primary_discharge");

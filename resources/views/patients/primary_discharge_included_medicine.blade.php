@@ -103,7 +103,7 @@
 
                             <div class="card-body">
                             <div class="row">
-                                <h4 style="text-align: center;color:green">Procedure Name: {{$admission->consultant_procedure->procedure->name ?? ""}}</h4>
+                                <h4 style="text-align: center;color:green">Procedure Name: {{$admission->consultant_procedure->procedure->name ?? ""}}  <span style="color: red;">Note: Medicine Included</span></h4>
                                 <div class="col-md-6">
                                     <table class="table table-bordered">
                                         <tr>
