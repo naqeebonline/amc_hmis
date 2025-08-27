@@ -81,9 +81,8 @@
 
 
 		</table>
-		<br>
-		<br>
 
+		<p style="text-align: center"><img src="data:image/png;base64,{{ DNS2D::getBarcodePNG($data[0]->invoice_no, 'QRCODE', 3, 3) }}" alt="qrcode" /></p>
 		<p style="text-align: center; font-weight: bold">Thank You For Visiting.</p>
 	</div>
 

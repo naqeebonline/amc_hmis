@@ -89,9 +89,9 @@
         }
 
         .main {
-            padding: 30px 20px;
+            padding: 4px 20px;
             width: 100%;
-            height: 720px;
+            height: 688px;
             margin-top: 10px;
         }
         .height{
@@ -176,12 +176,14 @@
 
                     </ul>
                     <p style="text-align: center;"><b>PMDC#{!! $data->consultant->pmdc_number !!} </b></p>
+                    <p style="text-align: center"><img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($data->appointment_number, "C128", 2, 20) }}" alt="barcode" /></p>
                 </div>
 
                 <div class="col-4">
                     <p><strong>{{date('l, F d, Y', strtotime($data->appointment_date))}} <br/> {{date('h:i A', strtotime($data->appointment_date))}}</strong></p>
                     <p><strong>{{ucfirst($data->opd_type->name) ?? ''}}</strong></p>
                     <p><strong>Appointment#: {{env('BRANCH_CODE')}} {{ $data->appointment_number }}</strong></p>
+
                 </div>
 
             </div>
