@@ -337,9 +337,11 @@ class FinanceReportController extends Controller
             ->where('ft.reference_type','!=', 'cash_payment_voucher')
             ->where('ft.reference_type','!=', 'cash_receipt_voucher')
             ->where('ft.reference_type','!=', 'journal_voucher')
+            ->where('ft.reference_type','!=', 'cost_of_lab_consumable')
             ->where(function ($q) {
                 $q->whereNull('ft.reference_type')
                     ->orWhere('ft.reference_type', '!=', 'commission');
+
             })
             ->select(
                 'ft.transaction_date',
@@ -356,6 +358,7 @@ class FinanceReportController extends Controller
             ->orderBy('ft.user_id')
             ->get()
             ->groupBy('transaction_date');
+      //  dd($transactions);
 
         $finalReport = [];
 
@@ -386,6 +389,7 @@ class FinanceReportController extends Controller
                 'date' => $date,
                 'users' => $users->values()
             ];
+
         }
 
         return view('Finance.Reports.user_base_closing_report2', compact('start_date', 'end_date', 'finalReport'));

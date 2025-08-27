@@ -63,7 +63,7 @@
                 <div class="card-body">
                     <form class=" form-submit-event" method="post" action="{{route('pos.post_daily_closing')}}" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="user_id" value="{{$user_id}}">
+                        <input type="hidden" required name="user_id" value="{{$user_id}}">
                         <input type="hidden" name="closing_date" value="{{$closing_date}}">
                         <div class="row">
                             <div class="col-md-6 col-sm-4 mb-3">

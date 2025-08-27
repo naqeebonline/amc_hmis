@@ -81,7 +81,7 @@
                                 <label style="text-align: center; width: 100%; font-weight: bold; color:red">Age</label>
                                 <div class="d-flex align-items-center">
                                     <label for="years" class="me-2">Years:</label>
-                                    <input type="text" id="age" name="age" class="form-control" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
+                                    <input type="text" id="age" name="age" required class="form-control" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
 
                                     <label for="months" class="me-2">Months:</label>
                                     <input type="text" id="months" value="0" name="months" class="form-control" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
@@ -93,7 +93,7 @@
 
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label class="form-label">Gender:<span class="asterisk">*</span></label>
-                                <select name="gender" id="gender" class="form-control">
+                                <select name="gender" id="gender" required class="form-control">
                                     <option selected value="male">Male</option>
                                     <option value="female">Female</option>
                                 </select>
@@ -747,8 +747,8 @@
             $("#father_husband_name").val('');
             $("#g4no").val(0);
             $("#age").val('');
-            $("#months").val('');
-            $("#days").val('');
+            $("#months").val('0');
+            $("#days").val('0');
             $("#gender").val('');
 
             $("#location_id").val('').trigger("change");

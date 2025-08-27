@@ -28,7 +28,7 @@ class FinanceController extends Controller
     {
 
         $closing_date = $_GET['closing_date'] ?? date("Y-m-d");
-        $user_id = $_GET['user_id'] ?? 0;
+        $user_id = $_GET['user_id'] ?? '';
         $data['user_id'] = $user_id;
         $data['closing_date'] = $closing_date;
         $data['users'] = Users::where("status",1)
@@ -37,7 +37,7 @@ class FinanceController extends Controller
             })
             ->get();
 
-        $data['finance_heads'] = FinanceHead::get();
+        $data['finance_heads'] = FinanceHead::where(["name"=>"Cash At Office"])->get();
 
         $query = SalePayment::where("is_posted",0)
             ->when($closing_date, function ($query) use ($closing_date) {
@@ -78,6 +78,9 @@ class FinanceController extends Controller
         }
 
         $user_id = request()->user_id;
+        if($user_id == '' || $user_id == 0){
+            return redirect()->back()->with("error","Please Select Closing User");
+        }
 
         $closing_date = request()->closing_date;
         if(request()->finance_head_id == ''){
@@ -107,6 +110,10 @@ class FinanceController extends Controller
         $service_charges = $this->serviceCharges($closing_date,$user_id);
         $consultant_charges = $this->consultant_charges($closing_date,$user_id);
         $total_amount = ($sale) + ($appointments) + ($investigations) + ($service_charges) + ($consultant_charges);
+
+        if($total_amount == 0){
+            return redirect()->back()->with("error","You can not post Zero Amount of user.");
+        }
 
         $voucher = generateVoucherNumber("closing",$user_id);
 
@@ -420,7 +427,7 @@ class FinanceController extends Controller
                 return $query->whereDate('patient_service_charges.service_date', '<=', date("Y-m-d", strtotime($closing_date)));
             })
             ->where("patient_service_charges.is_active",1)
-            ->where("patient_service_charges.user_type",'in_patient')
+            ->where("patient_service_charges.patient_type",'in_patient')
             ->whereIn("in_patient_admissions.admission_status",["Discharged","Reffered","Canceled"])
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('patient_service_charges.created_by',$user_id);
