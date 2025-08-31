@@ -333,6 +333,7 @@
         }, 1000);
 
 
+
         $("body").on("click", ".print_all_details", function(e) {
             var from_date = $("#filter_from_date").val();
             var to_date = $("#filter_to_date").val();
@@ -436,6 +437,9 @@
                     user_table.ajax.reload();
                 }
             })
+
+
+
         });
 
         $("body").on("keyup", "#days,#months,#age", function() {

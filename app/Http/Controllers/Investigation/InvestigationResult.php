@@ -11,8 +11,10 @@ use App\Models\ParameterHeading;
 use App\Models\Patient\InvestigationResult as PatientInvestigationResult;
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientInvestigation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use LDAP\Result;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -168,6 +170,28 @@ class InvestigationResult extends Controller
        // $res = collect($data["result"]->investigationResult)->groupBy('parameter_heading')->toArray();
         //dd($data["result"]->investigationResult);
         return view("reports.investigation_result", $data);
+    }
+
+    public function print_out_user_inv_result($inv_id)
+    {
+        $inv_id = Crypt::decrypt($inv_id);
+        $data["result"] = PatientInvestigation::where("id", $inv_id)
+            ->where("status", 1)
+            ->with("patient", "subCategory.main_category", "investigationResult.parameter", "admission.consultant", "consultant")
+            ->first();
+
+        $data['inv_sub_category'] = InvestigationSubCategory::where(['id'=>$data["result"]->investigation_sub_category_id])->first();
+
+        foreach ($data["result"]->investigationResult as $key => $value) {
+            $value->parameter_heading = $value->parameter->parameter_heading->name ?? '';
+        }
+
+        // generate pdf
+       // $pdf = Pdf::loadView('reports.print_out_user_inv_result', $data);
+
+        // download with filename
+       // return $pdf->download('investigation-result-'.$inv_id.'.pdf');
+        return view("reports.print_out_user_inv_result", $data);
     }
 
     public function investigation_add_result($inv_id, $cat_id)

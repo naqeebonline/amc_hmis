@@ -32,10 +32,12 @@
     </div>
 
     <div class="main">
+        <h6 style="font-size: 14px">Invoice#: {{ $record->InvoiceNo ?? "" }}</h6>
         {{--<h6 style="font-size: 14px">Name: {{ $patient->name ?? '' }}</h6>--}}
         @if($appointment_patient_name !='')
             <h6 style="font-size: 14px">{!! $appointment_patient_name !!} </h6>
         @endif
+
         <h6 style="font-size: 14px">Printed By: {{ auth()->user()->name ?? "" }}</h6>
 
         <table style="margin-top: 5px">
@@ -92,8 +94,9 @@
         </table>
     </div>
 
-    <br><br>
+    <p style="text-align: center"><img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(env('LIVE_URL'), 'QRCODE', 3, 3) }}" alt="qrcode" /></p>
     <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Thank You For Visiting</p>
+    <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Note: Returns are accepted only with the original receipt/invoice.</p>
     <br>
 </div>
 

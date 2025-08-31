@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.0.2",
         "ahmed-aliraqi/laravel-media-uploader": "^7.0",
+        "barryvdh/laravel-dompdf": "^3.1",
         "guzzlehttp/guzzle": "^7.4",
         "isahaq/barcode-qrcode-generator": "^1.0",
         "jeremykenedy/laravel-roles": "^8.1",

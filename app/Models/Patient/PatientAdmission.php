@@ -7,12 +7,14 @@ use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
 
 use App\Models\User;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PatientAdmission extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "patient_admissions";
     protected $guarded = ["id"];
     protected $primaryKey = 'id';

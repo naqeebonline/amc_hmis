@@ -207,7 +207,7 @@
                                         <input type="hidden" name="GDID[]" value="{{ $item->GDID }}">
                                         <input type="hidden" name="pack_size[]" value="{{ $item->pack_size }}">
 
-                                        {{ $item->products->ProductName }}
+                                        {{ $item->products?->ProductName ?? "" }}
                                     </td>
                                     <td class="text-center"><input type="number" id="bill_item_{{$item->GDID}}" onchange="handleChange(this, {{ $item->pack_size }})"
                                                                    name="pack_qty[]"

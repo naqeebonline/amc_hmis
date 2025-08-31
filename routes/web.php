@@ -13,10 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::get("import_all_products_to_bill", [\App\Http\Controllers\Admin\StockController::class, 'import_all_products_to_bill'])->name('pos.import_all_products_to_bill');
+Route::get("syncData", [\App\Http\Controllers\SyncController::class, 'load_sync_view'])->name('pos.syncData');
+Route::post("syncDataLive", [\App\Http\Controllers\SyncController::class, 'syncLoclDataWithLive'])->name('pos.syncDataLive');
+
 Route::get('/testData', function () {
-    $liveData = \Illuminate\Support\Facades\DB::connection('live_mysql')->table('company_levels')->get();
-    dd($liveData);
+
 });
+
+Route::get("lab-results/{invoice_no?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "out_user_print_investigation"])->name("pos.out_user_print_investigation");
+Route::get("print_out_user_inv_result/{inv_id}",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'print_out_user_inv_result'] )->name("pos.print_out_user_inv_result");
 
 Route::get("/", [\App\Http\Controllers\HomeController::class, 'index'])->name('app.landing-screen');
 Route::get("dashboardAnalytics", [\App\Http\Controllers\HomeController::class, 'dashboardAnalytics'])->name('app.dashboardAnalytics');
@@ -276,6 +281,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post("store_inv_result",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'store_inv_result'] )->name("pos.store_inv_result");
     Route::get("print_inv_result/{inv_id}",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'print_inv_result'] )->name("pos.print_inv_result");
 
+
     Route::get("patient_summary", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_summary"])->name("pos.patient_summary");
 
     Route::get("patient_investigation", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_investigation"])->name("pos.patient_investigation");
@@ -466,5 +472,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('get_consultant_procedures', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'get_consultant_procedures'])->name('pos.get_consultant_procedures');
     Route::post("update_in_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_in_patient_admission"])->name("pos.update_in_patient_admission");
     Route::get("in_patient_discharged_listing", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_listing"])->name("pos.in_patient_discharged_listing");
+
+
 
 });

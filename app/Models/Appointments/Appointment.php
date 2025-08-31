@@ -7,12 +7,14 @@ use App\Models\Patient\Patient;
 use App\Models\Patient\PatientLocation;
 use App\Models\User;
 use App\Models\Users;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Appointment extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "appointments";
     protected $primaryKey = 'id';
     protected $guarded = ["id"];

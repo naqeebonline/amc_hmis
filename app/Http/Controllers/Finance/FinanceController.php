@@ -111,7 +111,7 @@ class FinanceController extends Controller
         $consultant_charges = $this->consultant_charges($closing_date,$user_id);
         $total_amount = ($sale) + ($appointments) + ($investigations) + ($service_charges) + ($consultant_charges);
 
-        if($total_amount == 0){
+        if($total_amount == 0 && $pharmacy_return == 0){
             return redirect()->back()->with("error","You can not post Zero Amount of user.");
         }
 

@@ -308,81 +308,81 @@
                 </thead>
                 <tbody>
                 @if($inv_sub_category->is_parameter != 0)
-                <?php $default_heading = ($result->investigationResult)[0]->parameter_heading;
-                     $default_heading = strtolower($default_heading);
-                ?>
-                @foreach ($result->investigationResult as $key => $item)
+                    <?php $default_heading = ($result->investigationResult)[0]->parameter_heading;
+                    $default_heading = strtolower($default_heading);
+                    ?>
+                    @foreach ($result->investigationResult as $key => $item)
 
-                    @php
+                        @php
 
-                        $range_max_value = 0;
-                        $range_min_value = 0;
+                            $range_max_value = 0;
+                            $range_min_value = 0;
 
-                        if ($result->patient->gender == 'male' && $result->patient->age > 2) {
-                            $range_max_value = $item->parameter->male_max ?? '';
-                            $range_min_value = $item->parameter->male_min ?? '';
-                        } elseif ($result->patient->gender == 'female' && $result->patient->age > 2) {
-                            $range_max_value = $item->parameter->female_max ?? '';
-                            $range_min_value = $item->parameter->female_min ?? '';
-                        } else {
-                            $range_max_value = $item->parameter->child_max ?? '';
-                            $range_min_value = $item->parameter->child_min ?? '';
-                        }
+                            if ($result->patient->gender == 'male' && $result->patient->age > 2) {
+                                $range_max_value = $item->parameter->male_max ?? '';
+                                $range_min_value = $item->parameter->male_min ?? '';
+                            } elseif ($result->patient->gender == 'female' && $result->patient->age > 2) {
+                                $range_max_value = $item->parameter->female_max ?? '';
+                                $range_min_value = $item->parameter->female_min ?? '';
+                            } else {
+                                $range_max_value = $item->parameter->child_max ?? '';
+                                $range_min_value = $item->parameter->child_min ?? '';
+                            }
 
-                    @endphp
-                    <?php if(($default_heading != strtolower($item->parameter_heading) || $key == 0) && $default_heading != 'no heading'){ $default_heading =strtolower($item->parameter_heading); ?>
-                    <tr>
-                        <td colspan="4" style="font-weight: bold; font-size: 16px; font-style: oblique; text-decoration: underline">{{strtoupper($default_heading)}}</td>
-                    </tr>
-                    <?php } ?>
-                    <tr>
-                        <td style="margin-left: 20px">{{ $item->parameter->name ?? '' }}</td>
-                        @if ($item->result_text_value != '')
-                            <td
-                                    class="text-center {{ strtolower($item->result_text_value) == 'positive' ? 'fw-bold out-range' : '' }}">
-                                {{ ucfirst($item->result_text_value) }} </td>
-                        @else
-                            @if(is_numeric($item->result_value))
-                            <td
-                                    class="text-center {{ $item->result_value > $range_max_value || $item->result_value < $range_min_value ? 'fw-bold out-range' : '' }}">
-
-                                <?php
-
-                                if (strpos($item->result_value, ':') == false) {
-                                    echo  number_format($item->result_value,1) ;
-                                } else {
-                                    echo $item->result_value;
-                                }
-
-                                ?>
-                            </td>
-                             @else
-                                <td class="text-center">
-                                    {{$item->result_value}}
-                                </td>
-                             @endif
-                        @endif
-
-
-                        <td class="text-center">{{ $item->parameter->unit ?? '' }}</td>
-
-                        @if ($item->result_text_value != '' && $inv_sub_category->is_ict)
-                            <td class="text-center">-</td>
-                        @else
-                            @if ($result->patient->gender == 'male' && $result->patient->age > 2)
-                                <td class="text-center">{{ number_format($item->parameter?->male_min, 1) }} -
-                                    {{ number_format($item->parameter?->male_max,1) }}</td>
-                            @elseif($result->patient->gender == 'female' && $result->patient->age > 2)
-                                <td class="text-center">{{ number_format($item->parameter?->female_min,1) }} -
-                                    {{ number_format($item->parameter?->female_max,1) }}</td>
+                        @endphp
+                        <?php if(($default_heading != strtolower($item->parameter_heading) || $key == 0) && $default_heading != 'no heading'){ $default_heading =strtolower($item->parameter_heading); ?>
+                        <tr>
+                            <td colspan="4" style="font-weight: bold; font-size: 16px; font-style: oblique; text-decoration: underline">{{strtoupper($default_heading)}}</td>
+                        </tr>
+                        <?php } ?>
+                        <tr>
+                            <td style="margin-left: 20px">{{ $item->parameter->name ?? '' }}</td>
+                            @if ($item->result_text_value != '')
+                                <td
+                                        class="text-center {{ strtolower($item->result_text_value) == 'positive' ? 'fw-bold out-range' : '' }}">
+                                    {{ ucfirst($item->result_text_value) }} </td>
                             @else
-                                <td class="text-center">{{ number_format($item->parameter?->child_min) }} -
-                                    {{ number_format($item->parameter?->child_max,1) }}</td>
-                            @endif
-                        @endif
+                                @if(is_numeric($item->result_value))
+                                    <td
+                                            class="text-center {{ $item->result_value > $range_max_value || $item->result_value < $range_min_value ? 'fw-bold out-range' : '' }}">
 
-                    </tr>
-                @endforeach
+                                        <?php
+
+                                        if (strpos($item->result_value, ':') == false) {
+                                            echo  number_format($item->result_value,1) ;
+                                        } else {
+                                            echo $item->result_value;
+                                        }
+
+                                        ?>
+                                    </td>
+                                @else
+                                    <td class="text-center">
+                                        {{$item->result_value}}
+                                    </td>
+                                @endif
+                            @endif
+
+
+                            <td class="text-center">{{ $item->parameter->unit ?? '' }}</td>
+
+                            @if ($item->result_text_value != '' && $inv_sub_category->is_ict)
+                                <td class="text-center">-</td>
+                            @else
+                                @if ($result->patient->gender == 'male' && $result->patient->age > 2)
+                                    <td class="text-center">{{ number_format($item->parameter?->male_min, 1) }} -
+                                        {{ number_format($item->parameter?->male_max,1) }}</td>
+                                @elseif($result->patient->gender == 'female' && $result->patient->age > 2)
+                                    <td class="text-center">{{ number_format($item->parameter?->female_min,1) }} -
+                                        {{ number_format($item->parameter?->female_max,1) }}</td>
+                                @else
+                                    <td class="text-center">{{ number_format($item->parameter?->child_min) }} -
+                                        {{ number_format($item->parameter?->child_max,1) }}</td>
+                                @endif
+                            @endif
+
+                        </tr>
+                    @endforeach
 
 
                 </tbody>

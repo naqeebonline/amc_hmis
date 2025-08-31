@@ -15,10 +15,10 @@ use App\Http\Controllers\API\LoginController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::get('/sendDataToLive', [\App\Http\Controllers\DataSyncController::class, 'sendDataToLive']);
+Route::post('/sync', [\App\Http\Controllers\SyncController::class, 'syncData']);
+//Route::get('/sendDataToLive', [\App\Http\Controllers\DataSyncController::class, 'sendDataToLive']);
 Route::prefix('v1')->group(function (){
-    Route::post('/syncLiveDataFromLocal', [\App\Http\Controllers\DataSyncController::class, 'syncLiveDataFromLocal']);
+    //Route::post('/syncLiveDataFromLocal', [\App\Http\Controllers\DataSyncController::class, 'syncLiveDataFromLocal']);
 
     Route::post('updatePatient', [\App\Http\Controllers\API\SmsController::class,'updatePatient']);
     Route::post('sendSms', [\App\Http\Controllers\API\SmsController::class,'sendSms']);

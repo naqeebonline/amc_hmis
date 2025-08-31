@@ -64,6 +64,7 @@ class ProductController extends Controller
         $data = request()->except(["id","_token"]);
         $data['store_id'] = session('store_id');
         Cache::forget('products_store_2');
+        $data['unit_sale_price'] = (request()->SalePrice/request()->pack_size);
         Product::updateOrCreate(
             ["ProductID"=>request()->id],
             $data

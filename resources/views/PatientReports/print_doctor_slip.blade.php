@@ -176,7 +176,7 @@
 
                     </ul>
                     <p style="text-align: center;"><b>PMDC#{!! $data->consultant->pmdc_number !!} </b></p>
-                    <p style="text-align: center"><img src="data:image/png;base64,{{ DNS1D::getBarcodePNG($data->appointment_number, "C128", 2, 20) }}" alt="barcode" /></p>
+                    <p style="text-align: center">{!! DNS1D::getBarcodeSVG($data->appointment_number, 'C128', 2, 20, 'black', false) !!}</p>
                 </div>
 
                 <div class="col-4">

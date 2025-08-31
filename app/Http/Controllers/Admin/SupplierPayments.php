@@ -432,9 +432,9 @@ class SupplierPayments extends Controller
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
             })
-            ->when((userRole() != "Super Admin"), function ($q) {
+           /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
                 return $q->where(["CreatedBy" => auth()->user()->id]);
-            })
+            })*/
             ->limit(50);
 
         return DataTables::of($bills)

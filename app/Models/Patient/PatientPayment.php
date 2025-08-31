@@ -3,6 +3,7 @@
 namespace App\Models\Patient;
 
 use App\Models\Configuration\District;
+use App\Traits\Syncable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 class PatientPayment extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "in_patient_payments";
     protected $guarded = ["id"];
     protected $primaryKey = 'id';

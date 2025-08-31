@@ -253,6 +253,7 @@ class AppointmentController extends Controller
             "hospital_share"   => $hospital_share,
             "consultant_share"   => $consultant_share,
             "updated_by"   => auth()->user()->id,
+            "is_sync"   => 0,
 
         ];
 

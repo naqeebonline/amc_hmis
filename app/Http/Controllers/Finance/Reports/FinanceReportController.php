@@ -338,6 +338,9 @@ class FinanceReportController extends Controller
             ->where('ft.reference_type','!=', 'cash_receipt_voucher')
             ->where('ft.reference_type','!=', 'journal_voucher')
             ->where('ft.reference_type','!=', 'cost_of_lab_consumable')
+            ->where('ft.reference_type','!=', 'grn')
+            ->where('ft.reference_type','!=', 'pharmacy_sale_cogs')
+            ->where('ft.reference_type','!=', 'cogs_pharmacy_sale_return')
             ->where(function ($q) {
                 $q->whereNull('ft.reference_type')
                     ->orWhere('ft.reference_type', '!=', 'commission');
@@ -368,6 +371,9 @@ class FinanceReportController extends Controller
                 $advance = user_advance($userId, $date, $date);
 
                 $rows = $txns->map(function ($t) {
+                    if($t->reference_type == 'pharmacy_return'){
+                        $t->total_credit = -($t->total_credit);
+                    }
                     return [
                         'head_name'      => $t->head_name,
                         'reference_type' => $t->reference_type,

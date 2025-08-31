@@ -9,6 +9,7 @@ use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
 
 use App\Models\Users;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -16,11 +17,13 @@ use Illuminate\Support\Carbon;
 class PatientInvestigation extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "patient_investigations";
     protected $guarded = ["id"];
     protected $primaryKey = 'id';
     public $timestamps = false;
     protected $appends = ['my_date'];
+
 
     public function patient()
     {

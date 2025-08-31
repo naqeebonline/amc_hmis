@@ -4,12 +4,14 @@ namespace App\Models\Configuration;
 
 use App\Models\Patient\Patient;
 use App\Models\Patient\PatientAdmission;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Consultants extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "consultants";
     protected $guarded = ["id"];
     public $timestamps = false;

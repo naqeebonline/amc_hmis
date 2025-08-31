@@ -140,6 +140,7 @@ class SaleController extends Controller
         ->where("ProductName", "!=", '')
         ->where("pack_size", "!=", 0)
         ->where("pack_price", "!=", 0)
+
         ->get();
         foreach ($data['products'] as $key => $value){
             $value->avaliable_qty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');
@@ -203,6 +204,11 @@ class SaleController extends Controller
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
             })
+            ->orderBy("ProductName", "ASC")
+            ->where("IsActive", 1)
+            ->where("ProductName", "!=", '')
+            ->where("pack_size", "!=", 0)
+            ->where("pack_price", "!=", 0)
             ->get();
         foreach ($data['products'] as $key => $value){
             $value->avaliable_qty = GrnDetails::where(["ProductID"=> $value->ProductID])->sum('RemainingQuantity');

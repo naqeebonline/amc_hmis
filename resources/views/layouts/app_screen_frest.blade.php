@@ -458,6 +458,11 @@
                             <!-- /Search -->
 
                             <ul class="navbar-nav flex-row align-items-center ms-auto">
+                                @if(getUserRole() == "Super Admin" || getUserRole() == "Finance" || getUserRole() == "Receiption User")
+                                    <li>
+                                        <a class="btn btn-success" target="_blank" href="{{route('pos.syncData')}}" style="margin-right: 40px; color: white;font-weight: bold;">Sync Local Data</a>
+                                    </li>
+                                @endif
                                 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
                                    {{-- <a class="nav-link dropdown-toggle hide-arrow" href="{{route('listEmergencyAlerts')}}">
                                         <i class="bx bx-bell bx-sm"></i>

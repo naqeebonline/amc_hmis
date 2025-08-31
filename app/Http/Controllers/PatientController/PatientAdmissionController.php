@@ -888,6 +888,33 @@ class PatientAdmissionController extends Controller
         return response()->json(["status" => true, "data" => $investigations]);
     }
 
+    public function out_user_print_investigation($invoice_no)
+    {
+        $patients = PatientInvestigation::where("is_active", 1)->with("investigation")
+            ->with("patient")
+            ->with("users")
+            ->with("created_by_user")
+
+            ->when(request()->from_date, function ($query) {
+                $query->whereDate('inv_date','>=',date("Y-m-d",strtotime(request()->from_date)));
+            })
+            ->when(request()->to_date, function ($query) {
+                $query->whereDate('inv_date','<=',date("Y-m-d",strtotime(request()->to_date)));
+            })
+            ->when(request()->investigation_sub_category_id, function ($query) {
+                $query->where('investigation_sub_category_id','=',request()->investigation_sub_category_id);
+            })
+            ->when(request()->created_by, function ($query) {
+                $query->where('created_by','=',request()->created_by);
+            })
+            ->where(["patient_type"=>"hospital_patient"])
+            ->where(["invoice_no"=>$invoice_no])
+            ->orderBy("id", "desc")->get();
+          $data['data'] = $patients;
+         // dd($patients);
+          return view("out_user.out_user_print_investigation",$data);
+    }
+
 
 
     public function patient_vitals(){

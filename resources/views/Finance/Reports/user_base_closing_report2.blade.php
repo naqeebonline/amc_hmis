@@ -272,7 +272,7 @@
                                 </thead>
                                 <tbody>
                                 @foreach($user['transactions'] as $index => $txn)
-                                    @if($txn['total_credit'] > 0)
+                                    @if($txn['total_credit'] > 0 || $txn['total_credit'] < 0 )
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $txn['head_name'] }}</td>

@@ -272,8 +272,8 @@
                             <select class="form-control" id="product_id">
                                 <option value="">Select Product...</option>
                                 <?php foreach ($products as $key => $value): ?>
-                                    @if($value->ProductName != '' && $value->ProductName != '-')
-                                    <option value="{{$value->ProductID}}" data-purchasePrice={{$value->SalePrice}} data-taxPercentage="{{$value->taxPercentage}}">{{$value->ProductName}} | PS: {{$value->pack_size}} | Qty {{$value->avaliable_qty}}</option>
+                                @if($value->ProductName != '' && $value->ProductName != '-' && $value->avaliable_qty != 0)
+                                    <option value="{{$value->ProductID}}" data-purchasePrice={{$value->unit_sale_price}} data-taxPercentage="{{$value->taxPercentage}}">{{$value->ProductName}} | PS: {{$value->pack_size}} | Qty {{$value->avaliable_qty}}</option>
                                     @endif
                                 <?php endforeach; ?>
                             </select>
@@ -839,14 +839,17 @@
                     $("#save_bill").show();
                     sale_id_for_print=response.id;
 
-                    window.location.reload();
+                    setTimeout(function () {
+                        window.location.reload();
+                        //window.location="{{route('pos.retail_pharmacy_sale')}}";
+                    },1500);
 
 
 
                     url="{{route('pos.print_retail_thermel_purchase_details')}}/"+sale_id_for_print;
                     window.open(url, '_blank');
 
-                    window.location="{{route('pos.in_patient_pharmacy_sale')}}";
+                   // window.location="{{route('pos.in_patient_pharmacy_sale')}}";
 
 
                 }
@@ -999,7 +1002,8 @@
                             if(value.AvailableQuantity < value.qty){
                                 $(".horizontal-menu").append(`<li id='product_id_${value.product.ProductID}'>${value.product.ProductName} (Qty: ${value.AvailableQuantity}) <span data-item_id="product_id_${value.product.ProductID}" class="btn btn-warning remove_low_qty_item">x</span></li>`);
                             }
-                            add_item_to_grid(value.product.ProductID,value.product.ProductName,value.product.SalePrice,value.product.name,value.AvailableQuantity,value.qty,'');
+
+                            add_item_to_grid(value.product.ProductID,value.product.ProductName,value.product.unit_sale_price,value.product.name,value.AvailableQuantity,value.qty,'');
                         }else{
 
                             currentAvailableQuantity=value.AvailableQuantity ? value.AvailableQuantity : 0;

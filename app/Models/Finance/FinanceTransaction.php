@@ -2,12 +2,14 @@
 
 namespace App\Models\Finance;
 
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FinanceTransaction extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "finance_transactions";
     protected $primaryKey = 'id';
     protected $guarded = ["id"];
