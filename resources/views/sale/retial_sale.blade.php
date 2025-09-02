@@ -944,7 +944,7 @@
                     },1500);
 
 
-                    url="{{route('pos.print_retail_thermel_purchase_details')}}/"+sale_id_for_print;
+                    url="{{route('pos.print_customer_bill')}}/"+sale_id_for_print;
                     window.open(url, '_blank');
 
 
@@ -1259,7 +1259,7 @@
                         <td style="width: 20%">${value.Name}</td>
 
                         <td style="width: 10%" class="editable" data-field="quantity">${value.Quantity}</td>
-                        <td style="width: 10%" class="editable" data-field="rate">${value.UnitePrice}</td>
+                        <td style="width: 10%"  data-field="rate">${value.UnitePrice}</td>
                         <td style="width: 10%">${value.Total}</td>
                         <td style="width: 10%">${value.dose_type}</td>
                         <td style="">${value.AvailableQuantity}</td>
@@ -1300,7 +1300,7 @@
                         <td style="width: 20%"></td>
 
                         <td style="width: 10%" class="editable" data-field="quantity"></td>
-                        <td style="width: 10%" class="editable" data-field="rate"></td>
+                        <td style="width: 10%" class="" data-field="rate"></td>
                         <td style="width: 10%"></td>
                         <td style="width: 10%"></td>
                         <td style=""></td>

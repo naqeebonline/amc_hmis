@@ -161,7 +161,7 @@
             <div class="row">
                 <div class="col-4">
                     <img class="logo" width="100%" src="{{asset('')}}amc.jpeg" alt="">
-                    <h4 style="text-align: center">{{env('Branch_Name')}}</h4>
+                    <h4 style="text-align: center">{{config('app.Branch_Name')}}</h4>
                 </div>
 
                 <div class="col-4">
@@ -182,7 +182,7 @@
                 <div class="col-4">
                     <p><strong>{{date('l, F d, Y', strtotime($data->appointment_date))}} <br/> {{date('h:i A', strtotime($data->appointment_date))}}</strong></p>
                     <p><strong>{{ucfirst($data->opd_type->name) ?? ''}}</strong></p>
-                    <p><strong>Appointment#: {{env('BRANCH_CODE')}} {{ $data->appointment_number }}</strong></p>
+                    <p><strong>Appointment#: {{config('app.BRANCH_CODE')}} {{ $data->appointment_number }}</strong></p>
 
                 </div>
 
@@ -190,7 +190,7 @@
         </div>
 
         <div class="patient_detail pb-3">
-            <p class="text-end my-2 me-5 pe-2" style="font-weight: bold">MR# {{env('BRANCH_CODE')}} {{ ucfirst($data->patient->mr_no) ?? ''}}</p>
+            <p class="text-end my-2 me-5 pe-2" style="font-weight: bold">MR# {{config('app.BRANCH_CODE')}} {{ ucfirst($data->patient->mr_no) ?? ''}}</p>
 
             <div class="row g-0 pt_detail">
                 <div class="name col-6 pe-2 height">
@@ -289,12 +289,12 @@
         </div>
         <div class="row align-items-center">
             <div class="col-8  ">
-                <h4 class="my-0">{{env('COMPANY_ADDRESS')}}</h4>
+                <h4 class="my-0">{{config('app.COMPANY_ADDRESS')}}</h4>
             </div>
             <div class="col-4">
-                <p class="my-0"><strong>Website: <a href="#">{{env('COMPANY_WEBSITE')}}</a></strong></p>
-                <p class="my-0"><strong>Mob: {{env('COMPANY_PHONE')}} , {{env('COMPANY_MOBILE')}}</strong></p>
-                <p class="my-0"><strong>Email: {{env('COMPANY_EMAIL')}}</strong></p>
+                <p class="my-0"><strong>Website: <a href="#">{{config('app.COMPANY_WEBSITE')}}</a></strong></p>
+                <p class="my-0"><strong>Mob: {{config('app.COMPANY_PHONE')}} , {{config('app.COMPANY_MOBILE')}}</strong></p>
+                <p class="my-0"><strong>Email: {{config('app.COMPANY_EMAIL')}}</strong></p>
             </div>
         </div>
     </footer>

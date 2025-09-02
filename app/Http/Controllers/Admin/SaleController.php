@@ -25,6 +25,7 @@ use App\Models\WardRequestDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class SaleController extends Controller
@@ -118,7 +119,7 @@ class SaleController extends Controller
         $data['list_products'] = [];
 
         $data['appointments'] = Appointment::where('is_active', 1)
-            ->where('created_at', '>=', Carbon::now()->subDays(5)) // last 5 days
+            ->where('created_at', '>=', Carbon::now()->subDays(2)) // last 5 days
             ->with(['patient'])
             ->orderBy('appointment_date', 'desc')
             ->get();
@@ -436,10 +437,13 @@ class SaleController extends Controller
 
     public function save_retail_sale()
     {
+        $TotalSale = 0;
 
-        /*return response()->json([
-            "data" => $request->all()
-        ]);*/
+        foreach(request()->ProductList as $row){
+            $TotalSale = ($TotalSale) + (($row['Quantity'] * ($row['UnitePrice'])));
+
+        }
+
         $patient_id = request()->patient_id;
         $invoice_discount = request()->invoice_discount;
         $admission_id = request()->patient_admission_id ?? 0;
@@ -464,7 +468,7 @@ class SaleController extends Controller
 
         $userID = auth()->user()->id;
         $totalTax = 0;
-        $TotalSale = request()->BillAmount;
+
         $SalemanID = 0;
         $Commesion = 0;
         if($customer){
@@ -516,8 +520,40 @@ class SaleController extends Controller
         }
 
         $SaleArray['bill_details']=json_encode(request()->ProductList);
-        $sale = Sale::create($SaleArray);
-        $last_id = $sale->SaleID;
+
+        try {
+            DB::beginTransaction();
+
+            $sale = Sale::create($SaleArray);
+            $last_id = $sale->SaleID;
+            $SaleArray['SaleID'] = $last_id;
+            $temp_sale = TempSale::create($SaleArray);
+            $item_details = [];
+            foreach(request()->ProductList as $row){
+                $TotalSale = ($TotalSale) + (($row['Quantity'] * ($row['UnitePrice'])));
+                $item_details[] = array(
+                    'store_id'   => session('store_id'),
+                    'SaleID'   => $last_id,//$sale->SaleID,
+                    'temp_sale_id'   => $temp_sale->id,
+                    'patient_id'   => $patient_id,
+                    'admission_id'   => $admission_id,
+                    'ProductID' => $row['ProductID'],
+                    'UnitePrice'  => $row['UnitePrice'],
+                    'taxPercentage'  => $row['taxPercentage'],
+                    'dose_type'  => $row['dose_type'],
+                    'Quantity'  => $row['Quantity'],
+                    'UnitePrice'  => $row['UnitePrice'],
+                );
+            }
+
+            TempSaleDetails::insert($item_details);
+
+            DB::commit(); // ✅ commit if all good
+        } catch (\Exception $e) {
+            DB::rollBack(); // ❌ rollback on error
+            throw $e;       // optional: rethrow for logging
+        }
+
 
         if($ReceivedAmount >= 1){
             SalePayment::create(["sale_id"=>$last_id,"patient_id"=>$patient_id,"admission_id"=>$admission_id,"amount"=>$ReceivedAmount,"created_by"=>auth()->user()->id,"created_at"=>date("Y-m-d H:i:s")]);
@@ -545,11 +581,6 @@ class SaleController extends Controller
                     //echo "yes";
                     $total = ($soldQuantity) * ($row['UnitePrice']);
                     $taxAmount = ($total) * $applyTax;
-
-                    if($is_free){  // if free then sale price will be same as purchase price
-                        $Detail_array['UnitePrice']=$value->UnitPrice;
-                    }
-
                     $Detail_array['PurchasePrice']=$value->UnitPrice;
                     $Detail_array['Quantity']=$soldQuantity;
                     $Detail_array['GDID']=$value->GDID;
@@ -610,7 +641,7 @@ class SaleController extends Controller
         if(session('store_id') == 1){
             (new PatientAdmissionController())->updateAdmissionDetails($admission_id);
         }
-
+        sleep(1);
 
         return ["status"=>true,"message" => "Sale Completed Successfully","id"=>$last_id];
     }
@@ -893,14 +924,16 @@ class SaleController extends Controller
         //--- close balance will adjust from pharmacy return table only amount will be minus from total sale amount of user during closing  ---//
 
 
-        if(($is_admitted_patient == "yes" && $sale->received_amount == 0) || $sale->is_posted == 0){
+        if(($is_admitted_patient == "yes" && $sale->received_amount == 0)){
             //dd(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
             if($sale->admission_id == 0){  // if walking customer sale then also make changes in salepayment table
                 SalePayment::where(["sale_id"=>$sale_details->SaleID])->update(["amount"=>$total_sale_amount]);
             }
-            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            TempSale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
         }else{
+
             PharmacyRetrun::create([
                 "sale_id" => $sale_details->SaleID,
                 "sale_detail_id" => request()->SDID,
@@ -911,7 +944,8 @@ class SaleController extends Controller
                 "created_at" => date("Y-m-d H:i:s"),
             ]);
 
-            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            TempSale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
             if($admission_id != 0){
                 SalePayment::where(["admission_id"=>$admission_id])->update(["amount"=>$total_sale_amount]);

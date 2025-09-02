@@ -28,6 +28,7 @@
 
     <div class="logo text-center">
         <h2 style="font-size: 22px">{{ env('COMPANY_NAME') }}</h2>
+        <p style="font-size: 13px; font-weight:bold;">{{ env('BRANCH_NAME') }}</p>
         <small style="font-size: 13px">{{ date("d-m-Y h:i A") }}</small>
     </div>
 
@@ -94,7 +95,7 @@
         </table>
     </div>
 
-    <p style="text-align: center"><img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(env('LIVE_URL'), 'QRCODE', 3, 3) }}" alt="qrcode" /></p>
+    <div style="display: table; margin: 0 auto;">{!! DNS2D::getBarcodeHTML(config("app.LIVE_URL"), 'QRCODE', 3, 3) !!}</div>
     <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Thank You For Visiting</p>
     <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Note: Returns are accepted only with the original receipt/invoice.</p>
     <br>

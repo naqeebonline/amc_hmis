@@ -16,6 +16,8 @@ use App\Models\PaymentType;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
+use App\Models\TempSale;
+use App\Models\TempSaleDetails;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -343,6 +345,89 @@ class SupplierPayments extends Controller
         return view('reports/print_retail_sale_invoice', $data);
     }
 
+    public function print_customer_bill($SaleID)
+    {
+        $date = date("Y-m-d");
+        $data['record'] = TempSale::where(['SaleID' => $SaleID])->first();
+
+
+        $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
+        $data['appointment_patient_name'] = 'Walking Customer';
+        if($data['record']->admission_id){
+            $data['appointment_patient_name'] = $data['patient'] ? "In-Patient <br><br>MR# ".$data['patient']->mr_no." | Name: ".$data['patient']->name : "";
+        }elseif ($data['record']->appointment_id){
+            $appointments = Appointment::where('is_active', 1)
+                ->where('id', $data['record']->appointment_id) // last 5 days
+                ->with(['patient'])
+                ->first();
+            $data['appointment_patient_name'] = $appointments ? "Out Patient <br><br>MR# ".$appointments->patient?->mr_no." | Name: ".$appointments->patient?->name." <br><br>Appointment# ".$appointments->appointment_number : "";
+        }
+
+        $customer_id = $data['record']->SCID;
+        $billDate = date("d-m-Y", strtotime($data['record']->Date));
+
+        $discount_percentage = $data['record']->discount_percentage;
+
+        //$data['PreviousBalance']=(new CustomerPayments())->customer_previous_balance($customer_id,$date);
+
+        $data['data'] = TempSaleDetails::with('product')->where(['SaleID' => $SaleID])->get();
+        $data['title'] = 'Sale Details Report';
+        $return = "No";
+        $totalAmount = 0;
+        $data['prev_balance'] = (new CustomerPayments())->customer_previous_balance($customer_id, '');
+
+        foreach ($data['data'] as $rec) {
+            $rec->AvaliableQuantity = ($rec->Quantity) - ($rec->ReturnQuantity);
+            $rec->totalAmount = ($rec->AvaliableQuantity) * ($rec->UnitePrice);
+            $totalAmount = ($totalAmount) + ($rec->totalAmount);
+            if ($rec->ReturnQuantity > 0) {
+                $return = "Yes";
+            }
+        }
+
+
+        $result = [];
+
+        // Iterate through the array remove duplicate items . sum the quantity ,totalamount, taxamount and remove duplication for bill print only...//
+        foreach ($data['data'] as $item) {
+            $productId = $item->ProductID;
+
+            // If ProductID already exists in the result, sum up the Quantity and UnitePrice
+            if (isset($result[$productId])) {
+                $result[$productId]->Quantity += $item->Quantity;
+                $result[$productId]->totalAmount += $item->totalAmount;
+                $result[$productId]->taxAmount += $item->taxAmount;
+            } else {
+                // Add new ProductID to result
+                $result[$productId] = clone $item;
+            }
+        }
+
+        $result = array_values($result);
+        $data['data'] = $result;
+
+
+        if ($return == "Yes") {
+            $data['return'] = "Yes";
+        } else {
+            $data['return'] = "No";
+        }
+
+
+        $data['TotalAmount'] = $totalAmount;
+        $data['TotalDiscount'] = ($totalAmount * $discount_percentage)/100;
+
+        $data['show_customer_contact'] = "true";
+
+        $data['customer'] = Customer::where("SCID", $customer_id)->get();
+
+      //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        //$this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+
+
+        return view('reports/print_retail_sale_invoice', $data);
+    }
+
     public function printFormattedReceipt($data, $record, $patient, $TotalDiscount)
     {
         try {
@@ -435,13 +520,21 @@ class SupplierPayments extends Controller
            /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
                 return $q->where(["CreatedBy" => auth()->user()->id]);
             })*/
-            ->limit(50);
+            ->limit(600);
 
         return DataTables::of($bills)
 
             ->addColumn('action', function ($data) {
-                return '<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>
-                    <a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
+                $buttons = "";
+                $buttons .= '<a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
+                if($data->is_return_made == 1){
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                    $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
+                }else{
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                }
+
+                return $buttons;
             })
             ->rawColumns(["action"])
             ->make(true);

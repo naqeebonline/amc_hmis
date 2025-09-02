@@ -3,7 +3,17 @@
 use Illuminate\Support\Facades\Facade;
 
 return [
-
+    "live_url"=>"http://hospital.amch.org.pk/",
+    "COMPANY_NAME"=>"Akakhel Medical Complex",
+    "COMPANY_ADDRESS"=>"اکاخیل میڈیکل کمپلیکس نزد ولید فلنگ سٹیشن گاڑمنارہ ضلع وتحصیل صوابی",
+    "COMPANY_WEBSITE"=>"https://www.amch.org.pk",
+    "COMPANY_WEBSITE"=>"https://www.amch.org.pk",
+    "COMPANY_PHONE"=>"0938-481111",
+    "COMPANY_MOBILE"=>"0316-8481111",
+    "COMPANY_EMAIL"=>"info@amch.org.pk",
+    "BRANCH_CODE"=>"AMC-01-",
+    "Branch_Name"=>"",
+    "LIVE_URL"=>"http://hospital.amch.org.pk/",
     /*
     |--------------------------------------------------------------------------
     | Application Name

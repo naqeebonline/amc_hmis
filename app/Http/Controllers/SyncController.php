@@ -145,11 +145,11 @@ class SyncController extends Controller
     }
     public function syncLoclDataWithLiveBackup()
     {
-        $logPath = storage_path('logs');
+        /*$logPath = storage_path('logs');
         // Delete all log files inside storage/logs
         foreach (glob($logPath.'/*.log') as $file) {
             file_put_contents($file, ''); // Empty file
-        }
+        }*/
         $tables = [
             "in_patient_admissions",
             "patient_investigations",
@@ -167,7 +167,7 @@ class SyncController extends Controller
             \Illuminate\Support\Facades\DB::table($table)
                 ->where('is_sync', 0) // only unsynced
                 ->orderBy('id')
-                ->chunk(30, function ($records) use ($table) {
+                ->chunk(20, function ($records) use ($table) {
                     $apiUrl = env('LIVE_URL').'api/sync';
 
                     $payload = [
@@ -196,6 +196,6 @@ class SyncController extends Controller
                 });
         }
         return ["status"=>true,"message"=>"There is no data to sync. all records are synced"];
-        //echo "<br>There is no data to sync. all records are synced";
+
     }
 }

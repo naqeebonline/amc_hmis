@@ -131,6 +131,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('print_purchase_request/{SCID?}/{GRNID?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_purchase_request'])->name('pos.print_purchase_request');
     Route::get('print_thermel_purchase_details/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_thermel_purchase_details'])->name('pos.print_thermel_purchase_details');
     Route::get('print_retail_thermel_purchase_details/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_retail_thermel_purchase_details'])->name('pos.print_retail_thermel_purchase_details');
+    Route::get('print-customer-bill/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_customer_bill'])->name('pos.print_customer_bill');
     Route::get('previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'previous_bills'])->name('pos.previous_bills');
     Route::get('retail_previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'retail_previous_bills'])->name('pos.retail_previous_bills');
 

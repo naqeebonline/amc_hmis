@@ -83,7 +83,7 @@
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label for="nameBasic" class="form-label">Father/Husband Name<span
                                             class="asterisk">*</span></label>
-                                <input type="text" required id="father_husband_name" name="father_husband_name"
+                                <input type="text" required id="father_husband_name" value="-" name="father_husband_name"
                                        class="form-control" placeholder="" autocomplete="off">
                             </div>
 
@@ -378,7 +378,8 @@
 
              time = Date.now();
             $("#invoice_no").val(time);
-        }, 1000);
+
+        }, 2000);
 
 
         $("body").on("change", "#investigation_id", function(e) {
@@ -876,15 +877,18 @@
 
                     },
                     success: function(response) {
+                        var invoice_no = $("#invoice_no").val();
                         if(response.status =='empty'){
                             alert(response.message);
                             return false;
                         }
-                       // alert(response.appointment_id);
-                          var url = "";
-                        //window.open(url, '_blank');
 
-                        reset_fields();
+                        url="{{route('pos.print_hospital_lab_invoice')}}/"+invoice_no;
+                        window.open(url, '_blank');
+                        setTimeout(function () {
+                            reset_fields();
+                        },1000);
+
                         $("#mr_number").val("");
                         //window.location.reload();
                         user_table.ajax.reload();
@@ -926,14 +930,14 @@
             $("#id").val(0);
             $("#contact_no").val('');
 
-            $("#district_id").val('').trigger("change");
+            $("#district_id").val('44').trigger("change");
             $("#dob").val('');
-            $("#father_husband_name").val('');
+            $("#father_husband_name").val('-');
             $("#g4no").val(0);
             $("#age").val('');
-            $("#months").val('');
-            $("#days").val('');
-            $("#gender").val('');
+            $("#months").val('0');
+            $("#days").val('0');
+            $("#gender").val('male');
             $("#id").val('');
             $("#location_id").val('').trigger("change");
             $("#consultant_id").val(0).trigger("change");
@@ -944,7 +948,7 @@
             //$("#relation_id").val('');
             $("#sc_ref_no").val('');
             let time = Date.now();
-            $("#discount_percentage").val('');
+            $("#discount_percentage").val('0');
             $("#invoice_no").val(time);
             list_investigation = [];
             load_investigation();

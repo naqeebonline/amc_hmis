@@ -9,14 +9,15 @@ class TempSaleDetails extends Model
 {
     use HasFactory;
     protected $table = "temp_sale_details";
-    protected $primaryKey = 'SDID';
-    protected $guarded = ["SDID"];
+    protected $primaryKey = 'id';
+    protected $guarded = ["id"];
     public $timestamps = false;
 
     public function product()
     {
         return $this->belongsTo(Product::class, 'ProductID');
     }
+
 
 
 

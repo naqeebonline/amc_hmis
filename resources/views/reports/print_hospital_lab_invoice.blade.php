@@ -9,7 +9,8 @@
 <div class="wrap">
 
 	<div class="logo">
-		<h2 style="font-size: 22px">{{env('COMPANY_NAME')}}</h2>
+		<h2 style="font-size: 22px">{{config('app.COMPANY_NAME')}}</h2>
+		<p style="font-size: 13px; font-weight:bold;">{{ config('app.BRANCH_NAME') }}</p>
 		<small style="font-size: 13px">{{date("d-m-Y h:i A")}} </small>
 	</div>
 
@@ -82,7 +83,7 @@
 
 		</table>
 
-		<p style="text-align: center"><img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(env('LIVE_URL')."lab-results/".$data[0]->invoice_no, 'QRCODE', 3, 3) }}" alt="qrcode" /></p>
+		<p style="text-align: center"><img src="data:image/png;base64,{{ DNS2D::getBarcodePNG(config('app.LIVE_URL')."lab-results/".$data[0]->invoice_no, 'QRCODE', 3, 3) }}" alt="qrcode" /></p>
 		<p style="text-align: center; font-weight: bold">Thank You For Visiting.</p>
 	</div>
 
