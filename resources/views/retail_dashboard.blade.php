@@ -104,7 +104,7 @@
                                             <span class="avatar-initial bg-label-primary rounded-circle"><i class="bx bx-user fs-4"></i></span>
                                         </div>
                                         <div class="card-info">
-                                            <h5 class="card-title mb-0 me-2">{{ $data->Discount ?? 0 }}</h5>
+                                            <h5 class="card-title mb-0 me-2">{{ ($data->Discount ?? 0) + ($data->invoice_discount ?? 0) }}</h5>
                                             <small class="text-muted">Pharmacy Discount</small>
                                         </div>
                                     </div>

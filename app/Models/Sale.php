@@ -16,6 +16,14 @@ class Sale extends Model
     protected $guarded = ["SaleID"];
     public $timestamps = false;
 
+    protected static function booted()
+    {
+        static::created(function ($sale) {
+            // After creating, copy SaleID into id
+            $sale->id = $sale->SaleID;
+            $sale->saveQuietly(); // avoid recursion
+        });
+    }
     public function patient(){
         return $this->belongsTo(Patient::class,"patient_id","id");
     }

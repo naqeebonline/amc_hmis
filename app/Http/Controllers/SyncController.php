@@ -55,49 +55,63 @@ class SyncController extends Controller
     }
 
 
-    public function syncLoclDataWithLive()
-    {
-        $logPath = storage_path('logs');
-        // Clear logs
-        foreach (glob($logPath . '/*.log') as $file) {
-            file_put_contents($file, ''); // Empty file
-        }
+public function syncLoclDataWithLive()
+{
+    $logPath = storage_path('logs');
+    // Clear logs (optional, usually not recommended in production)
+    foreach (glob($logPath . '/*.log') as $file) {
+        file_put_contents($file, '');
+    }
 
-        $tables = [
-            "in_patient_admissions",
-            "patient_investigations",
-            "patients",
-            "consultants",
-            "patient_investigation_result",
-            "appointments",
-            "finance_heads",
-            "finance_transactions",
-            "finance_vouchers"
-        ];
+    $tables = [
+        "in_patient_admissions",
+        "patient_investigations",
+        "patients",
+        "consultants",
+        "patient_investigation_result",
+        "appointments",
+        "sale",
+        "sale_details",
+        "temp_sale",
+        "temp_sale_details",
+        "grn",
+        "grn_details",
 
-        $summary = [
-            'success' => [],
-            'errors'  => [],
-        ];
+    ];
 
-        foreach ($tables as $table) {
-            try {
-                \Illuminate\Support\Facades\DB::table($table)
-                    ->where('is_sync', 0)
-                    ->orderBy('id')
-                    ->chunk(70, function ($records) use ($table, &$summary) {
-                        if ($records->isEmpty()) {
-                            return; // nothing to sync
-                        }
+    if(date("His") >= 210101 && date("His") <= 235959){
+        $tables[] =  "finance_heads";
+        $tables[] =  'finance_transactions';
+        $tables[] =  'finance_vouchers';
+    }
 
-                        $apiUrl = env('LIVE_URL') . 'api/sync';
 
-                        $payload = [
-                            'table' => $table,
-                            'data'  => $records->map(fn($r) => (array) $r)->toArray(),
+    $summary = [
+        'success' => [],
+        'errors'  => [],
+    ];
+
+    foreach ($tables as $table) {
+        try {
+            \DB::table($table)
+                ->where('is_sync', 0)
+                ->orderBy('id')
+                ->chunk(30, function ($records) use ($table, &$summary) {
+
+                    if ($records->isEmpty()) {
+                        return;
+                    }
+
+                    $apiUrl = "https://hospital.awamisawari.com/api/sync";
+
+                    $payload = [
+                        'table' => $table,
+                        'data'  => $records->map(fn($r) => (array) $r)->toArray(),
                     ];
 
-                    $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    $response = \Http::withOptions([
+                        'verify' => false, // ?? important for your localhost SSL issue
+                    ])->withHeaders([
                         'Accept' => 'application/json',
                     ])->post($apiUrl, $payload);
 
@@ -105,14 +119,14 @@ class SyncController extends Controller
                         $syncedIds = $response->json('synced_ids') ?? [];
 
                         if (!empty($syncedIds)) {
-                            \Illuminate\Support\Facades\DB::table($table)
+                            \DB::table($table)
                                 ->whereIn('id', $syncedIds)
                                 ->update(['is_sync' => 1]);
                         }
 
                         $summary['success'][] = [
-                            'table'  => $table,
-                            'count'  => count($syncedIds),
+                            'table' => $table,
+                            'count' => count($syncedIds),
                         ];
                     } else {
                         $summary['errors'][] = [
@@ -121,28 +135,22 @@ class SyncController extends Controller
                         ];
                     }
                 });
-            } catch (\Exception $e) {
-                $summary['errors'][] = [
-                    'table'   => $table,
-                    'error'   => $e->getMessage(),
-                ];
-            }
+        } catch (\Exception $e) {
+            $summary['errors'][] = [
+                'table' => $table,
+                'error' => $e->getMessage(),
+            ];
         }
-
-        if (!empty($summary['errors'])) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Some tables failed to sync',
-                'details' => $summary,
-            ], 500);
-        }
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'All tables synced successfully',
-            'details' => $summary,
-        ]);
     }
+
+    return response()->json([
+        'status'  => empty($summary['errors']),
+        'message' => empty($summary['errors'])
+            ? 'All tables synced successfully'
+            : 'Some tables failed to sync',
+        'details' => $summary,
+    ]);
+}
     public function syncLoclDataWithLiveBackup()
     {
         /*$logPath = storage_path('logs');
@@ -157,11 +165,15 @@ class SyncController extends Controller
             "consultants",
             "patient_investigation_result",
             "appointments",
-            "finance_heads",
-            "finance_transactions",
-            "finance_vouchers"
-
         ];
+
+        if(date("His") >= 200101){
+
+            $tables =  $tables['finance_heads'];
+            $tables =  $tables['finance_transactions'];
+            $tables =  $tables['finance_vouchers'];
+        }
+
 
         foreach ($tables as $table) {
             \Illuminate\Support\Facades\DB::table($table)

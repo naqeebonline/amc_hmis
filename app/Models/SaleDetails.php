@@ -15,6 +15,15 @@ class SaleDetails extends Model
     protected $guarded = ["SDID"];
     public $timestamps = false;
 
+    protected static function booted()
+    {
+        static::created(function ($sale_details) {
+            // After creating, copy sale_details into id
+            $sale_details->id = $sale_details->SDID;
+            $sale_details->saveQuietly(); // avoid recursion
+        });
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class, 'ProductID');

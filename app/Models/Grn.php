@@ -18,6 +18,15 @@ class Grn extends Model
         return $this->belongsTo(Product::class);
     }
 
+    protected static function booted()
+    {
+        static::created(function ($data) {
+            // After creating, copy SaleID into id
+            $data->id = $data->GRNID;
+            $data->saveQuietly(); // avoid recursion
+        });
+    }
+
   
     
 }

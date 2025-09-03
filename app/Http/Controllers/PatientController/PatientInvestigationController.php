@@ -100,6 +100,11 @@ class PatientInvestigationController extends Controller
                 "patient_type"    => 'hospital_patient',
 
             ];
+            if($value->frequency > 3){
+                $data['frequency'] = 1;
+                $data['sale_price'] = $value->frequency;
+                $data['inv_amount'] = $value->frequency;
+            }
             PatientInvestigation::create($data);
         }
 

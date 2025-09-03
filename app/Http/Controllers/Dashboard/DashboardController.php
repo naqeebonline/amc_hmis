@@ -28,7 +28,7 @@ class DashboardController extends Controller
         $to_date = $_GET['to_date'] ?? date("Y-m-d");
         $data['from_date'] = $from_date;
         $data['to_date'] = $to_date;
-        $query = Sale::where('store_id', session('store_id'))
+        $query = Sale::where('store_id', 2)
             ->when($from_date, function ($query) use ($from_date) {
                 return $query->whereDate('Date', '>=', date("Y-m-d", strtotime($from_date)));
             })
@@ -36,8 +36,9 @@ class DashboardController extends Controller
                 return $query->whereDate('Date', '<=', date("Y-m-d", strtotime($to_date)));
             });
 
-        $totals = $query->selectRaw('SUM(TotalSale) as TotalSale, SUM(Discount) as Discount, SUM(received_amount) as received_amount')->first();
+        $totals = $query->selectRaw('SUM(TotalSale) as TotalSale, SUM(received_amount) as received_amount, SUM(Discount) as Discount, SUM(invoice_discount) as invoice_discount')->first();
         $data['data'] = $totals;
+        
 
         $data['appointments'] = $this->appointmentsPayment($from_date,$to_date);
         $data['investigations'] = $this->investigationPayment($from_date,$to_date);
@@ -55,7 +56,7 @@ class DashboardController extends Controller
             })
             ->when($to_date, function ($query) use ($to_date) {
                 return $query->whereDate('appointment_date', '<=', date("Y-m-d", strtotime($to_date)));
-            });
+            })->where("is_active",1);
 
         $totals = $query->selectRaw('SUM(fee) as total_fees, SUM(hospital_share) as total_hospital_share, SUM(consultant_share) as total_consultant_share')->first();
         return $totals;
