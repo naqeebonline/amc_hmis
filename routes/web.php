@@ -134,6 +134,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('print-customer-bill/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_customer_bill'])->name('pos.print_customer_bill');
     Route::get('previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'previous_bills'])->name('pos.previous_bills');
     Route::get('retail_previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'retail_previous_bills'])->name('pos.retail_previous_bills');
+    Route::get('in_patient_retail_previous_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'in_patient_retail_previous_bills'])->name('pos.in_patient_retail_previous_bills');
 
 
 

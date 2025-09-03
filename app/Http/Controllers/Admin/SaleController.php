@@ -929,9 +929,11 @@ class SaleController extends Controller
             if($sale->admission_id == 0){  // if walking customer sale then also make changes in salepayment table
                 SalePayment::where(["sale_id"=>$sale_details->SaleID])->update(["amount"=>$total_sale_amount]);
             }
-            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
-            TempSale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1]);
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"ModifiedAt"=>date("Y-m-d H:i:s"),"ModifiedBy"=>auth()->user()->id,"TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            TempSale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"ModifiedAt"=>date("Y-m-d H:i:s"),"ModifiedBy"=>auth()->user()->id]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+            TempSaleDetails::where(["SaleID"=>$sale_details->SaleID,"ProductID" => $sale_details->ProductID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+
         }else{
 
             PharmacyRetrun::create([
@@ -944,9 +946,10 @@ class SaleController extends Controller
                 "created_at" => date("Y-m-d H:i:s"),
             ]);
 
-            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
-            TempSale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1]);
+            Sale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"ModifiedAt"=>date("Y-m-d H:i:s"),"ModifiedBy"=>auth()->user()->id,"TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
+            TempSale::where(["SaleID"=>$sale_details->SaleID])->update(["is_return_made"=>1,"ModifiedAt"=>date("Y-m-d H:i:s"),"ModifiedBy"=>auth()->user()->id]);
             SaleDetails::where(["SDID"=>request()->SDID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
+            TempSaleDetails::where(["SaleID"=>$sale_details->SaleID,"ProductID" => $sale_details->ProductID])->update(['ReturnQuantity'=>$total_return_qty,'return_by'=>auth()->user()->id]);
             if($admission_id != 0){
                 SalePayment::where(["admission_id"=>$admission_id])->update(["amount"=>$total_sale_amount]);
             }else{

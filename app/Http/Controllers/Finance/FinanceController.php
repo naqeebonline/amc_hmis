@@ -58,11 +58,16 @@ class FinanceController extends Controller
         $data['service_charges'] = $this->serviceCharges($closing_date,$user_id);
         $data['in_patient_sale'] = $this->in_patient_sale($closing_date,$user_id);
         $data['consultant_charges'] = $this->consultant_charges($closing_date,$user_id);
+        $data['pharmacy_item_returns'] = $this->total_return_in_pharmacy_by_user($closing_date,$user_id);
+
+       // dd($user_id,$data['pharmacy_item_returns']);
         $data['voucher'] = FinanceVoucher::when((getUserRole() != 'Super Admin' && getUserRole() != 'Finance'), function ($query) use ($user_id) {
             return $query->where(["created_by"=>auth()->user()->id]);
         })->with(['user'])->orderBy("id","desc")
             ->where(["voucher_type"=>"closing"])
             ->paginate(20);
+
+       
 
 
        return view("Finance.daily_closing",$data);
@@ -710,6 +715,19 @@ class FinanceController extends Controller
         return $total;
 
 
+    }
+
+    public function total_return_in_pharmacy_by_user($closing_date='',$user_id='')
+    {
+
+        $data = SaleDetails::with(['product','return_by_user'])
+            ->leftJoin("sale","sale.SaleID","=","sale_details.SaleID")
+            ->select("sale_details.*","sale.*","users.name")
+            ->leftJoin("users","users.id","=","sale.ModifiedBy")
+            ->where("sale_details.return_by",$user_id)
+            ->whereDate("sale.ModifiedAt",$closing_date)
+            ->get();
+        return $data;
     }
 
     public function approve_transaction_entry()

@@ -29,6 +29,10 @@ class SaleDetails extends Model
     {
         return $this->belongsTo(User::class, 'return_by',"id");
     }
+    public function return_by_user()
+    {
+        return $this->belongsTo(User::class, 'return_by',"id");
+    }
 
   
     

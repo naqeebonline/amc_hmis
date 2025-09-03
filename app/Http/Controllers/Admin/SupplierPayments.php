@@ -501,6 +501,7 @@ class SupplierPayments extends Controller
     public function previous_bills(){
         $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
             ->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'))
+
             ->limit(50);
 
         return DataTables::of($bills)
@@ -508,6 +509,7 @@ class SupplierPayments extends Controller
             ->addColumn('action', function ($data) {
                 return '<a target="_blank" href="' . route("pos.print_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Thermal</a>';
             })
+
             ->rawColumns(["action"])
             ->make(true);
     }
@@ -517,9 +519,39 @@ class SupplierPayments extends Controller
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
             })
+            ->where("admission_id","=",0)
            /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
                 return $q->where(["CreatedBy" => auth()->user()->id]);
             })*/
+            ->limit(600);
+
+        return DataTables::of($bills)
+
+            ->addColumn('action', function ($data) {
+                $buttons = "";
+                $buttons .= '<a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
+                if($data->is_return_made == 1){
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                    $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
+                }else{
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                }
+
+                return $buttons;
+            })
+            ->rawColumns(["action"])
+            ->make(true);
+    }
+
+    public function in_patient_retail_previous_bills(){
+        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
+            ->when(session('store_id'),function ($q){
+                $q->where('store_id',session('store_id'));
+            })
+           /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
+                return $q->where(["CreatedBy" => auth()->user()->id]);
+            })*/
+           ->where("admission_id","!=",0)
             ->limit(600);
 
         return DataTables::of($bills)

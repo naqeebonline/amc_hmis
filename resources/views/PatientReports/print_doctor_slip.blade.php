@@ -91,7 +91,7 @@
         .main {
             padding: 4px 20px;
             width: 100%;
-            height: 688px;
+            height: 705px;
             margin-top: 10px;
         }
         .height{

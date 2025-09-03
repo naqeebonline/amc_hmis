@@ -27,8 +27,8 @@
 <div class="wrap">
 
     <div class="logo text-center">
-        <h2 style="font-size: 22px">{{ env('COMPANY_NAME') }}</h2>
-        <p style="font-size: 13px; font-weight:bold;">{{ env('BRANCH_NAME') }}</p>
+        <h2 style="font-size: 22px">{{ config('app.COMPANY_NAME') }}</h2>
+        <p style="font-size: 13px; font-weight:bold;">{{ config('app.BRANCH_NAME') }}</p>
         <small style="font-size: 13px">{{ date("d-m-Y h:i A") }}</small>
     </div>
 

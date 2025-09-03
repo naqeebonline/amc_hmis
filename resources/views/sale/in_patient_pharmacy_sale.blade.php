@@ -489,7 +489,7 @@
                 ],
                 pageLength: 50,
                 ajax: {
-                    url: `{{ route('pos.retail_previous_bills') }}`,
+                    url: `{{ route('pos.in_patient_retail_previous_bills') }}`,
                     
                 },
 
@@ -1161,7 +1161,7 @@
                         <td style="width: 20%">${value.Name}</td>
 
                         <td style="width: 10%" class="editable" data-field="quantity">${value.Quantity}</td>
-                        <td style="width: 10%" class="editable" data-field="rate">${value.UnitePrice}</td>
+                        <td style="width: 10%" class="" data-field="rate">${value.UnitePrice}</td>
                         <td style="width: 10%">${value.Total}</td>
                         <td style="width: 10%">${value.dose_type}</td>
                         <td style="">${value.AvailableQuantity}</td>
@@ -1200,7 +1200,7 @@
                         <td style="width: 20%"></td>
 
                         <td style="width: 10%" class="editable" data-field="quantity"></td>
-                        <td style="width: 10%" class="editable" data-field="rate"></td>
+                        <td style="width: 10%" class="" data-field="rate"></td>
                         <td style="width: 10%"></td>
                         <td style="width: 10%"></td>
                         <td style=""></td>

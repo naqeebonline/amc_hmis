@@ -123,8 +123,50 @@
                                 </table>
 
 
+
+
                             </div>
 
+
+                            <div class="col-md-6 col-sm-b mb-3">
+                                <p style="text-align: center; font-weight:bold;font-size: 12px;color:red;">Pharmacy Return By User</p>
+                                <table class="table table-strap">
+                                    <tr>
+                                        <th style="width: 10%">S.No</th>
+                                        <th style="width: 20%">Product Name</th>
+                                        <th style="width: 10%">Return Qty</th>
+                                        <th style="width: 10%">Unit Price</th>
+                                        <th style="width: 10%">Amount</th>
+                                        <th style="width: 10%">Return By</th>
+                                    </tr>
+                                    <?php $total_return=0; ?>
+                                    @foreach($pharmacy_item_returns as $key => $value)
+                                        <?php $total_return = ($total_return) + (($value->ReturnQuantity) * ($value->UnitePrice)); ?>
+                                    @if($value->admission_id == 0 || $value->admission_id == "null")
+
+                                     <tr>
+                                        <td style="width: 5%">{{$key + 1}}</td>
+                                        <td style="width: 15%">{{$value->product->ProductName ?? ''}}</td>
+                                        <td style="width: 10%">{{$value->ReturnQuantity}}</td>
+                                        <td style="width: 10%">{{$value->UnitePrice}}</td>
+                                        <td style="width: 10%">{{($value->ReturnQuantity) * ($value->UnitePrice)}}</td>
+                                        <td style="width: 10%">{{$value->return_by_user->name ?? ''}}</td>
+                                       
+                                    </tr>
+                                    @endif
+                                   @endforeach
+                                   <tr>
+                                       <td></td>
+                                       <td></td>
+                                       <td></td>
+                                       <td><b>Total:</b></td>
+                                       <td><b>{{$total_return}}</b></td>
+                                       <td></td>
+                                   </tr>
+                                </table>
+                            </div>
+
+                        
                         </div>
                     </form>
                 </div>

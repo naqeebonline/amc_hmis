@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}" />
+    <link rel="stylesheet" href="{{asset('')}}Jameel Noori Nastaleeq Regular.ttf">
     {{-- <link rel="stylesheet" href="style.css">
      --}}
     <script>
@@ -15,7 +16,16 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
+        @font-face {
+            font-family: 'CustomFont';
+            /* Name of the font */
+            src: url('{{asset('')}}Jameel Noori Nastaleeq Regular.ttf') format('truetype');
+            /* Path to the .ttf file */
+            font-weight: normal;
+            /* Optional: define font weight */
+            font-style: normal;
+            /* Optional: define font style */
+        }
         body {
             font-family: "Poppins", serif;
             margin: 0;
@@ -430,14 +440,14 @@
             <div class="col-5">
                 <div class="d-flex">
                     <p style="width: 100px;font-weight: bold;">Contact #:</p>
-                    <p class="w-50">0938-481111 <br /> 0316-8481111</p>
+                    <p class="w-50">{{config('app.COMPANY_PHONE')}} <br /> {{config('app.COMPANY_MOBILE')}}</p>
                 </div>
             </div>
 
             <div class="col-7">
                 <div class="d-flex">
                     <p style="width: 100px;font-weight: bold;">Address:</p>
-                    <p class="w-100">AMC, Opposite Waleed Filling Station, Gar Munara, District & Tehsil Swabi</p>
+                    <p class="w-100" style="font-family: 'CustomFont', sans-serif; font-weight: bold;font-size: 20px">{{config('app.COMPANY_ADDRESS')}}</p>
                 </div>
             </div>
         </div>
@@ -446,7 +456,7 @@
             <div class="col-5">
                 <div class="d-flex">
                     <p style="width: 100px;" class="fw-bold">Reported By:</p>
-                    <p class="w-50">Ahmad Johar</p>
+                    <p class="w-50">AMC Lab</p>
                 </div>
             </div>
 
