@@ -231,7 +231,7 @@
                                         <tr>
                                             <td width="50%" style="border-top: 2px solid black;font-weight: bold" >Total</td>
                                             <td width="50%" style="border-top: 2px solid black; font-weight: bold">
-                                                {{ $total = ($total_service_charges) + ($investigation['total']) + ($pharmacy['total'])  }}
+                                                {{ $total = round(($total_service_charges) + ($investigation['total']) + ($pharmacy['total']))  }}
                                             </td>
                                         </tr>
 
@@ -239,7 +239,7 @@
                                             <td width="50%" style="border-top: 2px solid black;font-weight: bold" >Balance</td>
                                             <td width="50%" style="border-top: 2px solid black; color: red;font-weight: bold">
 
-                                                <input type="text" disabled id="right_hand_balance" value="{{ ($admission->procedure_rate) - $total }}">
+                                                <input type="text" disabled id="right_hand_balance" value="{{ ($admission->procedure_rate) - round($total) }}">
                                             </td>
                                         </tr>
 

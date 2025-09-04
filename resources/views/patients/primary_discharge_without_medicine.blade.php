@@ -192,6 +192,10 @@
                                         @endif
 
                                     </table>
+                                    <ul>
+                                        <li><a target="_blank" href="{{route('pos.print_admitted_patient_medicine_list',[$admission_id])}}">Print Medicine List</a></li>
+                                        <li><a target="_blank" href="{{route('pos.in_patient_payments_receiving_bill',[$admission_id])}}">Print Patient Payment Slip</a></li>
+                                    </ul>
                                 </div>
 
                                 <div class="col-md-6">

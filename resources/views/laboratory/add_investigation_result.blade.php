@@ -68,7 +68,7 @@
                                             <input type="hidden" name="parameter_id[]" value="{{ $parameter->id }}">
                                              <input type="text" name="result_text_value[]" value="{{ $result[$key]['result_text_value'] ?? '' }}" placeholder="text" class="form-control " style="display: {{ $is_ict ? "block" : "none" }}" />
                                             <input type="text" value="{{ $result[$key]['result_value'] ?? '0' }}" {{ $is_ict ? "" : "required" }}
-                                                id="result-{{ $parameter->id }}" name="result[]" class="form-control " style="display: {{ !$is_ict ? "block" : "none" }}"
+                                                id="result-{{ $parameter->id }}" name="result[]" class="form-control next_input" style="display: {{ !$is_ict ? "block" : "none" }}"
                                                 placeholder="Add Result" autocomplete="off">
                                         </div>
 
@@ -110,7 +110,7 @@
                                 </div>
                         @endif
 
-                            
+
                             <div class="col-12">
                                 <label for="" class="form-label">Comment</label>
                                 <textarea name="inv_comment" id="inv_comment"  class="form-control" cols="30" rows="4">{{$investigation->inv_comment ?? ''}}</textarea>
@@ -171,6 +171,29 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
+        $(document).on("keydown", "form", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+
+                 return false;
+            }
+        });
+        $(document).on("keydown", ".next_input", function(e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+
+                // find all .next_input in DOM order
+                let $inputs = $(".next_input:visible:enabled");
+
+                // current index
+                let idx = $inputs.index(this);
+
+                // move to next .next_input if exists
+                if (idx + 1 < $inputs.length) {
+                    $inputs.eq(idx + 1).focus();
+                }
+            }
+        });
         $("#add_inv_result").on("submit", function(e) {
             e.preventDefault();
 

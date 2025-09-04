@@ -169,6 +169,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("get-daily-sale", [\App\Http\Controllers\HomeController::class, 'getDailySaleData'])->name('pos.getDailySaleData');
 
     Route::post('deactivate_record', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'deactivate_record'])->name('pos.deactivate_record');
+    Route::post('delete_appointment', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'delete_appointment'])->name('pos.delete_appointment');
     Route::post('deactivate_in_patient_service_charges', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'deactivate_in_patient_service_charges'])->name('pos.deactivate_in_patient_service_charges');
 
     Route::get('main-category', [\App\Http\Controllers\ProductConfiguration\CategoryController::class, 'add_main_category'])->name('pos.add_main_category');
@@ -282,6 +283,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("investigation_add_result/{inv_id?}/{inv_cat_id?}",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'investigation_add_result'] )->name("pos.investigation_add_result");
     Route::post("store_inv_result",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'store_inv_result'] )->name("pos.store_inv_result");
     Route::get("print_inv_result/{inv_id}",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'print_inv_result'] )->name("pos.print_inv_result");
+    Route::get("delete_investigation_result/{inv_id?}",  [\App\Http\Controllers\Investigation\InvestigationResult::class, 'delete_investigation_result'] )->name("pos.delete_investigation_result");
 
 
     Route::get("patient_summary", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "patient_summary"])->name("pos.patient_summary");

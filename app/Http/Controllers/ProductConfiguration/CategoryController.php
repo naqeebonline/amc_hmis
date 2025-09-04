@@ -220,6 +220,13 @@ class CategoryController extends Controller
 
     }
 
+    public function delete_appointment()
+    {
+        DB::table(request()->table)->whereId(request()->id)->update(["is_active"=>0,"is_sync"=>0,"updated_at"=>date("Y-m-d H:i:s")]);
+        return ["status"=>true,"message"=>"Record saved successfully"];
+
+    }
+
     public function deactivate_in_patient_service_charges()
     {
         DB::table(request()->table)->whereId(request()->id)->update(["is_active"=>0]);

@@ -31,16 +31,16 @@
         <p style="font-size: 13px; font-weight:bold;">{{ config('app.BRANCH_NAME') }}</p>
         <small style="font-size: 13px">{{ date("d-m-Y h:i A") }}</small>
     </div>
-
+    <hr style="border: 1px solid black;">
     <div class="main">
         <h6 style="font-size: 14px">Patient Name: {{ $admission->patient->name ?? "" }}</h6>
-        <h6 style="font-size: 14px">Admission Date: {{ date("d-m-Y H:i:s",strtotime($admission->admission_date)) ?? "" }}</h6>
+        <h6 style="font-size: 14px">Admission Date: {{ date("d-m-Y H:i A",strtotime($admission->admission_date)) ?? "" }}</h6>
 
 
 
         <h6 style="font-size: 14px">Procedure: {{ $admission->consultant_procedure->procedure->name ?? "" }}</h6>
         <h6 style="font-size: 14px">Printed By: {{ auth()->user()->name ?? "" }}</h6>
-
+         <hr style="border: 1px solid black;">
         <table style="margin-top: 5px">
             <thead>
             <tr>
@@ -49,6 +49,11 @@
                 <th style="width: 10%; font-size: 14px">Qty</th>
                 <th style="width: 10%; font-size: 14px">Price</th>
                 <th style="width: 10%; font-size: 14px">Amount</th>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <hr style="border: 1px solid black;">
+                </td>
             </tr>
             </thead>
             <tbody>
@@ -73,7 +78,11 @@
                         </tr>
                     @endforeach
 
-
+                    <tr>
+                        <td colspan="5">
+                            <hr style="border: 1px solid black;">
+                        </td>
+                    </tr>
                 @endforeach
 
                 <tr>

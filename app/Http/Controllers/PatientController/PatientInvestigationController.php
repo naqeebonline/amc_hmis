@@ -105,6 +105,11 @@ class PatientInvestigationController extends Controller
                 $data['sale_price'] = $value->frequency;
                 $data['inv_amount'] = $value->frequency;
             }
+            if (in_array($investigation->investigation_category_id, [7, 8, 9,10])) {
+                $data['status'] = 1;
+                $data['inv_out_date'] = date("Y-m-d H:i:s");
+                $data['inv_comment'] = "no result required";
+            }
             PatientInvestigation::create($data);
         }
 
@@ -221,7 +226,7 @@ class PatientInvestigationController extends Controller
     {
 
 
-        PatientInvestigation::whereId(request()->id)->update(["is_active"=>0]);
+        PatientInvestigation::whereId(request()->id)->update(["is_active"=>0,"is_sync"=>0,"updated_at"=>date("Y-m-d H:i:s")]);
         $list_investigations = PatientInvestigation::whereId(request()->id)->first();
         $invoice_no = $list_investigations->invoice_no ?? "";
         $list_investigations = PatientInvestigation::with("subCategory")->where("invoice_no",$invoice_no)->where(["is_active"=>1])->get();

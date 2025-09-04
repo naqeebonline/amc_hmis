@@ -74,7 +74,7 @@
                                     <th>Status</th>
 
                                     {{-- <th>Status</th> --}}
-                                    <th style="width: 10%">Action</th>
+                                    <th style="width: 250px">Action</th>
                                 </tr>
                             </thead>
 
@@ -441,26 +441,29 @@
         // });
 
 
-        // $("body").on("click", ".delete_record", function(e) {
-        //     var id = $(this).attr("data-id");
-        //     if (confirm('Are you sure to delete this record ?')) {
-        //         $.ajax({
-        //             type: 'post',
-        //             url: "{{ route('pos.deactivate_record') }}",
-        //             data: {
-        //                 id: id,
-        //                 table: "patient_admissions",
-        //                 _token: '{{ csrf_token() }}'
+        $("body").on("click", ".delete_result", function(e) {
+            var id = $(this).attr("data-id");
 
-        //             },
-        //             success: function(res) {
-        //                 investigation_result.ajax.reload();
-        //                 //window.location.reload();
-        //             }
-        //         })
-        //     } else {
-        //         alert('Why did you press cancel? You should have confirmed');
-        //     }
-        // });
+            if (confirm('Are you sure to delete this test Result ?')) {
+                var  url = "{{route('pos.delete_investigation_result')}}/"+id;
+                window.location = url;
+                /*$.ajax({
+                    type: 'post',
+                    url: " //route('pos.deactivate_record') ",
+                    data: {
+                        id: id,
+                        table: "patient_admissions",
+                        _token: '{{ csrf_token() }}'
+
+                    },
+                    success: function(res) {
+                        investigation_result.ajax.reload();
+                        //window.location.reload();
+                    }
+                })*/
+            } else {
+
+            }
+        });
     </script>
 @endpush

@@ -15,6 +15,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use LDAP\Result;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -65,10 +66,15 @@ class InvestigationResult extends Controller
                     : '<span class="badge bg-dark badge-warning">Pending</span>';
             })
             ->addColumn("actions", function ($investigation) {
-                return '<a href="' . route('pos.investigation_add_result', [$investigation->id, $investigation->investigation_sub_category_id]) . '"  data-details=\'' . $investigation . '\'  class="btn btn-sm btn-warning ">Result</a>'
+                $buttons =  '&nbsp;<a href="' . route('pos.investigation_add_result', [$investigation->id, $investigation->investigation_sub_category_id]) . '"  data-details=\'' . $investigation . '\'  class="btn btn-sm btn-warning ">Result</a>'
                 . (($investigation->status == 1)
-                    ? '<a href="' . route('pos.print_inv_result', [$investigation->id]) . '" class="btn btn-sm btn-success btn-inline-block ">Print</a>'
+                    ? '&nbsp;<a href="' . route('pos.print_inv_result', [$investigation->id]) . '" class="btn btn-sm btn-success btn-inline-block ">Print</a>'
                     : '');
+
+                if(getUserRole() == "Super Admin"){
+                    $buttons .= '&nbsp;<a href="javascript:void(0)" data-id=\'' . $investigation->id . '\'  class="btn btn-sm btn-danger delete_result">Delete</a>';
+                }
+                return $buttons;
             })
             ->rawColumns(["status", "actions"])
             ->make(true);
@@ -96,6 +102,7 @@ class InvestigationResult extends Controller
         }else{
 
                 foreach (request()->parameter_id as $key => $paramenter) {
+
                     PatientInvestigationResult::create([
                         "patient_investigation_id" => request()->inv_id,
                         "parameter_id" => $paramenter,
@@ -147,6 +154,7 @@ class InvestigationResult extends Controller
 
         $investigation->status = 1;
         $investigation->inv_out_date = Carbon::now();
+        $investigation->is_sync = 0;
         $investigation->inv_comment = request()->inv_comment;
         $investigation->update();
         
@@ -203,7 +211,9 @@ class InvestigationResult extends Controller
         $data['sub_category'] = $sub_category;
         $data['is_textual'] = ($sub_category->is_parameter == 0) ? 1: 0;
 
+
         $data["is_ict"] = ($sub_category->is_ict == 1) ? true : false;
+
         $heading = ParameterHeading::where(["investigation_sub_category_id"=>$cat_id])->orWhere("id",1)->orderBy("id","asc")->get();
         foreach ($heading as $key => $value){
             $value->parameters = InvestigationParameter::where("is_active",1)
@@ -218,5 +228,11 @@ class InvestigationResult extends Controller
         $data["result"] = PatientInvestigationResult::where("patient_investigation_id", $inv_id)->get();
 
         return view("laboratory.add_investigation_result", $data);
+    }
+
+    public function delete_investigation_result($patient_investigation_id)
+    {
+        DB::table('patient_investigation_result')->where(["patient_investigation_id"=>$patient_investigation_id])->delete();
+        return redirect()->back();
     }
 }
