@@ -229,6 +229,7 @@
                 <th style="width: 5%;">S.No</th>
                 <th style="width: 6%; ">Appointment#</th>
                 <th style="width: 15%; ">Patient Name</th>
+                <th style="width: 15%; ">Contact#</th>
                 <th style="width: 15%;">Consultant</th>
                 <th style="width: 10%;">OPD Type</th>
 
@@ -253,6 +254,7 @@
                     <td >{{ucfirst($value->patient->name) ?? ''}} <br>
                     {{$value->patient->mr_no ?? ''}}
                     </td>
+                    <td >{{$value->patient->contact_no?? ''}}
                     <td >{{$value->consultant->name ?? ''}}</td>
                     <td >{{$value->opd_type->name ?? ''}}</td>
 

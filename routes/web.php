@@ -443,6 +443,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get("in_patient_payment", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_payment"])->name("pos.in_patient_payment");
     Route::get("in_patient_admission_list", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_admission_list"])->name("pos.in_patient_admission_list");
     Route::get("primary_discharge/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "primary_discharge"])->name("pos.primary_discharge");
+    Route::get("print_admitted_patient_medicine_list/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "print_admitted_patient_medicine_list"])->name("pos.print_admitted_patient_medicine_list");
+    Route::get("in_patient_payments_receiving_bill/{admission_id?}", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_payments_receiving_bill"])->name("pos.in_patient_payments_receiving_bill");
     Route::get('in_patient_pharmacy_sale', [\App\Http\Controllers\Admin\SaleController::class, 'in_patient_pharmacy_sale'])->name('pos.in_patient_pharmacy_sale')->middleware('store.selected');
     Route::get('add_consultant_procedure', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'add_consultant_procedure'])->name('pos.add_consultant_procedure');
     Route::get('consultant_procedure_pricing/{consultant_procedure_id?}', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'consultant_procedure_pricing'])->name('pos.consultant_procedure_pricing');

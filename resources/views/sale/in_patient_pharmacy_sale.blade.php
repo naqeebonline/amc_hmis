@@ -261,7 +261,7 @@
 
     <!-- Item Input Section -->
     <div class="row mt-2">
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="row">
                 <!--<div class="col-md-3">
                     <input type="text" class="form-control" placeholder="Item/Bar Code">
@@ -410,7 +410,7 @@
         </div>
 
         <!-- Sidebar Section -->
-        <div class="col-md-4 sidebar">
+        <div class="col-md-5 sidebar">
             <!--<div class="no-photo">
                 <h5><?php /*echo Company_Name; */?></h5>
             </div>-->
@@ -448,6 +448,7 @@
                             <th>After Discount</th>
 
                             <th>Received</th>
+                            <th>Created By</th>
                             <th style="width: 30%">Actions</th>
                         </tr>
                     </thead>
@@ -528,6 +529,11 @@
                     {
                         data: 'received_amount',
                         name: 'received_amount',
+                        searchable: true
+                    },
+                    {
+                        data: 'created_by.name',
+                        name: 'created_by.name',
                         searchable: true
                     },
 

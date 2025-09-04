@@ -155,7 +155,7 @@
                         <tr>
                             <th style="width: 50px">#</th>
                             <th style="width: 14%">Name</th>
-                            <th style="width: 5%">Qty</th>
+                            <th style="width: 5%">Pack Qty</th>
                             <th style="width: 8%">Units</th>
                             <th style="width: 8%">Pack Price</th>
                             <th style="width: 6%">Total</th>
@@ -209,23 +209,23 @@
 
                                         {{ $item->products?->ProductName ?? "" }}
                                     </td>
-                                    <td class="text-center"><input type="number" id="bill_item_{{$item->GDID}}" onchange="handleChange(this, {{ $item->pack_size }})"
+                                    <td class="text-center"><input type="number" style="width: 100px !important;" id="bill_item_{{$item->GDID}}" onchange="handleChange(this, {{ $item->pack_size }})"
                                                                    name="pack_qty[]"
                                                                    value="{{ ceil($qty) }}"><br/><p style="font-size: 9px">{{ number_format($qty,2) . ' x ' . $item->pack_size }}</p></td>
-                                    <td class="text-center"> <input  type="number" name="Quantity[]"
+                                    <td class="text-center"> <input  type="number" style="width: 100px !important;" name="Quantity[]"
                                                                      value="{{ $item->Quantity }}"></td>
 
-                                    <td><input type="number" step="0.01" name="pack_price[]" value="{{ $item->pack_price }}"> <span style="color: red;font-size: 9px;">U.Price: {{$item->UnitPrice}}</span>
+                                    <td><input type="number" step="0.01" style="width: 100px !important;" name="pack_price[]" value="{{ $item->pack_price }}"> <span style="color: red;font-size: 9px;">U.Price: {{$item->UnitPrice}}</span>
                                     </td>
 
                                     <td>{{ $totalAmount }}</td>
                                     <td>{{ $item->gst_tax_amount }}</td>
                                     <td>{{ $item->advance_tax_amount }}</td>
-                                    <td class="text-center"><input type="number" style="width: 80% !important;" step="0.01" name="discount[]" value="{{ $item->discount ?? "0" }}">%</td>
-                                    <td class="text-center"><input type="number" step="0.01" name="advance_tax[]"  value="{{ $item->advance_tax }}"></td>
+                                    <td class="text-center"><input type="number" style="width: 100px !important;" step="0.01" name="discount[]" value="{{ $item->discount ?? "0" }}">%</td>
+                                    <td class="text-center"><input type="number" style="width: 100px !important;" step="0.01" name="advance_tax[]"  value="{{ $item->advance_tax }}"></td>
 
-                                    <td class="text-center"><input type="number" name="gst_tax[]" step="0.01" value="{{ $item->gst_tax }}"></td>
-                                    <td class="text-center"><input style="width: 100%" name="expiry_date[]" type="date" value="{{ ($item->expiry_date) ? date("Y-m-d",strtotime($item->expiry_date)) :"" }}"></td>
+                                    <td class="text-center"><input type="number" style="width: 100px !important;" name="gst_tax[]" step="0.01" value="{{ $item->gst_tax }}"></td>
+                                    <td class="text-center"><input style="width: 150px !important;" name="expiry_date[]" type="date" value="{{ ($item->expiry_date) ? date("Y-m-d",strtotime($item->expiry_date)) :"" }}"></td>
                                     <td>
                                         <button type="submit" class="btn btn-primary">Upd</button>
                                         <a class="btn btn-danger delete_item" data_id="{{ $item->GDID }}" href="javascript:void(0)">X</a></td>

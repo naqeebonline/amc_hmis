@@ -33,13 +33,13 @@
     </div>
 
     <div class="main">
-        <h6 style="font-size: 14px">Invoice#: {{ $record->InvoiceNo ?? "" }}</h6>
+        <h6 style="font-size: 14px">Invoice#: {{ $record->InvoiceNo ?? "" }} | Created At: {{ $record->CreatedAt ?? "" }}</h6>
         {{--<h6 style="font-size: 14px">Name: {{ $patient->name ?? '' }}</h6>--}}
         @if($appointment_patient_name !='')
             <h6 style="font-size: 14px">{!! $appointment_patient_name !!} </h6>
         @endif
 
-        <h6 style="font-size: 14px">Printed By: {{ auth()->user()->name ?? "" }}</h6>
+        <h6 style="font-size: 14px">Created By: {{ $record->created_by->name ?? "" }} | Printed By: {{ auth()->user()->name ?? "" }}</h6>
 
         <table style="margin-top: 5px">
             <thead>
@@ -97,7 +97,7 @@
 
     <div style="display: table; margin: 0 auto;">{!! DNS2D::getBarcodeHTML(config("app.LIVE_URL"), 'QRCODE', 3, 3) !!}</div>
     <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Thank You For Visiting</p>
-    <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Note: Returns are accepted only with the original receipt/invoice.</p>
+    <p style="font-size: 12px; font-weight: bold; text-align: center !important;">Note: Returns are accepted only with the original receipt/invoice in 48 Hours.</p>
     <br>
 </div>
 

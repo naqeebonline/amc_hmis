@@ -1697,6 +1697,7 @@ class PatientAdmissionController extends Controller
         $data['investigation'] = $this->patientInvestigationBalance($admission->patient_id,$admission_id);
         $data['pharmacy'] = $this->totalMedicineCost($admission->patient_id,$admission_id);
         $data['total_received_payment'] = $this->totalReceivedPayment($admission->patient_id,$admission_id);
+        $data['admission_id'] = $admission_id;
 
 
        // $data['service_type'] = ServiceType::whereIsActive(1)->get();
@@ -2004,6 +2005,53 @@ class PatientAdmissionController extends Controller
         return $data;
 
 
+    }
+
+    public function print_admitted_patient_medicine_list($admission_id)
+    {
+        $data['admission'] = InPatientAdmission::with(['patient','consultant_procedure.procedure'])->where("id",$admission_id)->first();
+        //dd($data['admission']->consultant_procedure->procedure->name);
+        $sale = Sale::where("admission_id",$admission_id)->get();
+        $total_discount = 0;
+        $total_amount = 0;
+        foreach ($sale as $key => $value){
+            $total_discount = ($total_discount) + ($value->Discount);
+            $value->items = SaleDetails::with('product')->where(["SaleID"=>$value->SaleID])->get();
+
+            foreach ($value->items as $key => $value2){
+                $value2->product_name = $value2->product->ProductName ?? '';
+
+                $value2->total_amount = (($value2->Quantity) - ($value2->ReturnQuantity)) * ($value2->UnitePrice);
+                $total_amount = ($total_amount) + ($value2->total_amount);
+
+            }
+        }
+        $data['sale'] = $sale;
+        $data['total_discount'] = $total_discount;
+        $data['total_amount'] = $total_amount;
+        return view('reports.print_patient_medicine_list',$data);
+
+    }
+
+    public function in_patient_payments_receiving_bill($admission_id)
+    {
+        $data['admission'] = InPatientAdmission::with(['patient','consultant_procedure.procedure','createdBy'])->where("id",$admission_id)->first();
+        $data['payments'] = PatientPayment::with(["createdBy"])->where("admission_id",$admission_id)->get();
+        $advance_amount = $data['admission']->advance_payment;
+        $total = $advance_amount;
+        foreach($data['payments'] as $key => $value){
+            if(strtoupper($value->payment_type) == "ADVANCE"){
+                $total = ($total) + ($value->amount);
+                $value->amount = $value->amount;
+            }else{
+                $total = ($total) - ($value->amount);
+                $value->amount = "-".$value->amount;
+
+            }
+
+        }
+        $data['total'] = $total;
+        return view('reports.print_in_patient_payments_receiving_bill',$data);
     }
 
 

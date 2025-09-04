@@ -20,6 +20,10 @@ class TempSale extends Model
         return $this->belongsTo(Patient::class,"patient_id","id");
     }
 
+    public function created_by(){
+        return $this->belongsTo(Users::class,"CreatedBy","id");
+    }
+
 
 
   

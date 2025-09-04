@@ -3,6 +3,7 @@
 namespace App\Models\Patient;
 
 use App\Models\Configuration\District;
+use App\Models\Users;
 use App\Traits\Syncable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +26,11 @@ class PatientPayment extends Model
     public function admission()
     {
         return $this->belongsTo(PatientAdmission::class, "admission_id", "id");
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(Users::class, "created_by", "id");
     }
     
 }

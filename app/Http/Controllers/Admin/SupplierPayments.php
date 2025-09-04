@@ -266,7 +266,7 @@ class SupplierPayments extends Controller
     public function print_retail_thermel_purchase_details($SaleID)
     {
         $date = date("Y-m-d");
-        $data['record'] = Sale::where(['SaleID' => $SaleID])->first();
+        $data['record'] = Sale::where(['SaleID' => $SaleID])->with('created_by')->first();
 
         $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
         $data['appointment_patient_name'] = 'Walking Customer';
@@ -348,7 +348,7 @@ class SupplierPayments extends Controller
     public function print_customer_bill($SaleID)
     {
         $date = date("Y-m-d");
-        $data['record'] = TempSale::where(['SaleID' => $SaleID])->first();
+        $data['record'] = TempSale::with(['created_by'])->where(['SaleID' => $SaleID])->first();
 
 
         $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
@@ -515,7 +515,7 @@ class SupplierPayments extends Controller
     }
 
     public function retail_previous_bills(){
-        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
+        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")->with('created_by')
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
             })
@@ -531,7 +531,8 @@ class SupplierPayments extends Controller
                 $buttons = "";
                 $buttons .= '<a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
                 if($data->is_return_made == 1){
-                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                    /*$buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';*/
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                     $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
                 }else{
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
@@ -544,7 +545,7 @@ class SupplierPayments extends Controller
     }
 
     public function in_patient_retail_previous_bills(){
-        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
+        $bills = Sale::orderBy("SaleID", "DESC")->with("patient")->with('created_by')
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
             })
@@ -560,6 +561,7 @@ class SupplierPayments extends Controller
                 $buttons = "";
                 $buttons .= '<a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
                 if($data->is_return_made == 1){
+                    /*$buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';*/
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                     $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
                 }else{

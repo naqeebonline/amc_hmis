@@ -405,6 +405,7 @@
                             <th>Invoice #</th>
                             <th>Patient</th>
                             <th>Amount</th>
+                            <th>Created By</th>
                             <th style="width: 30%">Actions</th>
                         </tr>
                     </thead>
@@ -568,6 +569,11 @@
                     {
                         data: 'received_amount',
                         name: 'received_amount',
+                        searchable: true
+                    },
+                    {
+                        data: 'created_by.name',
+                        name: 'created_by.name',
                         searchable: true
                     },
                     {

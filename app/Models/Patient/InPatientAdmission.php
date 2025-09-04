@@ -8,6 +8,7 @@ use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
 
 use App\Models\User;
+use App\Models\Users;
 use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -66,6 +67,11 @@ class InPatientAdmission extends Model
     public function procedure_type()
     {
         return $this->belongsTo(ProcedureType::class, 'procedure_type_id', "id");
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(Users::class, 'created_by', "id");
     }
  
 }
