@@ -99,6 +99,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('retail-sale', [\App\Http\Controllers\Admin\SaleController::class, 'retail_pharmacy_sale'])->name('pos.retail_pharmacy_sale');
     Route::get('search_appointment', [\App\Http\Controllers\Admin\SaleController::class, 'search_appointment'])->name('pos.search_appointment');
 
+    Route::get('pharmacy-transfer', [\App\Http\Controllers\Admin\SaleController::class, 'pharmacy_transfer'])->name('pos.pharmacy_transfer');
+    Route::post('save_pharmacy_transfer', [\App\Http\Controllers\Admin\SaleController::class, 'save_pharmacy_transfer'])->name('pos.save_pharmacy_transfer');
+    Route::get('print_pharmacy_transfer_bill/{id?}', [\App\Http\Controllers\Admin\SupplierPayments::class, 'print_pharmacy_transfer_bill'])->name('pos.print_pharmacy_transfer_bill');
+    Route::get('pharmacy_transfer_bills', [\App\Http\Controllers\Admin\SupplierPayments::class, 'pharmacy_transfer_bills'])->name('pos.pharmacy_transfer_bills');
 
     Route::get('list_product', [\App\Http\Controllers\Admin\ProductController::class, 'list_product'])->name('pos.list_product');
     Route::post('save-product', [\App\Http\Controllers\Admin\ProductController::class, 'save_product'])->name('pos.save_product');
@@ -479,6 +483,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post("update_in_patient_admission", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "update_in_patient_admission"])->name("pos.update_in_patient_admission");
     Route::get("in_patient_discharged_listing", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "in_patient_discharged_listing"])->name("pos.in_patient_discharged_listing");
 
+// Finance Head named routes
+    Route::get('finance-heads', [App\Http\Controllers\FinanceHeadController::class, 'index'])->name('finance-heads.index');
+    Route::post('finance-heads', [App\Http\Controllers\FinanceHeadController::class, 'store'])->name('finance-heads.store');
+    Route::get('finance-heads/{finance_head}', [App\Http\Controllers\FinanceHeadController::class, 'show'])->name('finance-heads.show');
+    Route::put('finance-heads/{finance_head}', [App\Http\Controllers\FinanceHeadController::class, 'update'])->name('finance-heads.update');
+    Route::delete('finance-heads/{finance_head}', [App\Http\Controllers\FinanceHeadController::class, 'destroy'])->name('finance-heads.destroy');
 
 
 });

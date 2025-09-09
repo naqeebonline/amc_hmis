@@ -793,6 +793,12 @@
             $('#loading-icon').hide();
         });
 
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
         //notification_count
         function update(){
             /*$.ajax({

@@ -13,6 +13,8 @@ use App\Models\Market;
 use App\Models\Patient\Patient;
 use App\Models\PaymentDetail;
 use App\Models\PaymentType;
+use App\Models\PharmacyTransfer;
+use App\Models\PharmacyTransferDetails;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetails;
@@ -428,6 +430,81 @@ class SupplierPayments extends Controller
         return view('reports/print_retail_sale_invoice', $data);
     }
 
+    public function print_pharmacy_transfer_bill($SaleID)
+    {
+        $date = date("Y-m-d");
+        $data['record'] = PharmacyTransfer::with(['created_by'])->where(['id' => $SaleID])->first();
+
+
+
+        $data['appointment_patient_name'] = 'Pharmacy Transfer';
+
+
+
+
+        $billDate = date("d-m-Y", strtotime($data['record']->Date));
+
+        $discount_percentage = $data['record']->discount_percentage;
+
+        //$data['PreviousBalance']=(new CustomerPayments())->customer_previous_balance($customer_id,$date);
+
+        $data['data'] = PharmacyTransferDetails::with('product')->where(['temp_sale_id' => $SaleID])->get();
+        $data['title'] = 'Pharmacy Transfer Report';
+        $return = "No";
+        $totalAmount = 0;
+
+        foreach ($data['data'] as $rec) {
+            $rec->AvaliableQuantity = ($rec->Quantity) - ($rec->ReturnQuantity);
+            $rec->totalAmount = ($rec->AvaliableQuantity) * ($rec->UnitePrice);
+            $totalAmount = ($totalAmount) + ($rec->totalAmount);
+            if ($rec->ReturnQuantity > 0) {
+                $return = "Yes";
+            }
+        }
+
+
+        $result = [];
+
+        // Iterate through the array remove duplicate items . sum the quantity ,totalamount, taxamount and remove duplication for bill print only...//
+        foreach ($data['data'] as $item) {
+            $productId = $item->ProductID;
+
+            // If ProductID already exists in the result, sum up the Quantity and UnitePrice
+            if (isset($result[$productId])) {
+                $result[$productId]->Quantity += $item->Quantity;
+                $result[$productId]->totalAmount += $item->totalAmount;
+                $result[$productId]->taxAmount += $item->taxAmount;
+            } else {
+                // Add new ProductID to result
+                $result[$productId] = clone $item;
+            }
+        }
+
+        $result = array_values($result);
+        $data['data'] = $result;
+
+
+        if ($return == "Yes") {
+            $data['return'] = "Yes";
+        } else {
+            $data['return'] = "No";
+        }
+
+
+        $data['TotalAmount'] = $totalAmount;
+        $data['TotalDiscount'] = ($totalAmount * $discount_percentage)/100;
+
+        $data['show_customer_contact'] = "true";
+
+        $data['customer'] = [];
+
+      //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        //$this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+
+
+        return view('reports/print_pharmacy_transfer_invoice', $data);
+    }
+
     public function printFormattedReceipt($data, $record, $patient, $TotalDiscount)
     {
         try {
@@ -536,6 +613,29 @@ class SupplierPayments extends Controller
                     $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
                 }else{
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                }
+
+                return $buttons;
+            })
+            ->rawColumns(["action"])
+            ->make(true);
+    }
+
+    public function pharmacy_transfer_bills(){
+        $bills = PharmacyTransfer::orderBy("id", "DESC")->with("patient")->with('created_by')
+            ->where("admission_id","=",0)
+            ->limit(600);
+
+        return DataTables::of($bills)
+
+            ->addColumn('action', function ($data) {
+                $buttons = "";
+                if($data->is_return_made == 1){
+                    /*$buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';*/
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_pharmacy_transfer_bill", [$data->id]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
+                    $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
+                }else{
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_pharmacy_transfer_bill", [$data->id]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                 }
 
                 return $buttons;

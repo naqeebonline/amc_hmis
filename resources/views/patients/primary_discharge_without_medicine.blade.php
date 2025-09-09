@@ -155,7 +155,7 @@
                                         <tr>
                                             <td width="60%" >Pharmacy</td>
                                             <td width="40%">
-                                              -  {{$pharmacy['total'] ?? 0}}
+                                              -  {{round($pharmacy['total']) ?? 0}}
                                             </td>
                                         </tr>
 
@@ -163,9 +163,9 @@
                                             <td width="60%" style="border-top: 2px solid black; font-weight: bold;" >Balance</td>
                                             <td width="40%" style="border-top: 2px solid black;font-weight: bold;">
                                                 @if($right_hand_side_balance < 0)
-                                                    <input type="text" disabled id="left_hand_balance" value="{{ (($total_receiving_balance ?? 0) - ($investigation['total'] ?? 0)) - ($pharmacy['total'] ?? 0) + ($right_hand_side_balance)}}">
+                                                    <input type="text" disabled id="left_hand_balance" value="{{ (($total_receiving_balance ?? 0) - ($investigation['total'] ?? 0)) - (round($pharmacy['total']) ?? 0) + ($right_hand_side_balance)}}">
                                                 @else
-                                                    <input type="text" disabled id="left_hand_balance" value="{{ (($total_receiving_balance ?? 0) - ($investigation['total'] ?? 0)) - ($pharmacy['total'] ?? 0)}}">
+                                                    <input type="text" disabled id="left_hand_balance" value="{{ (($total_receiving_balance ?? 0) - ($investigation['total'] ?? 0)) - (round($pharmacy['total']) ?? 0)}}">
                                                 @endif
 
                                             </td>
@@ -325,8 +325,8 @@
         $("body").on("click", "#discharge_patient", function(e) {
             $("#discharge_patient").hide();
             var total_payment_paid_by_patient = "{{$total_payment_paid_by_patient}}";
-            var investigations = "{{$investigation['total']}}";
-            var pharmacy_sale = "{{$pharmacy['total']}}";
+            var investigations = "{{round($investigation['total'])}}";
+            var pharmacy_sale = "{{round($pharmacy['total']) ?? 0}}";
             if (confirm('Are you sure to delete this record ?')) {
                 $.ajax({
                     type: 'post',

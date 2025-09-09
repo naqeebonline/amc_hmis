@@ -222,7 +222,7 @@
                                         <tr>
                                             <td width="50%" >Pharmacy</td>
                                             <td width="50%">
-                                                {{$pharmacy['total'] ?? 0}} &nbsp;&nbsp;&nbsp; Balance: {{ ($pharmacy['total'] ?? 0) - ($pharmacy['received'] ?? 0)}}
+                                                {{round($pharmacy['total']) ?? 0}} &nbsp;&nbsp;&nbsp; Balance: {{ (round($pharmacy['total']) ?? 0) - (round($pharmacy['received']) ?? 0)}}
                                             </td>
                                         </tr>
 
@@ -231,7 +231,7 @@
                                         <tr>
                                             <td width="50%" style="border-top: 2px solid black;font-weight: bold" >Total</td>
                                             <td width="50%" style="border-top: 2px solid black; font-weight: bold">
-                                                {{ $total = round(($total_service_charges) + ($investigation['total']) + ($pharmacy['total']))  }}
+                                                {{ $total = round(($total_service_charges) + ($investigation['total']) + (round($pharmacy['total'])))  }}
                                             </td>
                                         </tr>
 
@@ -307,7 +307,7 @@
             $("#discharge_patient").hide();
             var total_payment_paid_by_patient = "{{$total_payment_paid_by_patient ?? 0}}";
             var investigations = "{{$investigation['total']}}";
-            var pharmacy_sale = "{{$pharmacy['total']}}";
+            var pharmacy_sale = "{{round($pharmacy['total'])}}";
             if (confirm('Are you sure to delete this record ?')) {
                 $.ajax({
                     type: 'post',
