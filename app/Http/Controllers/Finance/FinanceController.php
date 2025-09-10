@@ -114,11 +114,12 @@ class FinanceController extends Controller
         $pharmacy_return = $this->total_return_in_pharmacy($closing_date,$user_id);
         $service_charges = $this->serviceCharges($closing_date,$user_id);
         $consultant_charges = $this->consultant_charges($closing_date,$user_id);
-        $total_amount = ($sale) + ($appointments) + ($investigations) + ($service_charges) + ($consultant_charges);
+        $total_amount = ($sale) + ($appointments) + ($investigations) + ($service_charges) + ($consultant_charges) - ($pharmacy_return);
 
         if($total_amount == 0 && $pharmacy_return == 0){
             return redirect()->back()->with("error","You can not post Zero Amount of user.");
         }
+
 
         $voucher = generateVoucherNumber("closing",$user_id);
 
@@ -173,12 +174,22 @@ class FinanceController extends Controller
 
 
         if($pharmacy_return > 0){
-            $return = $query = PharmacyRetrun::where("is_posted",0)
+            $return = $query = PharmacyRetrun::where("pharmacy_return_items.is_posted", 0)
+                ->select("pharmacy_return_items.*", "sale.CreatedBy as bill_user")
+                ->join("sale", "sale.SaleID", "=", "pharmacy_return_items.sale_id")
+                ->where(function ($q) use ($user_id) {
+                    $q->where("sale.CreatedBy", "!=", $user_id)
+                        ->orWhere("sale.is_posted", 1);
+                })
                 ->when($closing_date, function ($query) use ($closing_date) {
-                    return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+                    return $query->whereDate(
+                        'pharmacy_return_items.created_at',
+                        '<=',
+                        date("Y-m-d", strtotime($closing_date))
+                    );
                 })
                 ->when($user_id, function ($query) use ($user_id) {
-                    return $query->where('created_by',$user_id);
+                    return $query->where('pharmacy_return_items.created_by', $user_id);
                 })->get();
             foreach ($return as $key => $value){
                 $amount = $value->amount;
@@ -379,13 +390,24 @@ class FinanceController extends Controller
 
     public function total_return_in_pharmacy($closing_date='',$user_id='')
     {
-        $query = PharmacyRetrun::where("is_posted",0)
+        $query = $query = PharmacyRetrun::where("pharmacy_return_items.is_posted", 0)
+            ->select("pharmacy_return_items.*", "sale.CreatedBy as bill_user")
+            ->join("sale", "sale.SaleID", "=", "pharmacy_return_items.sale_id")
+            ->where(function ($q) use ($user_id) {
+                $q->where("sale.CreatedBy", "!=", $user_id)
+                    ->orWhere("sale.is_posted", 1);
+            })
             ->when($closing_date, function ($query) use ($closing_date) {
-                return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+                return $query->whereDate(
+                    'pharmacy_return_items.created_at',
+                    '<=',
+                    date("Y-m-d", strtotime($closing_date))
+                );
             })
             ->when($user_id, function ($query) use ($user_id) {
-                return $query->where('created_by',$user_id);
-            })->sum('amount');
+                return $query->where('pharmacy_return_items.created_by', $user_id);
+            })
+            ->sum('amount');
 
 
         return $query;
@@ -692,7 +714,7 @@ class FinanceController extends Controller
                 return $query->where('CreatedBy',$user_id);
             });
 
-        $totals = $query->selectRaw('SUM(TotalSale)-SUM(Discount) as in_patient_sale')->first();
+        $totals = $query->selectRaw('SUM(TotalSale) - SUM(Discount) as in_patient_sale')->first();
         return $totals->in_patient_sale ?? 0;
     }
 

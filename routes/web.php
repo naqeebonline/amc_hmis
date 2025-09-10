@@ -490,5 +490,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('finance-heads/{finance_head}', [App\Http\Controllers\FinanceHeadController::class, 'update'])->name('finance-heads.update');
     Route::delete('finance-heads/{finance_head}', [App\Http\Controllers\FinanceHeadController::class, 'destroy'])->name('finance-heads.destroy');
 
+    Route::get('reports', function() {
+        return view('reports.dashboard');
+    })->name('reports.dashboard');
+    Route::get('grn-supplier-report', [\App\Http\Controllers\Reports\GrnReportController::class, 'supplierPurchaseReport'])->name('reports.grn_supplier_report');
+    Route::get('grn-supplier-report-pdf', [\App\Http\Controllers\Reports\GrnReportController::class, 'supplierPurchaseReportPdf'])->name('reports.grn_supplier_report_pdf');
+    Route::get('inventory-summary', [\App\Http\Controllers\Reports\GrnReportController::class, 'inventorySummary'])->name('reports.inventory_summary');
+    Route::get('export-inventory-excel', [\App\Http\Controllers\Reports\GrnReportController::class, 'exportInventoryToExcel'])->name('reports.export_inventory_excel');
+    Route::get('export-low-stock-excel', [\App\Http\Controllers\Reports\GrnReportController::class, 'exportLowStockToExcel'])->name('reports.export_low_stock_excel');
 
 });

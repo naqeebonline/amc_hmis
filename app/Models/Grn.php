@@ -18,6 +18,14 @@ class Grn extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function supplier(){
+        return $this->belongsTo(Customer::class, 'SCID', 'SCID');
+    }
+
+    public function grnDetails(){
+        return $this->hasMany(GrnDetails::class, 'GRNID', 'GRNID');
+    }
+
     protected static function booted()
     {
         static::created(function ($data) {

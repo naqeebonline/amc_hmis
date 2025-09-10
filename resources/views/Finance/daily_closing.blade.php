@@ -84,7 +84,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td>Pharmacy Return</td>
+                                        <td >Pharmacy Return<br><p style="font-size: 10px; color: red">( Return taken in other users or posted bills )</p></td>
                                         <td>- {{$pharmacy_return ?? 0}}</td>
                                     </tr>
 
