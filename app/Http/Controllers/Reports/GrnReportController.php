@@ -17,6 +17,7 @@ class GrnReportController extends Controller
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
         $invoice_no = $request->get('invoice_no');
+        $product_ids = $request->get('product_ids', []); // Multi-select product filter
         
         // Get supplier information
         $supplier = DB::table('sup_cus_details')
@@ -45,6 +46,11 @@ class GrnReportController extends Controller
         // Apply invoice number filter if provided
         if ($invoice_no) {
             $purchaseQuery->where('grn.InvoiceNo', '=' ,$invoice_no);
+        }
+        
+        // Apply product filter if provided
+        if (!empty($product_ids) && is_array($product_ids)) {
+            $purchaseQuery->whereIn('grn_details.ProductID', $product_ids);
         }
         
         $purchaseData = $purchaseQuery->select(
@@ -120,6 +126,16 @@ class GrnReportController extends Controller
             ->where('IsActive', 1)
             ->select('SCID', 'Name')
             ->get();
+            
+        // Get all available products from this supplier for filter dropdown
+        $availableProducts = DB::table('grn_details')
+            ->join('grn', 'grn_details.GRNID', '=', 'grn.GRNID')
+            ->join('products', 'grn_details.ProductID', '=', 'products.ProductID')
+            ->where('grn.SCID', $supplier_id)
+            ->select('products.ProductID', 'products.ProductName')
+            ->distinct()
+            ->orderBy('products.ProductName')
+            ->get();
         
         $data = [
             'supplier' => $supplier,
@@ -137,7 +153,9 @@ class GrnReportController extends Controller
             'from_date' => $from_date,
             'to_date' => $to_date,
             'invoice_no' => $invoice_no,
-            'allSuppliers' => $allSuppliers
+            'product_ids' => $product_ids,
+            'allSuppliers' => $allSuppliers,
+            'availableProducts' => $availableProducts
         ];
         
         return view('reports.grn_supplier_report', $data);
@@ -149,6 +167,7 @@ class GrnReportController extends Controller
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
         $invoice_no = $request->get('invoice_no');
+        $product_ids = $request->get('product_ids', []); // Multi-select product filter
         
         // Get supplier information
         $supplier = DB::table('sup_cus_details')
@@ -177,6 +196,11 @@ class GrnReportController extends Controller
         // Apply invoice number filter if provided
         if ($invoice_no) {
             $purchaseQuery->where('grn.InvoiceNo', '=' ,$invoice_no);
+        }
+        
+        // Apply product filter if provided
+        if (!empty($product_ids) && is_array($product_ids)) {
+            $purchaseQuery->whereIn('grn_details.ProductID', $product_ids);
         }
         
         $purchaseData = $purchaseQuery->select(
@@ -262,12 +286,16 @@ class GrnReportController extends Controller
             'from_date' => $from_date,
             'to_date' => $to_date,
             'invoice_no' => $invoice_no,
+            'product_ids' => $product_ids,
         ];
         
         // Generate filename based on filters
         $filename = 'GRN_Supplier_Report_' . $supplier->Name;
         if ($invoice_no) {
             $filename .= '_Invoice_' . $invoice_no;
+        }
+        if (!empty($product_ids)) {
+            $filename .= '_Products_' . count($product_ids);
         }
         if ($from_date) {
             $filename .= '_From_' . $from_date;
@@ -293,8 +321,8 @@ class GrnReportController extends Controller
                 ->leftJoin('grn', 'grn_details.GRNID', '=', 'grn.GRNID')
                 ->leftJoin('sup_cus_details', 'grn.SCID', '=', 'sup_cus_details.SCID')
                 ->leftJoin('generic_names', 'products.generic_name_id', '=', 'generic_names.id')
-                ->where('grn_details.ProductStatus', 1) // Only active products
-                ->where('grn_details.RemainingQuantity', '>', 0); // Only products with remaining quantity
+                ->where('grn_details.ProductStatus', 1); // Only active products
+                //->where('grn_details.RemainingQuantity', '>', 0); // Only products with remaining quantity
 
             // Group by ProductID and sum the RemainingQuantity
             $inventoryData = $inventoryQuery->select(
@@ -309,8 +337,9 @@ class GrnReportController extends Controller
                     DB::raw('MAX(grn.Dated) as last_purchase_date')
                 )
                 ->groupBy('products.ProductID', 'products.ProductName', 'generic_names.name')
-                ->having('total_available_quantity', '>', 0)
-                ->orderBy('total_available_quantity', 'DESC')
+                // ->having('total_available_quantity', '>', 0)
+                // ->orderBy('total_available_quantity', 'DESC')
+                ->orderBy('products.ProductName', 'ASC')
                 ->get();
 
         } catch (\Exception $e) {
@@ -320,7 +349,8 @@ class GrnReportController extends Controller
                     ->join('products', 'grn_details.ProductID', '=', 'products.ProductID')
                     ->leftJoin('grn', 'grn_details.GRNID', '=', 'grn.GRNID')
                     ->where('grn_details.ProductStatus', 1)
-                    ->where('grn_details.RemainingQuantity', '>', 0);
+                    //->where('grn_details.RemainingQuantity', '>', 0)
+                    ;
 
                 $inventoryData = $inventoryQuery->select(
                         'products.ProductID',
@@ -334,8 +364,9 @@ class GrnReportController extends Controller
                         DB::raw('MAX(grn.Dated) as last_purchase_date')
                     )
                     ->groupBy('products.ProductID', 'products.ProductName')
-                    ->having('total_available_quantity', '>', 0)
-                    ->orderBy('total_available_quantity', 'DESC')
+                     ->having('total_available_quantity', '>', 0)
+                  // ->orderBy('total_available_quantity', 'DESC')
+                ->orderBy('products.ProductName', 'ASC')
                     ->get();
                     
             } catch (\Exception $e2) {

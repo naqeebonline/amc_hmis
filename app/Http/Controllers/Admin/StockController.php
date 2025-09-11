@@ -415,7 +415,7 @@ class StockController extends Controller
         }
 
          $final_total = ($totalAmount) + ($totalAdvanceTax) + ($totalGst) - ($total_per_item_discount);
-        //dd($final_total);
+
 
 
 
@@ -423,8 +423,8 @@ class StockController extends Controller
 
 
         //dd(["ModifiedBy"=>auth()->user()->id,"TotalPurchase" => ($totalAmount + $totalAdvanceTax + $totalGst), "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
-        GrnRequest::where(["GRNID" => $grnID])->update(["ModifiedBy"=>auth()->user()->id,"per_item_discount"=>$total_per_item_discount,"TotalPurchase" => ($totalAmount + $totalAdvanceTax + $totalGst - $per_item_discount), "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
-        
+        //GrnRequest::where(["GRNID" => $grnID])->update(["ModifiedBy"=>auth()->user()->id,"per_item_discount"=>$total_per_item_discount,"TotalPurchase" => ($totalAmount + $totalAdvanceTax + $totalGst - $per_item_discount), "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
+        GrnRequest::where(["GRNID" => $grnID])->update(["ModifiedBy"=>auth()->user()->id,"per_item_discount"=>$total_per_item_discount,"TotalPurchase" => $final_total, "total_gst" => $totalGst, "total_advance_tax" => $totalAdvanceTax]);
         return true;
 
     }

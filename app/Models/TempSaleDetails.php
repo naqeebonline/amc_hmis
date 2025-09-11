@@ -18,6 +18,11 @@ class TempSaleDetails extends Model
         return $this->belongsTo(Product::class, 'ProductID');
     }
 
+    public function tempSale()
+    {
+        return $this->belongsTo(TempSale::class, 'SaleID');
+    }
+
 
 
 

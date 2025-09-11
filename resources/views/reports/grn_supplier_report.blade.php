@@ -105,23 +105,29 @@
                 <div class="card-body">
                     <!-- Report Header Section -->
                     <div class="report-header text-center">
-                        <h2>Supplier Purchase Report</h2>
-                        <h4>{{ $supplier->Name }}</h4>
-                        <p class="mb-0">Supplier ID: {{ $supplier->SCID }} | Contact: {{ $supplier->ContactNo ?? 'N/A' }}</p>
-                        <p class="mb-0">Address: {{ $supplier->Address ?? $supplier->BusinessAddress ?? 'N/A' }}</p>
+                        <p class="mb-0">Supplier Purchase Report</p>
+                        <p class="mb-0"><b>Name:</b> {{ $supplier->Name }}  <b>| Contact:</b> {{ $supplier->ContactNo ?? 'N/A' }}</p>
+                        <p class="mb-0">
+
                         @if($invoice_no)
-                            <p class="mb-0">
-                                <strong>Invoice Filter:</strong> {{ $invoice_no }}
-                            </p>
+
+                               <b> Invoice#:</b> {{ $invoice_no }}
+
+                        @endif
+                        @if(!empty($product_ids))
+
+                               <b>| Products:</b> {{ count($product_ids) }} Selected
+
                         @endif
                         @if($from_date || $to_date)
-                            <p class="mb-0">
-                                <strong>Date Filter:</strong> 
-                                {{ $from_date ? date('d-M-Y', strtotime($from_date)) : 'All' }} 
-                                to 
+
+                                <b>| Date Filter:</b>
+                                {{ $from_date ? date('d-M-Y', strtotime($from_date)) : 'All' }}
+                                <b>to </b>
                                 {{ $to_date ? date('d-M-Y', strtotime($to_date)) : 'All' }}
-                            </p>
+
                         @endif
+                        </p>
                         <p class="mb-0"><small>Report Generated: {{ date('d-M-Y H:i:s') }}</small></p>
                     </div>
 
@@ -172,13 +178,14 @@
 
                     <!-- Action Buttons -->
                     <div class="row mb-3 no-print">
-                        <div class="col-md-3">
+                        <div class="col-md-12">
                              
                             <a href="{{ route('reports.grn_supplier_report_pdf', [
                                 'supplier_id' => $supplier_id,
                                 'from_date' => $from_date,
                                 'to_date' => $to_date,
-                                'invoice_no' => $invoice_no
+                                'invoice_no' => $invoice_no,
+                                'product_ids' => $product_ids
                             ]) }}" class="btn btn-sm btn-danger me-2" title="Download PDF">
                                 <i class="fas fa-file-pdf"></i>
                             </a>
@@ -189,32 +196,59 @@
                                 <i class="fas fa-arrow-left"></i> Back
                             </a>
                         </div>
-                        <div class="col-md-9">
-                            <form method="GET" action="{{ route('reports.grn_supplier_report') }}" class="d-flex align-items-center">
-                                <select name="supplier_id" class="form-select me-2" style="min-width: 200px;">
-                                    @foreach($allSuppliers as $sup)
-                                        <option value="{{ $sup->SCID }}" {{ $sup->SCID == $supplier_id ? 'selected' : '' }}>
-                                            {{ $sup->Name }} (ID: {{ $sup->SCID }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <input type="text" name="invoice_no" class="form-control me-2" 
-                                       value="{{ $invoice_no ?? '' }}" placeholder="Invoice No" style="min-width: 120px;">
-                                <input type="date" name="from_date" class="form-control me-1" 
-                                       value="{{ $from_date }}" placeholder="From Date" style="min-width: 100px;">
-                                <input type="date" name="to_date" class="form-control me-1" 
-                                       value="{{ $to_date }}" placeholder="To Date" style="min-width: 100px;">
-                                <button type="submit" class="btn btn-sm btn-warning me-1">
-                                      Filter
-                                </button>
-                                @if($from_date || $to_date || $supplier_id != 1 || $invoice_no)
-                                    <a href="{{ route('reports.grn_supplier_report') }}" 
-                                       class="btn btn-sm btn-outline-secondary">
-                                          Clear
-                                    </a>
-                                @endif
-                            </form>
-                        </div>
+                        <div class="col-md-12 mt-2">
+    <form method="GET" action="{{ route('reports.grn_supplier_report') }}">
+        <div class="row">
+            <div class="col-md-4 mb-2">
+                <select name="supplier_id" id="supplier_id" class="form-select">
+                    @foreach($allSuppliers as $sup)
+                        <option value="{{ $sup->SCID }}" {{ $sup->SCID == $supplier_id ? 'selected' : '' }}>
+                            {{ $sup->Name }} (ID: {{ $sup->SCID }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-md-8 mb-2">
+                <select name="product_ids[]" id="product_select" class="form-select" multiple>
+                    @foreach($availableProducts as $product)
+                        <option value="{{ $product->ProductID }}" 
+                            {{ in_array($product->ProductID, $product_ids ?? []) ? 'selected' : '' }}>
+                            {{ $product->ProductName }} (ID: {{ $product->ProductID }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <input type="text" name="invoice_no" class="form-control" 
+                       value="{{ $invoice_no ?? '' }}" placeholder="Invoice No">
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <input type="date" name="from_date" class="form-control" 
+                       value="{{ $from_date }}" placeholder="From Date">
+            </div>
+
+            <div class="col-md-3 mb-2">
+                <input type="date" name="to_date" class="form-control" 
+                       value="{{ $to_date }}" placeholder="To Date">
+            </div>
+
+            <div class="col-md-3 mb-2 d-flex">
+                <button type="submit" class="btn btn-sm btn-warning me-2 flex-fill">
+                    Filter
+                </button>
+                @if($from_date || $to_date || $supplier_id != 1 || $invoice_no || !empty($product_ids))
+                    <a href="{{ route('reports.grn_supplier_report') }}" 
+                       class="btn btn-sm btn-outline-secondary flex-fill">
+                        Clear
+                    </a>
+                @endif
+            </div>
+        </div>
+    </form>
+</div>
                     </div>
                 </div>
             </div>
@@ -388,6 +422,22 @@
     <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.form.min.js') }}"></script>
     <script>
+        $(document).ready(function() {
+            // Initialize Select2 for product multi-select
+            setTimeout(function(){
+            $('#product_select').select2({
+                placeholder: 'Select Products (Optional)',
+                allowClear: true,
+                width: '100%'
+            });
+             $('#supplier_id').select2({
+                placeholder: 'Select Products (Optional)',
+                allowClear: true,
+                width: '100%'
+            });
+            },2000);
+        });
+
         function exportToExcel() {
             // Simple CSV export
             let csv = 'GRN ID,Invoice No,Date,Product ID,Product Name,Batch No,Quantity,Unit Price,Subtotal,Discount %,Discount Amount,Advance Tax %,Advance Tax Amount,GST Tax %,GST Tax Amount,Final Total,Expiry Date\n';

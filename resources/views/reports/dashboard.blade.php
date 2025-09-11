@@ -4,15 +4,6 @@
 @push('stylesheets')
     <style>
         .table > :not(caption) > * > * {padding: 5px;}
-        .report-card {
-            transition: transform 0.3s;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .report-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
     </style>
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
@@ -32,62 +23,58 @@
 
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card report-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-truck fa-3x text-primary"></i>
+                        <div class="col-lg-3 col-md-3 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar">
+                                                <span class="avatar-initial bg-label-primary rounded-circle"><i class="bx bx-truck fs-4"></i></span>
+                                            </div>
+                                            <div class="card-info">
+                                                <h5 class="card-title mb-0 me-2">GRN Report</h5>
+                                                <small class="text-muted"><a target="_blank" href="{{ route('reports.grn_supplier_report') }}">Supplier Purchase</a></small>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h5 class="card-title">GRN Supplier Purchase Report</h5>
-                                    <p class="card-text">
-                                        Complete purchase report from specific supplier showing all products, quantities, and total amounts purchased.
-                                    </p>
-                                    <a href="{{ route('reports.grn_supplier_report') }}" class="btn btn-primary">
-                                        <i class="fas fa-eye me-2"></i>View Report
-                                    </a>
-                                </div>
-                                <div class="card-footer text-muted text-center">
-                                    <small><i class="fas fa-info-circle me-1"></i>Currently showing data for Supplier ID: 1</small>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card report-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-boxes fa-3x text-success"></i>
+                        <div class="col-lg-3 col-md-3 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar">
+                                                <span class="avatar-initial bg-label-success rounded-circle"><i class="bx bx-box fs-4"></i></span>
+                                            </div>
+                                            <div class="card-info">
+                                                <h5 class="card-title mb-0 me-2">Inventory</h5>
+                                                <small class="text-muted"><a target="_blank" href="{{ route('reports.inventory_summary') }}">Summary Report</a></small>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h5 class="card-title">Inventory Summary</h5>
-                                    <p class="card-text">
-                                        Detailed inventory summary report showing current stock levels, quantities, and valuation for all products.
-                                    </p>
-                                    <a href="{{ route('reports.inventory_summary') }}" class="btn btn-success">
-                                        <i class="fas fa-eye me-2"></i>View Report
-                                    </a>
-                                </div>
-                                <div class="card-footer text-muted text-center">
-                                    <small><i class="fas fa-info-circle me-1"></i>Real-time inventory data from GRN records</small>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card report-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-chart-line fa-3x text-warning"></i>
+                        
+
+                        <div class="col-lg-3 col-md-3 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar">
+                                                <span class="avatar-initial bg-label-info rounded-circle"><i class="bx bx-line-chart fs-4"></i></span>
+                                            </div>
+                                            <div class="card-info">
+                                                <h5 class="card-title mb-0 me-2">Sales Trends</h5>
+                                                <small class="text-muted"><a target="_blank" href="{{ route('reports.analytics') }}">View Dashboard</a></small>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h5 class="card-title">Purchase Analytics</h5>
-                                    <p class="card-text">
-                                        Coming Soon - Advanced purchase analytics with trends and comparative analysis.
-                                    </p>
-                                    <button class="btn btn-outline-warning" disabled>
-                                        <i class="fas fa-clock me-2"></i>Coming Soon
-                                    </button>
-                                </div>
-                                <div class="card-footer text-muted text-center">
-                                    <small><i class="fas fa-wrench me-1"></i>Under Development</small>
                                 </div>
                             </div>
                         </div>

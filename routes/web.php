@@ -498,5 +498,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('inventory-summary', [\App\Http\Controllers\Reports\GrnReportController::class, 'inventorySummary'])->name('reports.inventory_summary');
     Route::get('export-inventory-excel', [\App\Http\Controllers\Reports\GrnReportController::class, 'exportInventoryToExcel'])->name('reports.export_inventory_excel');
     Route::get('export-low-stock-excel', [\App\Http\Controllers\Reports\GrnReportController::class, 'exportLowStockToExcel'])->name('reports.export_low_stock_excel');
+    
+    // Analytics Routes
+    Route::get('analytics', [\App\Http\Controllers\Reports\AnalyticsController::class, 'index'])->name('reports.analytics');
+    Route::get('analytics/sales-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getSalesChart'])->name('analytics.sales_chart');
+    Route::get('analytics/product-sales-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getProductSalesChart'])->name('analytics.product_sales_chart');
+    Route::get('analytics/monthly-sales-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getMonthlySalesChart'])->name('analytics.monthly_sales_chart');
+    Route::get('analytics/sales-stats-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getSalesStatsChart'])->name('analytics.sales_stats_chart');
 
 });
