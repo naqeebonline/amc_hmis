@@ -10,7 +10,7 @@
 
 	<div class="logo">
 		<h2 style="font-size: 22px">{{config('app.COMPANY_NAME')}}</h2>
-		<p style="font-size: 13px; font-weight:bold;">{{ config('app.BRANCH_NAME') }}</p>
+		<p style="font-size: 13px; font-weight:bold;">{{ config('app.Branch_Name') }}</p>
 		<small style="font-size: 13px">{{date("d-m-Y h:i A")}} </small>
 	</div>
 
