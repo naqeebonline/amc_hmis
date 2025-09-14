@@ -416,6 +416,7 @@
                     "_token": "{{ csrf_token() }}"
                 },
                 success: function(res) {
+                     
                     let $select = $('#edit_consultant_procedure_id'); // Replace with your <select> element ID
                     $select.empty(); // Clear existing options
                     $select.append(`<option value="" data-net_rate=""></option>`);
@@ -431,9 +432,12 @@
                         allowClear: true                // optional
                     });*/
 
-                    setTimeout(function () {
+                    setTimeout(function (e) {
                         $("#edit_consultant_procedure_id").val(consultant_procedure_id).trigger("change");
-                    },1200)
+                        $("#edit_consultant_procedure_id").val(consultant_procedure_id).trigger("change");
+                        $("#edit_consultant_procedure_id").val(consultant_procedure_id).trigger("change");
+                        
+                    },3000);
 
                 }
             });
