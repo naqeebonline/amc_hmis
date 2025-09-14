@@ -141,7 +141,7 @@
                             <div class="mb-2">
                                 <i class="fas fa-dollar-sign fa-2x"></i>
                             </div>
-                            <h3 class="text-white">₨ {{ $totalValue }}</h3>
+                            <h3 class="text-white">₨ {{ $totalInventoryValue }}</h3>
                             <p class="mb-0">Total Value</p>
                         </div>
                     </div>

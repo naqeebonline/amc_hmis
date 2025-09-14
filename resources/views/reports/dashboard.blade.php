@@ -78,6 +78,24 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="col-lg-3 col-md-3 mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar">
+                                                <span class="avatar-initial bg-label-info rounded-circle"><i class="bx bx-line-chart fs-4"></i></span>
+                                            </div>
+                                            <div class="card-info">
+                                                <h5 class="card-title mb-0 me-2">Sales Statistics</h5>
+                                                <small class="text-muted"><a target="_blank" href="{{ route('sale.dashboard') }}">View Dashboard</a></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

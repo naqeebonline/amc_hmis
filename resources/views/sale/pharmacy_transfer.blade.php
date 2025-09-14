@@ -238,10 +238,11 @@
         <div class="col-md-3">
             <label for="received">Transfer to  Pharmacy</label>
             <select id="SID" name="SID" class="form-control">
-                <option value="">Please Pharmacy...</option>
-               {{-- <option data-admission_id="0" value="2" selected="selected">Walking Customer </option>--}}
+                <option value="">Please Select Type...</option>
 
-                <option data-admission_id="0" selected value="1" >Sehat Card Pharmacy</option>
+                <option data-admission_id="0" selected value="pharmacy_transfer" >Sehat Card Pharmacy</option>
+                <option data-admission_id="0" selected value="pharmacy_consumption" >Pharmacy Consumption</option>
+                <option data-admission_id="0" selected value="pharmacy_damage" >Pharmacy Damage</option>
 
             </select>
         </div>
@@ -1165,25 +1166,7 @@
 
     function get_prev_balance(e){
 
-        var value=$("#SID").val();
-        var name=$('#SID').select2('data')[0]['text'];
-        var serverBaseUrl = "";
-        $("#page_title").text(name);
-        if(value!=''){
-            $.ajax({
-                type:"get",
-                url:"{{route("pos.customer_previous_balance")}}/"+value,
-                success:function(response){
-
-                    PreviousBalance = parseFloat(response).toFixed(2);
-                    $("#previous_balance").val(PreviousBalance);
-                    calculateBalance();
-
-                }
-            });
-        }else{
-            $("#prev_balance").val(0);
-        }
+       $("#prev_balance").val('');
     }
 
     function calculateBalance() {

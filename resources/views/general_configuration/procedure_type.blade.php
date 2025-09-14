@@ -74,6 +74,7 @@
                                 <option value="" >Select Type</option>
                                 <option value="Surgical" >Surgical</option>
                                 <option value="Medical" >Medical</option>
+                                <option value="NICU" >NICU</option>
                                 <option value="GYNAECOLOGY" >GYNAECOLOGY</option>
                                 <option value="ORTHOPAEDIC" >ORTHOPAEDIC</option>
                                 <option value="EAR" >EAR</option>

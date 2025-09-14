@@ -378,7 +378,7 @@ class GrnReportController extends Controller
         // Calculate summary statistics
         $totalProducts = $inventoryData->count();
         $totalQuantity = $inventoryData->sum('total_available_quantity');
-        $totalValue = $inventoryData->sum('total_value');
+        $totalValue = $this->totalInventoryValue();
         $averageValue = $totalProducts > 0 ? $totalValue / $totalProducts : 0;
 
         // Get products with low stock (less than 10 units)
@@ -395,10 +395,38 @@ class GrnReportController extends Controller
             'averageValue' => number_format($averageValue, 2),
             'lowStockProducts' => $lowStockProducts,
             'highValueProducts' => $highValueProducts,
+            'totalInventoryValue' => $totalValue,
             'generated_at' => now()->format('Y-m-d H:i:s')
         ];
         
         return view('reports.inventory_summary', $data);
+    }
+
+    public function totalInventoryValue() {
+
+$totalInventoryValue = DB::table('grn_details as gd')
+    ->join('grn as g', 'gd.GRNID', '=', 'g.GRNID')
+    ->where('gd.RemainingQuantity', '>', 0)
+    ->where('gd.ProductStatus', '=', 1)
+    ->sum(
+        DB::raw('
+            (
+                gd.UnitPrice * gd.RemainingQuantity
+            ) 
+            - (
+                gd.UnitPrice * gd.RemainingQuantity * IFNULL(gd.discount, 0) / 100
+            ) 
+            + (
+                gd.UnitPrice * gd.RemainingQuantity * IFNULL(gd.gst_tax, 0) / 100
+            ) 
+            + (
+                gd.UnitPrice * gd.RemainingQuantity * IFNULL(gd.advance_tax, 0) / 100
+            )
+        ')
+    );
+
+return $totalInventoryValue;
+
     }
 
     /**

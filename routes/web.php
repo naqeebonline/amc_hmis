@@ -41,6 +41,9 @@ Route::post('custom-authenticate', [\App\Http\Controllers\Auth\LoginController::
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::get("sehatcard_patients_statistics", [\App\Http\Controllers\PatientController\PatientAdmissionController::class, "sehatcard_patients_statistics"])->name("pos.sehatcard_patients_statistics");
+
+// Test route for sales dashboard (temporary - remove after testing)
+Route::get('/test-sale-dashboard', [\App\Http\Controllers\SaleDashboardController::class, 'index'])->name('test.sale.dashboard');
 Route::prefix('no-auth')->group(function () {
 
     Route::post('districts-by-province-id', [\App\Http\Controllers\NoAuthActionsControllers::class, 'districtsByProvinceId'])->name('noauth.districts-by-province-id');
@@ -80,6 +83,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('pharmacy_dashboard', [\App\Http\Controllers\HomeController::class, 'pharmacy_dashboard'])->name('user.pharmacy_dashboard')->middleware('store.selected');
     Route::get('/retail-dashboard', [App\Http\Controllers\Dashboard\DashboardController::class, 'retailPharmacyDashboard'])->name('pos.retailPharmacyDashboard');
     Route::get('user-dashboard', [\App\Http\Controllers\HomeController::class, 'userDashboard'])->name('user.dashboard');
+    
     Route::get('view-history', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'index'])->name('view-history');
     Route::get('list-sms', [\App\Http\Controllers\Admin\SmsHistoryController::class, 'listSms'])->name('list-sms');
     Route::get('add_new_market', [\App\Http\Controllers\Admin\MarketController::class, 'add_new_market'])->name('pos.add_new_market');
@@ -505,5 +509,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('analytics/product-sales-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getProductSalesChart'])->name('analytics.product_sales_chart');
     Route::get('analytics/monthly-sales-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getMonthlySalesChart'])->name('analytics.monthly_sales_chart');
     Route::get('analytics/sales-stats-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getSalesStatsChart'])->name('analytics.sales_stats_chart');
+
+    Route::get('/sale-dashboard', [\App\Http\Controllers\SaleDashboardController::class, 'index'])->name('sale.dashboard');
+    Route::get('/appointment-dashboard', [\App\Http\Controllers\AppointmentDashboardController::class, 'index'])->name('appointment.dashboard');
 
 });

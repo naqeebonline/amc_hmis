@@ -726,7 +726,7 @@ class SaleController extends Controller
         $Description = request()->BillDiscription;
         $appointment_id = request()->appointment_id;
         $medicine_type = request()->medicine_type;
-        $bill_description = request()->BillDiscription;
+        $bill_description = request()->previous_balance ?? '';
         $discount_percentage = request()->discount_percentage ?? 0;
         $Discount = request()->discount_amount ?? 0;
         $demage = 0;
@@ -760,9 +760,10 @@ class SaleController extends Controller
         $total = ($TotalSale) + $totalTax;
 
         $SaleArray = array(
-            'SCID'     => (session('store_id') == env('SEHAT_CARD_PHARMACY_STORE_ID')) ? 1 : 2,// 1 sehat card user,2 walking customer of retail store , table use sup_cus_details
+            'SCID'     => 0,// 1 sehat card user,2 walking customer of retail store , table use sup_cus_details
             'store_id'     => 1,// sehat card user
             'wr_id'     =>  0,// sehat card user
+            'transfer_type'     =>  request()->SID,// sehat card user
             'ReceivedAmountFromCustomer'   => $ReceivedAmountFromCustomer,
             'patient_id'   => 0,
             'admission_id'   => 0,
@@ -781,6 +782,8 @@ class SaleController extends Controller
             'CreatedBy'     => $userID,
             'CreatedAt'     => date('Y-m-d')
         );
+
+         
 
 
         $SaleArray['bill_details']=json_encode(request()->ProductList);
