@@ -425,6 +425,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/daily-closing', [\App\Http\Controllers\Finance\FinanceController::class, 'daily_closing'])->name('pos.daily_closing');
     Route::post('/post_daily_closing', [\App\Http\Controllers\Finance\FinanceController::class, 'post_daily_closing'])->name('pos.post_daily_closing');
     Route::get('/balanceReport', [\App\Http\Controllers\Finance\Reports\FinanceReportController::class, 'balanceReport'])->name('pos.balanceReport');
+    Route::get('/view_details', [\App\Http\Controllers\Finance\FinanceController::class, 'view_details'])->name('pos.view_details');
 
 
     Route::post('/getBalance', [\App\Http\Controllers\Finance\FinanceController::class, 'getBalance'])->name('pos.getBalance');

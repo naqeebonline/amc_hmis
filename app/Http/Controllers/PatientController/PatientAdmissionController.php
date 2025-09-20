@@ -1116,6 +1116,7 @@ class PatientAdmissionController extends Controller
                 "consultant_id"=>request()->consultant_id,
                // "sc_ref_no"=>request()->edit_sc_ref_no,
                 //"sub_consultant_id"=>request()->sub_consultant_id,
+                "included_medicine"=> request()->included_medicine ? request()->included_medicine : 0,
                 "consultant_procedure_id"=>request()->consultant_procedure_id,
                 "consultant_share"=>$consultant_procedure_id->consultant_share_percentage,
                 "procedure_rate"=>request()->procedure_rate,

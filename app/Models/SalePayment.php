@@ -17,8 +17,14 @@ class SalePayment extends Model
     public function patient(){
         return $this->belongsTo(Patient::class,"patient_id","id");
     }
+    public function sale(){
+        return $this->belongsTo(Sale::class,"sale_id","id");
+    }
 
-
+    public function createdBy()
+    {
+        return $this->belongsTo(Users::class, 'created_by',"id");
+    }
 
   
     

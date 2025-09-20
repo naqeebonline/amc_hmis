@@ -3,6 +3,7 @@
 namespace App\Models\Patient;
 
 use App\Models\Configuration\District;
+use App\Models\Users;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,15 @@ class PatientInvestigationPayment extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
 
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class, 'patient_id');
+    }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(Users::class, 'created_by',"id");
+    }
 
     
 }

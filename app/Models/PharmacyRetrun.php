@@ -17,6 +17,13 @@ class PharmacyRetrun extends Model
     public function patient(){
         return $this->belongsTo(Patient::class,"patient_id","id");
     }
+    public function product(){
+        return $this->belongsTo(Product::class,"product_id","ProductID");
+    }
+
+    public function createdBy(){
+        return $this->belongsTo(Users::class,"created_by","id");
+    }
 
 
 

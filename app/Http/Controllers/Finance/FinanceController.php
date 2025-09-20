@@ -39,17 +39,8 @@ class FinanceController extends Controller
 
         $data['finance_heads'] = FinanceHead::where(["name"=>"Cash At Office"])->get();
 
-        $query = SalePayment::where("is_posted",0)
-            ->when($closing_date, function ($query) use ($closing_date) {
-                return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
-            })
-            ->where("is_active",1)
-            ->when($user_id, function ($query) use ($user_id) {
-                return $query->where('created_by',$user_id);
-            });
 
-        $totals = $query->selectRaw('SUM(amount) as received_amount')->first();
-        $data['data'] = $totals;
+        $data['data'] = $this->sale_payments($closing_date,$user_id);
 
 
         $data['pharmacy_return'] = $this->total_return_in_pharmacy($closing_date,$user_id);
@@ -71,6 +62,25 @@ class FinanceController extends Controller
 
 
        return view("Finance.daily_closing",$data);
+    }
+
+    public function view_details()
+    {
+        $closing_date = $_GET['closing_date'] ?? "";
+        $data['from_date'] = $closing_date;
+        $data['to_date'] = $closing_date;
+        $user_id = $_GET['user_id'] ?? "";
+        if($closing_date == "" || $user_id == ""){
+            echo "invalid attempt. your id and details are recorded. ".auth()->user()->name;
+            exit;
+        }
+        $data['sale'] = $this->sale_payments($closing_date,$user_id,true);
+
+        $data['pharmacy_item_returns'] = $this->total_return_in_pharmacy_by_user($closing_date,$user_id);
+        $data['appointments'] = $this->appointmentsPayment($closing_date,$user_id,true);
+        $data['investigations'] = $this->investigationPayment($closing_date,$user_id,true);
+//dd($data['sale']);
+        return view("Finance.Reports.print_user_transactions_report",$data);
     }
 
     public function post_daily_closing()
@@ -388,10 +398,30 @@ class FinanceController extends Controller
         return redirect()->back()->with('success', 'Record Posted Successfully.');
     }
 
-    public function total_return_in_pharmacy($closing_date='',$user_id='')
+    public function sale_payments($closing_date='',$user_id='',$get_result=false)
+    {
+        $query = SalePayment::where("is_posted",0)
+            ->when($closing_date, function ($query) use ($closing_date) {
+                return $query->whereDate('created_at', '<=', date("Y-m-d", strtotime($closing_date)));
+            })
+            ->where("is_active",1)
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('created_by',$user_id);
+            });
+        if($get_result){
+            $totals = $query->with(["patient","sale","createdBy"])->get();
+            return $totals;
+        }else{
+            $totals = $query->selectRaw('SUM(amount) as received_amount')->first();
+            return $totals;
+        }
+
+    }
+
+    public function total_return_in_pharmacy($closing_date='',$user_id='',$get_result=false)
     {
         $query = $query = PharmacyRetrun::where("pharmacy_return_items.is_posted", 0)
-            ->select("pharmacy_return_items.*", "sale.CreatedBy as bill_user")
+            ->select("pharmacy_return_items.*", "sale.CreatedBy as bill_user","sale.InvoiceNo")
             ->join("sale", "sale.SaleID", "=", "pharmacy_return_items.sale_id")
             ->where(function ($q) use ($user_id) {
                 $q->where("sale.CreatedBy", "!=", $user_id)
@@ -406,14 +436,19 @@ class FinanceController extends Controller
             })
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('pharmacy_return_items.created_by', $user_id);
-            })
-            ->sum('amount');
+            });
+
+        if($get_result){
+            $totals = $query->with(["patient","product","createdBy"])->get();
+            return $totals;
+        }else{
+            return $query->sum('amount');
+        }
 
 
-        return $query;
     }
 
-    public function appointmentsPayment($closing_date='',$user_id='')
+    public function appointmentsPayment($closing_date='',$user_id='',$get_result=false)
     {
         $query = Appointment::where("is_posted",0)
             ->when($closing_date, function ($query) use ($closing_date) {
@@ -423,12 +458,17 @@ class FinanceController extends Controller
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             });
+        if($get_result){
+            $totals = $query->with(["patient","opd_type","consultant"])->get();
+            return $totals;
+        }else{
+            $totals = $query->selectRaw('SUM(fee) as total_fees, SUM(hospital_share) as total_hospital_share, SUM(consultant_share) as total_consultant_share')->first();
+            return $totals;
+        }
 
-        $totals = $query->selectRaw('SUM(fee) as total_fees, SUM(hospital_share) as total_hospital_share, SUM(consultant_share) as total_consultant_share')->first();
-        return $totals;
     }
 
-    public function investigationPayment($closing_date='',$user_id='')
+    public function investigationPayment($closing_date='',$user_id='',$get_result=false)
     {
         $query = PatientInvestigationPayment::where("is_posted",0)
             //->whereNull("admission_id")
@@ -439,10 +479,15 @@ class FinanceController extends Controller
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('created_by',$user_id);
             });
+        if($get_result){
+            $totals = $query->with(["patient","createdBy"])->get();
+            return $totals;
+        }else{
+            $totals = $query->selectRaw('SUM(amount) as cash_in_hand')->first();
+            //dd($totals);
+            return $totals;
+        }
 
-        $totals = $query->selectRaw('SUM(amount) as cash_in_hand')->first();
-        //dd($totals);
-        return $totals;
     }
 
     public function serviceCharges($closing_date='',$user_id='')
@@ -744,7 +789,8 @@ class FinanceController extends Controller
 
         $data = SaleDetails::with(['product','return_by_user'])
             ->leftJoin("sale","sale.SaleID","=","sale_details.SaleID")
-            ->select("sale_details.*","sale.*","users.name")
+            ->leftJoin("pharmacy_return_items","sale.SaleID","=","pharmacy_return_items.sale_id")
+            ->select("sale_details.*","sale.*","users.name","pharmacy_return_items.amount as returnAmount")
             ->leftJoin("users","users.id","=","sale.ModifiedBy")
             ->where("sale_details.return_by",$user_id)
             ->whereDate("sale.ModifiedAt",$closing_date)

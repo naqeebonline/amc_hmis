@@ -67,6 +67,7 @@
                         <input type="hidden" name="closing_date" value="{{$closing_date}}">
                         <div class="row">
                             <div class="col-md-6 col-sm-4 mb-3">
+                                <a target="_blank" style="float: right" href="{{route('pos.view_details')}}?user_id={{$user_id}}&closing_date={{$closing_date}}">View Report</a>
                                 <table class="table table-bordered">
                                     <tr>
                                         <td style="width: 50%">Investigation</td>
