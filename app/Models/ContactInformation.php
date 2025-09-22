@@ -10,4 +10,5 @@ class ContactInformation extends Model
     use HasFactory;
     protected $table = "contact_informations";
     protected $guarded = ["id"];
+
 }
