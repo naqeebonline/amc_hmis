@@ -275,6 +275,7 @@ class FinanceReportController extends Controller
             $rows->push([
                 'head_code' => $t->head_code,
                 'head_title' => $t->head_title,
+                'remarks' => $t->remarks,
                 'debit' => $t->debit,
                 'credit' => $t->credit,
                 'balance' => $t->debit > 0 ? $t->debit : $t->credit,
