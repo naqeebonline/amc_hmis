@@ -906,7 +906,7 @@ class FinanceController extends Controller
                     'head_id' => $entry['head_id'],
                     'debit' => $entry['type'] === 'debit' ? $entry['amount'] : 0,
                     'credit' => $entry['type'] === 'credit' ? $entry['amount'] : 0,
-                    'remarks' => $remarks,
+                    'remarks' => $entry['remarks'],
                     'user_id' => auth()->user()->id,
                     'created_by' => auth()->user()->id,
                     'created_at' => date("Y-m-d H:i:s"),
