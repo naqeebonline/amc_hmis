@@ -254,7 +254,8 @@ class FinanceReportController extends Controller
                 'fh.head_code',
                 'fh.name as head_title',
                 'ft.debit',
-                'ft.credit'
+                'ft.credit',
+                'ft.remarks'
             )
             ->where('ft.voucher_id', $voucher_id)
             ->where(function ($q) {
