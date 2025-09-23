@@ -109,7 +109,12 @@
                                         <tr>
                                             <td width="40%" >Procedure Amount</td>
                                             <td width="60%">
-                                                {{$admission->procedure_rate ?? 0}}
+                                                @if(getUserRole() == "Super Admin")
+                                                <input type="number" name="procedure_rate" value="{{ rtrim(rtrim(number_format($admission->procedure_rate, 2, '.', ''), '0'), '.') }}" >
+                                                @else
+                                                    {{$admission->procedure_rate ?? 0}}
+                                                @endif
+
                                             </td>
                                         </tr>
                                         <tr>
@@ -188,7 +193,12 @@
                                         <tr>
                                             <th width="50%" >Consultant Charges</th>
                                             <th width="50%">
-                                                <input type="text"  id="consultant_charges" style="height: 30px !important;" name="consultant_charges" value="{{$admission->consultant_charges}}" class="form-control" placeholder="" autocomplete="off">
+                                                @if(getUserRole() == "Super Admin")
+                                                    <input type="text"  id="consultant_charges" style="height: 30px !important;" name="consultant_charges" value="{{$admission->consultant_charges}}" class="form-control" placeholder="" autocomplete="off">
+                                                @else
+                                                    {{$admission->consultant_charges ?? 0}}
+                                                @endif
+
                                             </th>
                                         </tr>
                                         @foreach($service_type as $key => $value)

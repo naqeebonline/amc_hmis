@@ -1798,6 +1798,31 @@ class PatientAdmissionController extends Controller
 
     public function calculate_patient_discharge_amount()
     {
+
+        $patient_admission = InPatientAdmission::where("id",request()->admission_id)->first();
+        if($patient_admission->consultant_charges != request()->consultant_charges){
+            $consultant_charges = request()->consultant_charges;
+            $consultant_share_amount = ($consultant_charges) * (($patient_admission->consultant_share ?? 0)/100);
+            InPatientAdmission::where("id",request()->admission_id)->update(
+                [
+                    "consultant_charges"            => request()->consultant_charges,
+                    "consultant_share_amount"       => $consultant_share_amount,
+                    "updated_by"            => auth()->user()->id,
+                    "updated_at"            => date("Y-m-d H:i:s"),
+                ]
+            );
+        }
+        if($patient_admission->procedure_rate != request()->procedure_rate){
+            InPatientAdmission::where("id",request()->admission_id)->update(
+                [
+                    "procedure_rate"            => request()->procedure_rate,
+                    "updated_by"            => auth()->user()->id,
+                    "updated_at"            => date("Y-m-d H:i:s"),
+                ]
+            );
+        }
+       // dd($patient_admission);
+
         $service_charges_id = request()->service_charges_id;
         $service_charges_amount = request()->service_charges_amount;
         $data = [];
