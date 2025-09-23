@@ -1800,7 +1800,7 @@ class PatientAdmissionController extends Controller
     {
 
         $patient_admission = InPatientAdmission::where("id",request()->admission_id)->first();
-        if($patient_admission->consultant_charges != request()->consultant_charges){
+        if(request()->has('consultant_charges') && $patient_admission->consultant_charges != request()->consultant_charges){
             $consultant_charges = request()->consultant_charges;
             $consultant_share_amount = ($consultant_charges) * (($patient_admission->consultant_share ?? 0)/100);
             InPatientAdmission::where("id",request()->admission_id)->update(
@@ -1812,7 +1812,7 @@ class PatientAdmissionController extends Controller
                 ]
             );
         }
-        if($patient_admission->procedure_rate != request()->procedure_rate){
+        if(request()->has('procedure_rate') && $patient_admission->procedure_rate != request()->procedure_rate){
             InPatientAdmission::where("id",request()->admission_id)->update(
                 [
                     "procedure_rate"            => request()->procedure_rate,
@@ -1826,6 +1826,8 @@ class PatientAdmissionController extends Controller
         $service_charges_id = request()->service_charges_id;
         $service_charges_amount = request()->service_charges_amount;
         $data = [];
+        $user_role = getUserRole();
+
         foreach ($service_charges_id as $key => $value){
             $service = ServiceType::where("id",$service_charges_id[$key])->first();
             $data= [
@@ -1835,9 +1837,12 @@ class PatientAdmissionController extends Controller
                 "actual_price" => $service->price ?? 0,
                 "service_rate" => $service_charges_amount[$key],
                 "service_date" => date("Y-m-d H:i:s-"),
-                "created_by" => auth()->user()->id,
                 "created_at" => date("Y-m-d H:i:s-"),
             ];
+            //---- its because closing amount goes to super admin when created_by updated on super admin id ---/
+            if($user_role != "Super Admin"){
+                $data['created_by'] = auth()->user()->id;
+            }
             PatientServiceCharges::updateOrCreate(
                 ["patient_id" => request()->patient_id, "admission_id" => request()->admission_id, "service_type_id" => $service_charges_id[$key],"is_active"=>1],
                 $data
