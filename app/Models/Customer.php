@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "sup_cus_details";
     protected $primaryKey = 'SCID';
     protected $guarded = ["id"];

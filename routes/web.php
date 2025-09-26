@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get("add_is_sync_field", [\App\Http\Controllers\Admin\StockController::class, 'add_is_sync_field']);
 Route::get("import_all_products_to_bill", [\App\Http\Controllers\Admin\StockController::class, 'import_all_products_to_bill'])->name('pos.import_all_products_to_bill');
 Route::get("syncData", [\App\Http\Controllers\SyncController::class, 'load_sync_view'])->name('pos.syncData');
 Route::post("syncDataLive", [\App\Http\Controllers\SyncController::class, 'syncLoclDataWithLive'])->name('pos.syncDataLive');

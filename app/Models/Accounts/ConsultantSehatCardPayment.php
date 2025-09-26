@@ -5,12 +5,14 @@ namespace App\Models\Accounts;
 use App\Models\Configuration\Consultants;
 use App\Models\PaymentType;
 use App\Models\Users;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ConsultantSehatCardPayment extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "consultant_sc_payments_details";
     protected $primaryKey = 'id';
     protected $guarded = ["id"];

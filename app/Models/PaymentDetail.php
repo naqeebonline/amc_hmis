@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentDetail extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "payments_details";
     protected $primaryKey = 'PDID ';
     protected $guarded = ["PDID "];

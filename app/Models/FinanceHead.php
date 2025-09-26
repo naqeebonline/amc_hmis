@@ -1,11 +1,13 @@
 <?php
 namespace App\Models;
 
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Model;
 
 class FinanceHead extends Model
 {
     protected $table = 'finance_heads';
+    use Syncable;
     protected $fillable = [
         'parent_id', 'level', 'head_code', 'name', 'type', 'description', 'is_contra', 'is_sync'
     ];

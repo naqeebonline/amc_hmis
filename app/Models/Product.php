@@ -2,17 +2,27 @@
 
 namespace App\Models;
 
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "products";
     protected $primaryKey = 'ProductID';
     protected $guarded = ["id"];
     public $timestamps = false;
 
+    protected static function booted()
+    {
+        static::created(function ($sale) {
+            // After creating, copy SaleID into id
+            $sale->id = $sale->ProductID;
+            $sale->saveQuietly(); // avoid recursion
+        });
+    }
     public function main_categroy(){
         return $this->belongsTo(MainCategory::class,"main_category_id");
     }

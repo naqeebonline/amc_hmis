@@ -21,6 +21,7 @@ use App\Models\Store;
 use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\Facades\DataTables;
 
 class StockController extends Controller
@@ -828,5 +829,32 @@ class StockController extends Controller
         }
         return ["status"=>true,"message"=>"All Products added successfully"];
 
+    }
+
+
+    public function add_is_sync_field()
+    {
+        $tables = DB::select('SHOW TABLES');
+        $dbName = DB::getDatabaseName();
+        $key = "Tables_in_" . $dbName;
+
+        foreach ($tables as $table) {
+            $tableName = $table->$key;
+
+            // Skip migrations table
+            if ($tableName === 'migrations') {
+                continue;
+            }
+
+            if (!Schema::hasColumn($tableName, 'is_sync')) {
+                DB::statement("ALTER TABLE `$tableName` ADD `is_sync` TINYINT(1) NOT NULL DEFAULT 0");
+                print_r("Added is_sync column to: $tableName <br>");
+            } else {
+                print_r("Skipped (already has is_sync): $tableName <br>");
+            }
+        }
+
+        print_r('Done ✅');
+       exit;
     }
 }

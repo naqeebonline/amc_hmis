@@ -5,12 +5,14 @@ namespace App\Models\Accounts;
 use App\Models\Configuration\Consultants;
 use App\Models\User;
 use App\Models\Users;
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ConsultantShareInvoice extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "consultant_shares_payment_invoice";
     protected $primaryKey = 'id';
     protected $guarded = ["id"];

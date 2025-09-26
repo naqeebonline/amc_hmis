@@ -278,13 +278,13 @@
                     <input type="text" class="form-control" placeholder="Item/Bar Code">
                 </div>-->
                @if($type !='' || $type == '')
-                        <div class="col-md-5 mt-1">
+                        <div class="col-md-6 mt-1">
                             <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Product Name</p>
                             <select class="form-control" id="product_id">
                                 <option value="">Select Product...</option>
                                 <?php foreach ($products as $key => $value): ?>
                                     @if($value->ProductName != '' && $value->ProductName != '-' && $value->avaliable_qty != 0)
-                                    <option value="{{$value->ProductID}}" data-purchasePrice={{$value->unit_sale_price}} data-taxPercentage="{{$value->taxPercentage}}">{{$value->ProductName}} | PS: {{$value->pack_size}} | Qty {{$value->avaliable_qty}}</option>
+                                    <option value="{{$value->ProductID}}" data-purchasePrice={{$value->unit_sale_price}} data-taxPercentage="{{$value->taxPercentage}}">{{$value->ProductName}} | {{$value->generic_name?->name ?? ''}} | PS: {{$value->pack_size}} | Qty {{$value->avaliable_qty}}</option>
                                     @endif
                                 <?php endforeach; ?>
                             </select>
@@ -293,7 +293,7 @@
 
 
                         @if($type == "Home" || $type == "Ward")
-                            <div class="col-md-3 mt-1">
+                            <div class="col-md-2 mt-1">
                                 <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Dose Type</p>
                                 <select class="form-select" id="dose_type" >
                                     <option value="">Select Dose Type...</option>
@@ -309,14 +309,16 @@
                         @endif
 
 
-                        <div class="col-md-2 mt-1">
-                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Unit Price</p>
-                            <input type="number"  id="SalePrice" class="form-control" placeholder="Unit Price">
-                        </div>
+                        
 
                         <div class="col-md-2 mt-1">
-                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Quantity</p>
+                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Qty</p>
                             <input type="number" class="form-control" id="sale_quantity" placeholder="Quantity" value="1">
+                        </div>
+                        <div class="col-md-2 mt-1">
+                            <p style="font-size: 12px;line-height: 0px;font-weight: bold;">Unit Price</p>
+                            <strong id="SalePrice_text" class="form-control"></strong>
+                            <input type="number" style="display: none;"  id="SalePrice" class="form-control" placeholder="Unit Price">
                         </div>
 
 
@@ -631,7 +633,7 @@
         }
     });
 
-
+ 
 
     $(document).ready(function(){
         $("#product_id").select2();
@@ -759,7 +761,7 @@
 
         });
 
-        // Save the edited value on blur (when input loses focus)
+
         $(document).on("blur", ".editable-input", function(){
 
             var $input = $(this);
@@ -797,6 +799,7 @@
             var purchasePrice = $('#product_id option:selected').attr('data-purchasePrice');
             taxPercentage = $('#product_id option:selected').attr('data-taxPercentage');
             $("#SalePrice").val(purchasePrice);
+            $("#SalePrice_text").html(purchasePrice);
             getItemDetails();
         });
 
@@ -1166,6 +1169,7 @@
 
         $("#sale_quantity").val(1);
         $("#SalePrice").val('');
+        $("#SalePrice_text").html('');
 
         $("#product_id").val(null).trigger('change');
         $("#product_id").focus();

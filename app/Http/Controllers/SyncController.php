@@ -28,7 +28,8 @@ class SyncController extends Controller
 
         $syncedIds = [];
 
-        foreach ($records as $data) {
+        foreach ($records as $key => $data) {
+
             if (!isset($data['id'])) {
                 continue; // skip invalid
             }
@@ -69,13 +70,16 @@ public function syncLoclDataWithLive()
         "patients",
         "consultants",
         "patient_investigation_result",
+        "patient_investigations_payments",
         "appointments",
         "sale",
         "sale_details",
+        "sale_payments",
         "temp_sale",
         "temp_sale_details",
         "grn",
         "grn_details",
+
 
     ];
 

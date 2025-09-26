@@ -5,13 +5,15 @@ use App\Models\Configuration\Investigation;
 use App\Models\Configuration\ServiceType;
 use App\Models\Configuration\Ward;
 use App\Models\Configuration\WardBed;
- 
+
+use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PatientServiceCharges extends Model
 {
     use HasFactory;
+    use Syncable;
     protected $table = "patient_service_charges";
     protected $guarded = ["id"];
     protected $primaryKey = 'id';
