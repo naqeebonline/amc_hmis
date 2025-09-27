@@ -32,7 +32,7 @@
 
                         <div class="row">
                             <input type="hidden" required id="id" name="id" value="0"
-                                   class="form-control" />
+                                   class="form-control id_class" />
                             <input type="hidden" name="list_investigations" id="list_investigations">
                             <input type="hidden" name="invoice_no" id="invoice_no">
 
@@ -43,11 +43,11 @@
                                        placeholder="" autocomplete="off">
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label class="form-label">CNIC (without -)<span class="asterisk"></span></label>
                                 <input type="text"  id="cnic" name="cnic"
 
-                                       class="form-control" placeholder="" autocomplete="off"   pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed"/>
+                                       class="form-control" value="0" placeholder="" autocomplete="off"   pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed"/>
                             </div>
 
 
@@ -80,19 +80,19 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">Father/Husband Name<span
                                             class="asterisk">*</span></label>
-                                <input type="text" required id="father_husband_name" value="-" name="father_husband_name"
+                                <input type="text" value="-" id="father_husband_name" value="-" name="father_husband_name"
                                        class="form-control" placeholder="" autocomplete="off">
                             </div>
 
 
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">District<span class="asterisk">*</span></label>
-                                <select name="district_id" required id="district_id" class="form-control">
-                                    <option value="">Select District</option>
+                                <select name="district_id"  id="district_id" class="form-control">
+                                    <option value="22">Select District</option>
                                     @foreach ($district as $dist)
                                         <option value="{{ $dist->id }}">{{ $dist->title }}</option>
                                     @endforeach
@@ -102,9 +102,13 @@
                                 <label for="nameBasic" class="form-label">location<span class="asterisk">*</span></label>
 
                                 <select name="location_id" required id="location_id" class="form-select">
-                                    <option value="">Select Locations</option>
+                                     <option value="">Select Locations</option>
                                     @foreach ($locations as $location)
+                                    @if($location->id == "53")
+                                    <option value="{{ $location->id }}" selected>{{ $location->name }}</option>
+                                    @else
                                         <option value="{{ $location->id }}">{{ $location->name }}</option>
+                                    @endif
                                     @endforeach
                                 </select>
 
@@ -115,7 +119,7 @@
                                 <label for="nameBasic" class="form-label">Consultant<span class="asterisk">*</span></label>
 
                                 <select name="consultant_id"  id="consultant_id" class="form-select">
-                                    <option value="0">Select Locations</option>
+                                    <option value="0">Select Consultant...</option>
                                     @foreach ($consultants as $value)
                                         <option value="{{ $value->id }}">{{ $value->name }}</option>
                                     @endforeach
@@ -124,7 +128,7 @@
 
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3" >
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">Dob<span class="asterisk">*</span></label>
                                 <input  type="date" required id="dob" name="dob" class="form-control"
                                         placeholder="" autocomplete="off">
@@ -134,7 +138,7 @@
                                 <label for="nameBasic" class="form-label">Discount<span class="asterisk">*</span></label>
 
                                 <select name="discount_percentage" id="discount_percentage" required class="form-select">
-                                    <option value="0">0%</option>
+                                    <option value="0" selected>0%</option>
                                     <option value="2">2%</option>
                                     <option value="5">5%</option>
                                     <option value="7">7%</option>
@@ -152,6 +156,17 @@
                             </div>
 
 
+                            
+
+
+
+
+
+
+                        </div>
+
+                        <div class="row">
+                        <div class="row">
                             <div class="col-md-4" >
                                 <select  id="investigation_id" class="form-select">
                                     <option value="">Select Investigations...</option>
@@ -192,15 +207,7 @@
                                     </tfoot>
                                 </table>
                             </div>
-
-
-
-
-
-
                         </div>
-
-                        <div class="row">
                             <div class="text-left mt-3 float-right">
                                 <button class="btn btn-success" style="float: right" id="submit_btn">Save</button>
                             </div>
@@ -289,7 +296,7 @@
     <div class="modal fade" id="add_new_record_model" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <form class="modal-content form-submit-event" id="from_submit">
-                <input type="hidden" id="id" name="id" value="0">
+                <input type="hidden" class="id_class" id="id" name="id" value="0">
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">Patients</h5>
@@ -927,10 +934,12 @@
         });
 
         function reset_fields() {
-            $("#id").val(0);
+            $("#id").val("0");
+            $("#id").val("0");
+           
             $("#contact_no").val('');
 
-            $("#district_id").val('44').trigger("change");
+            $("#district_id").val('22').trigger("change");
             $("#dob").val('');
             $("#father_husband_name").val('-');
             $("#g4no").val(0);
@@ -939,19 +948,21 @@
             $("#days").val('0');
             $("#gender").val('male');
             $("#id").val('');
-            $("#location_id").val('').trigger("change");
+            $("#location_id").val('53').trigger("change");
             $("#consultant_id").val(0).trigger("change");
-            $("#cnic").val('');
-            $("#cnic").val('');
+            $("#cnic").val('0');
+            $("#cnic").val('0');
             $("#name").val('');
             $("#regdate").val('{{date("Y-m-d")}}');
             //$("#relation_id").val('');
-            $("#sc_ref_no").val('');
+            $("#sc_ref_no").val('0');
             let time = Date.now();
             $("#discount_percentage").val('0');
             $("#invoice_no").val(time);
             list_investigation = [];
             load_investigation();
+             $(".id_class").val("0");
+             
         }
     </script>
 @endpush

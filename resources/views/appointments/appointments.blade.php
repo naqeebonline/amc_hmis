@@ -53,7 +53,7 @@
 
                         <div class="row">
                             <input type="hidden" required id="id" name="id" value="0"
-                                   class="form-control" />
+                                   class="form-control id_class" />
 
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label for="nameBasic" class="form-label">Contact Number<span
@@ -62,11 +62,11 @@
                                        placeholder="" autocomplete="off">
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label class="form-label">CNIC (without -)<span class="asterisk">*</span></label>
-                                <input type="text" required id="cnic" name="cnic"
+                                <input type="text"  id="cnic"  name="cnic"
 
-                                       class="form-control" placeholder="" autocomplete="off"   pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed"/>
+                                       class="form-control" placeholder="" value="0" autocomplete="off"   pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed"/>
                             </div>
 
 
@@ -99,19 +99,19 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">Father/Husband Name<span
                                             class="asterisk">*</span></label>
-                                <input type="text" required id="father_husband_name" name="father_husband_name"
+                                <input type="text"  id="father_husband_name" name="father_husband_name"
                                        class="form-control" placeholder="" autocomplete="off">
                             </div>
 
 
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">District<span class="asterisk">*</span></label>
-                                <select name="district_id" required id="district_id" class="form-control">
-                                    <option value="">Select District</option>
+                                <select name="district_id"  id="district_id" class="form-control">
+                                    <option value="22" selected>Select District</option>
                                     @foreach ($district as $dist)
                                         <option value="{{ $dist->id }}">{{ $dist->title }}</option>
                                     @endforeach
@@ -123,14 +123,18 @@
                                 <select name="location_id" required id="location_id" class="form-select">
                                     <option value="">Select Locations</option>
                                     @foreach ($locations as $location)
+                                    @if($location->id == "53")
+                                    <option value="{{ $location->id }}" selected>{{ $location->name }}</option>
+                                    @else
                                         <option value="{{ $location->id }}">{{ $location->name }}</option>
+                                    @endif
                                     @endforeach
                                 </select>
 
 
                             </div>
 
-                            <div class="col-md-3 col-sm-4 mb-3" >
+                            <div class="col-md-3 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">Dob<span class="asterisk">*</span></label>
                                 <input  type="date" required id="dob" name="dob" class="form-control"
                                         placeholder="" autocomplete="off">
@@ -230,7 +234,7 @@
     <div class="modal fade" id="add_new_record_model" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <form class="modal-content form-submit-event" id="from_submit">
-                <input type="hidden" id="id" name="id" value="0">
+                <input type="hidden id_class" id="id" name="id" value="0">
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel1">Patients</h5>
@@ -743,25 +747,27 @@
 
         function reset_fields() {
             $("#id").val(0);
+            $(".id_class").val(0);
             $("#mr_number").val('');
             $("#contact_no").val('');
             $("#consultant_id").val('').trigger("change");
-            $("#district_id").val('').trigger("change");
+            $("#district_id").val('22').trigger("change");
             $("#dob").val('');
-            $("#father_husband_name").val('');
+            $("#father_husband_name").val('-');
             $("#g4no").val(0);
             $("#age").val('');
             $("#months").val('0');
             $("#days").val('0');
-            $("#gender").val('');
+            $("#gender").val('male');
 
-            $("#location_id").val('').trigger("change");
-            $("#cnic").val('');
-            $("#cnic").val('');
+            $("#location_id").val('53').trigger("change");
+            $("#cnic").val('0');
+            $("#cnic").val('0');
             $("#name").val('');
             $("#regdate").val('{{date("Y-m-d")}}');
             //$("#relation_id").val('');
-            $("#sc_ref_no").val('');
+            $("#sc_ref_no").val('0');
+            $(".id_class").val("0");
         }
     </script>
 @endpush
