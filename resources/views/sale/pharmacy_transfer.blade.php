@@ -398,6 +398,7 @@
 
                             <th>Amount</th>
                             <th>Transfer By</th>
+                             <th>Type</th>
                             <th style="width: 30%">Actions</th>
                         </tr>
                     </thead>
@@ -562,6 +563,11 @@
                     {
                         data: 'created_by.name',
                         name: 'created_by.name',
+                        searchable: true
+                    },
+                    {
+                        data: 'transfer_type',
+                        name: 'transfer_type',
                         searchable: true
                     },
                     {

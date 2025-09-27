@@ -38,7 +38,7 @@
         @if($appointment_patient_name !='')
             <h6 style="font-size: 14px">{!! $appointment_patient_name !!} </h6>
         @endif
-
+        <h6>{{ $record->transfer_type ?? "" }}</h6>
         <h6 style="font-size: 14px">Created By: {{ $record->created_by->name ?? "" }} | Printed By: {{ auth()->user()->name ?? "" }}</h6>
 
         <table style="margin-top: 5px">
