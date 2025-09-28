@@ -1138,8 +1138,7 @@
                         ProductList,
                         "_token": "{{ csrf_token() }}"
                     },
-                    url: "{{ route("
-                    pos.save_retail_sale ") }}",
+                    url: "{{ route('pos.save_retail_sale') }}",
                     success: function(response) {
                         $("#save_bill").show();
                         $(this).html('<i class="fas fa-save me-2"></i>Save Bill');
@@ -1360,8 +1359,7 @@
             if (value != '') {
                 $.ajax({
                     type: "get",
-                    url: "{{route("
-                    pos.customer_previous_balance ")}}/" + value,
+                    url: "{{route('pos.customer_previous_balance')}}/" + value,
                     success: function(response) {
                         PreviousBalance = parseFloat(response).toFixed(2);
                         $("#previous_balance").val(PreviousBalance);
