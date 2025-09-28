@@ -58,16 +58,16 @@
                                        placeholder="" autocomplete="off">
                             </div>
 
-                            <div class="col-md-3 col-sm-4 ">
+                            <div class="col-md-4 col-sm-4 ">
                                 <label style="text-align: center; width: 100%; font-weight: bold; color:red">Age</label>
                                 <div class="d-flex align-items-center">
-                                    <label for="years" class="me-2">Years:</label>
+                                    <label for="years" class="me-2">YYYY:</label>
                                     <input type="text" id="age" name="age" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
 
-                                    <label for="months" class="me-2">Months:</label>
+                                    <label for="months" class="me-2">MM:</label>
                                     <input type="text" id="months" value="0" name="months" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
 
-                                    <label for="days" class="me-2">Days:</label>
+                                    <label for="days" class="me-2">DD:</label>
                                     <input type="text" id="days" value="0" name="days" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
                                 </div>
                             </div>
