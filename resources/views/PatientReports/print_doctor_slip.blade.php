@@ -126,7 +126,7 @@
         footer h4 {
             font-size: 28px;
             font-weight: bolder;
-            font-family: 'CustomFont', sans-serif;
+            font-family: 'CustomFont', "Jameel Noori Nastaleeq Regular";
             padding: 0 20px;
         }
 
