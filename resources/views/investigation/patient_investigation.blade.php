@@ -7,6 +7,25 @@
             padding: 5px;
         }
 
+        .select2-container--default .select2-selection--single {
+        min-height: 28px !important;
+        height: 28px !important;
+        padding: 0 8px !important;
+        font-size: 0.92rem !important;
+        border-radius: 0.2rem !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 24px !important;
+        padding-left: 0 !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 28px !important;
+    }
+
     </style>
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
@@ -25,21 +44,21 @@
 
 
                             <div class="col-md-2 col-sm-4 mt-1 float-right">
-                                <input  type="text" id="mr_number" value=""  class="form-control" placeholder="MR.No" autocomplete="off">
+                                <input  type="text" id="mr_number" value=""  class="form-control form-control-sm" placeholder="MR.No" autocomplete="off">
                             </div>
                         </div>
 
 
                         <div class="row">
                             <input type="hidden" required id="id" name="id" value="0"
-                                   class="form-control id_class" />
+                                   class="form-control form-control-sm id_class" />
                             <input type="hidden" name="list_investigations" id="list_investigations">
                             <input type="hidden" name="invoice_no" id="invoice_no">
 
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label for="nameBasic" class="form-label">Contact Number<span
                                             class="asterisk">*</span></label>
-                                <input type="text" required id="contact_no" oninput="if(this.value.length > 11) this.value = this.value.slice(0, 11);"  name="contact_no" class="form-control"
+                                <input type="text" required id="contact_no" oninput="if(this.value.length > 11) this.value = this.value.slice(0, 11);"  name="contact_no" class="form-control form-control-sm"
                                        placeholder="" autocomplete="off">
                             </div>
 
@@ -47,34 +66,34 @@
                                 <label class="form-label">CNIC (without -)<span class="asterisk"></span></label>
                                 <input type="text"  id="cnic" name="cnic"
 
-                                       class="form-control" value="0" placeholder="" autocomplete="off"   pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed"/>
+                                       class="form-control form-control-sm" value="0" placeholder="" autocomplete="off"   pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed"/>
                             </div>
 
 
 
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label class="form-label">Patient Name<span class="asterisk">*</span></label>
-                                <input type="text"  required id="name" name="name" class="form-control"
+                                <input type="text"  required id="name" name="name" class="form-control form-control-sm"
                                        placeholder="" autocomplete="off">
                             </div>
 
-                            <div class="col-md-4 col-sm-4 ">
+                            <div class="col-md-3 col-sm-12 ">
                                 <label style="text-align: center; width: 100%; font-weight: bold; color:red">Age</label>
                                 <div class="d-flex align-items-center">
                                     <label for="years" class="me-2">YYYY:</label>
-                                    <input type="text" id="age" name="age" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
+                                    <input type="text" id="age" name="age" class="form-control form-control-sm" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed"/>
 
                                     <label for="months" class="me-2">MM:</label>
-                                    <input type="text" id="months" value="0" name="months" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
+                                    <input type="text" id="months" value="0" name="months" class="form-control form-control-sm" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
 
                                     <label for="days" class="me-2">DD:</label>
-                                    <input type="text" id="days" value="0" name="days" class="form-control" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
+                                    <input type="text" id="days" value="0" name="days" class="form-control form-control-sm" style="width: 40px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed"/>
                                 </div>
                             </div>
 
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label class="form-label">Gender:<span class="asterisk">*</span></label>
-                                <select name="gender" id="gender" class="form-control">
+                                <select name="gender" id="gender" class="form-control form-control-sm">
                                     <option selected value="male">Male</option>
                                     <option value="female">Female</option>
                                 </select>
@@ -84,14 +103,14 @@
                                 <label for="nameBasic" class="form-label">Father/Husband Name<span
                                             class="asterisk">*</span></label>
                                 <input type="text" value="-" id="father_husband_name" value="-" name="father_husband_name"
-                                       class="form-control" placeholder="" autocomplete="off">
+                                       class="form-control form-control-sm" placeholder="" autocomplete="off">
                             </div>
 
 
 
                             <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">District<span class="asterisk">*</span></label>
-                                <select name="district_id"  id="district_id" class="form-control">
+                                <select name="district_id"  id="district_id" class="form-control form-control-sm">
                                     <option value="22">Select District</option>
                                     @foreach ($district as $dist)
                                         <option value="{{ $dist->id }}">{{ $dist->title }}</option>
@@ -101,7 +120,7 @@
                             <div class="col-md-2 col-sm-4 mb-3">
                                 <label for="nameBasic" class="form-label">location<span class="asterisk">*</span></label>
 
-                                <select name="location_id" required id="location_id" class="form-select">
+                                <select name="location_id" required id="location_id" class="form-select form-select-sm">
                                      <option value="">Select Locations</option>
                                     @foreach ($locations as $location)
                                     @if($location->id == "53")
@@ -115,10 +134,10 @@
 
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="col-md-4 col-sm-12 mb-3">
                                 <label for="nameBasic" class="form-label">Consultant<span class="asterisk">*</span></label>
 
-                                <select name="consultant_id"  id="consultant_id" class="form-select">
+                                <select name="consultant_id"  id="consultant_id" class="form-select form-select-sm">
                                     <option value="0">Select Consultant...</option>
                                     @foreach ($consultants as $value)
                                         <option value="{{ $value->id }}">{{ $value->name }}</option>
@@ -128,16 +147,16 @@
 
                             </div>
 
-                            <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
+                            <div class="col-md-4 col-sm-12 mb-3" style="display: none;">
                                 <label for="nameBasic" class="form-label">Dob<span class="asterisk">*</span></label>
-                                <input  type="date" required id="dob" name="dob" class="form-control"
+                                <input  type="date" required id="dob" name="dob" class="form-control form-control-sm"
                                         placeholder="" autocomplete="off">
                             </div>
 
-                            <div class="col-md-1 col-sm-4 mb-3">
+                            <div class="col-md-4 col-sm-12 mb-3">
                                 <label for="nameBasic" class="form-label">Discount<span class="asterisk">*</span></label>
 
-                                <select name="discount_percentage" id="discount_percentage" required class="form-select">
+                                <select name="discount_percentage" id="discount_percentage" required class="form-select form-select-sm">
                                     <option value="0" selected>0%</option>
                                     <option value="2">2%</option>
                                     <option value="5">5%</option>
@@ -168,7 +187,7 @@
                         <div class="row">
                         <div class="row">
                             <div class="col-md-4" >
-                                <select  id="investigation_id" class="form-select">
+                                <select  id="investigation_id" class="form-select form-select-sm">
                                     <option value="">Select Investigations...</option>
                                     @foreach ($investigation as $value)
                                         <option sale_price="{{$value->sale_price}}" investigation_name="{{ $value->name }}" value="{{ $value->id }}">{{ $value->name }}</option>
@@ -176,7 +195,7 @@
                                 </select>
                                 <br>
                                 <br>
-                                <input type="number" class="form-control" id="frequency" value="1" placeholder="frequency">
+                                <input type="number" class="form-control form-control-sm" id="frequency" value="1" placeholder="frequency">
                             </div>
 
                             <div class="col-md-8" >
@@ -218,22 +237,22 @@
 
 
             {{-- LISTIN PATIENTS --}}
-            <div class="card my-5">
+            <div class="card my-2">
                 <div class="card-body">
                     <h5 class="card-title">General Patient Investigations</h5>
 
                         <div class="row">
                             <div class="col-md-2">
                                 <label>From Date</label>
-                                <input type="date" class="form-control" value="{{date("Y-m-d")}}" id="filter_from_date">
+                                <input type="date" class="form-control form-control-sm" value="{{date("Y-m-d")}}" id="filter_from_date">
                             </div>
                             <div class="col-md-2">
                                 <label>To Date</label>
-                                <input type="date" class="form-control" value="{{date("Y-m-d")}}" id="filter_to_date">
+                                <input type="date" class="form-control form-control-sm" value="{{date("Y-m-d")}}" id="filter_to_date">
                             </div>
                             <div class="col-md-2">
                                 <label>Investigations</label>
-                                <select class="form-select" id="investigation_sub_category_id">
+                                <select class="form-select form-select-sm" id="investigation_sub_category_id">
                                     <option value="">View--All</option>
                                     @foreach($investigation_sub_category as $key => $value)
                                         <option value="{{$value->id}}">{{$value->name}}</option>
@@ -243,7 +262,7 @@
 
                             <div class="col-md-2">
                                 <label>Users</label>
-                                <select class="form-select" id="created_by">
+                                <select class="form-select form-select-sm" id="created_by">
                                     <option value="">View--All</option>
                                     @foreach($users as $key => $value)
                                         <option value="{{$value->id}}">{{$value->name}}</option>
@@ -253,7 +272,7 @@
 
 
                             <div class="col-md-3 mt-4">
-                                <div class="btn btn-primary print_all_details">Print</div>
+                                <div class="btn btn-primary btn-sm print_all_details"><i class="tf-icons bx bx-printer"></i></div>
                             </div>
                         </div>
 

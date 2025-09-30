@@ -57,7 +57,7 @@
         .header-section {
             background: linear-gradient(135deg, var(--pharmacy-green) 0%, var(--pharmacy-blue) 100%);
             border-radius: 10px;
-            padding: 12px;
+            padding: 4px;
             margin-bottom: 8px;
             color: white;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -119,13 +119,13 @@
         .sidebar-section {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 10px;
-            padding: 10px;
+            padding: 5px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar-section h6 {
             font-size: 0.9rem;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: var(--pharmacy-green);
             font-weight: 700;
         }
@@ -138,7 +138,7 @@
         }
 
         .sidebar-section .card-body {
-            padding: 6px;
+            padding: 3px;
         }
 
         .sidebar-section .form-control,
@@ -175,14 +175,14 @@
         .product-input-section {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 10px;
-            padding: 10px;
+            padding: 5px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
         }
 
         .product-input-section h5 {
             font-size: 1rem;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: var(--pharmacy-green);
             font-weight: 700;
         }
@@ -194,7 +194,7 @@
         }
 
         .product-input-section .card-body {
-            padding: 8px;
+            padding: 4px;
         }
 
         .product-input-section label {
@@ -613,7 +613,7 @@
         <div class="header-section">
             <div class="row align-items-center mb-2">
                 <div class="col-6">
-                    <h2 class="mb-0"><i class="fas fa-pills me-1"></i>{{session('store_name')}}</h2>
+                    <h6 class="mb-0"><i class="fas fa-pills me-1"></i>{{session('store_name')}}</h6>
                 </div>
                 <div class="col-6 text-end">
                     <small class="opacity-75">Professional Pharmacy Management</small>
@@ -1183,7 +1183,7 @@
                 }
 
                 var quantity = selectedRow.closest("tr").find("td:eq(2)").text();
-                var rate = selectedRow.closest("tr").find("td:eq(3)").text();
+                var rate = selectedRow.closest("tr").find("td:eq(3)").text().replace('Rs. ', '');
                 var avaliable_qty = selectedRow.closest("tr").find("td:eq(6)").text();
 
                 if (parseInt(quantity) > parseInt(avaliable_qty)) {
@@ -1196,10 +1196,10 @@
                     return false;
                 }
 
-                var total = parseFloat(quantity) * parseFloat(rate);
-                selectedRow.closest("tr").find("td:eq(4)").text(total);
+                var total = (parseFloat(quantity) * parseFloat(rate)).toFixed(2);
+                selectedRow.closest("tr").find("td:eq(4)").text('Rs. ' + total);
                 var product_id = selectedRow.closest("tr").find("td:eq(0)").attr("data-id");
-                updateProductByID(product_id, quantity, rate, total);
+                updateProductByID(product_id, quantity, rate, parseFloat(total));
             });
         });
 
@@ -1347,11 +1347,12 @@
             $("#sale_quantity").val(1);
             $("#SalePrice").val('');
             $("#SalePrice_text").html('0.00');
+
             $("#product_id").val(null).trigger('change');
-            $("#product_id").focus();
             $("#dose_type").val('-');
             taxPercentage = 0;
             currentAvailableQuantity = 0;
+            $("#product_id").select2('open');
         }
 
         function get_prev_balance(e) {
