@@ -211,6 +211,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('list-service-type', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'add_service_type'])->name('pos.add_service_type');
     Route::get('list_service_type', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'list_service_type'])->name('pos.list_service_type');
+    Route::get('print_service_type', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'print_service_type'])->name('pos.print_service_type');
     Route::post('save_service_type', [\App\Http\Controllers\GeneralConfigration\GeneralConfigController::class, 'save_service_type'])->name('pos.save_service_type');
 
 
@@ -265,6 +266,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('add_consultant', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'add_consultant'])->name('pos.add_consultant');
     Route::get('list_consultant', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'list_consultant'])->name('pos.list_consultant');
     Route::post('save_consultant', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'save_consultant'])->name('pos.save_consultant');
+    Route::get('export_consultants_pdf', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'exportConsultantsPdf'])->name('pos.export_consultants_pdf');
+    Route::get('preview_consultants_pdf', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'previewConsultantsPdf'])->name('pos.preview_consultants_pdf');
 
     Route::get('add_consultant_department', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'add_consultant_department'])->name('pos.add_consultant_department');
     Route::get('list_consultant_department', [\App\Http\Controllers\GeneralConfigration\ConsultantController::class, 'list_consultant_department'])->name('pos.list_consultant_department');
@@ -504,6 +507,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('export-inventory-excel', [\App\Http\Controllers\Reports\GrnReportController::class, 'exportInventoryToExcel'])->name('reports.export_inventory_excel');
     Route::get('export-low-stock-excel', [\App\Http\Controllers\Reports\GrnReportController::class, 'exportLowStockToExcel'])->name('reports.export_low_stock_excel');
 
+    // Procedure Dashboard Routes
+    Route::get('procedure-dashboard', [\App\Http\Controllers\Reports\ProcedureDashboardController::class, 'index'])->name('reports.procedure_dashboard');
+    Route::get('procedure-dashboard/data', [\App\Http\Controllers\Reports\ProcedureDashboardController::class, 'getProcedureData'])->name('reports.procedure_dashboard.data');
+    Route::get('procedure-dashboard/stats', [\App\Http\Controllers\Reports\ProcedureDashboardController::class, 'getDashboardStats'])->name('reports.procedure_dashboard.stats');
+    Route::get('procedure-dashboard/pdf', [\App\Http\Controllers\Reports\ProcedureDashboardController::class, 'exportPdf'])->name('reports.procedure_dashboard.pdf');
+    Route::get('procedure-dashboard/print', [\App\Http\Controllers\Reports\ProcedureDashboardController::class, 'printProcedures'])->name('reports.procedure_dashboard.print');
+
     // Analytics Routes
     Route::get('analytics', [\App\Http\Controllers\Reports\AnalyticsController::class, 'index'])->name('reports.analytics');
     Route::get('analytics/sales-chart', [\App\Http\Controllers\Reports\AnalyticsController::class, 'getSalesChart'])->name('analytics.sales_chart');
@@ -513,6 +523,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/sale-dashboard', [\App\Http\Controllers\SaleDashboardController::class, 'index'])->name('sale.dashboard');
     Route::get('/appointment-dashboard', [\App\Http\Controllers\AppointmentDashboardController::class, 'index'])->name('appointment.dashboard');
+
+    Route::get('/appointment-dashboard/day-appointments', [\App\Http\Controllers\AppointmentDashboardController::class, 'dayAppointments'])->name('appointment.dashboard.day');
 
     // New Retail Sale Point Route
     Route::get('retail-sale-point', [\App\Http\Controllers\Admin\SaleController::class, 'retail_sale_point'])->name('pos.retail_sale_point');

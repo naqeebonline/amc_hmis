@@ -264,7 +264,6 @@
         .menu-vertical .menu-item .menu-link{
             font-size: 0.85rem !important;
         }
-
     </style>
 </head>
 
@@ -368,7 +367,7 @@
 
                     <li class="menu-item">
                         <a href="{{ url($current_app->route) }}" class="menu-link active">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                        <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <span data-i18n="Dashboards" style="color: #FFFFFF">Dashboard</span>
                         </a>
                     </li>
