@@ -691,15 +691,47 @@ $filtersForPrint = [
                     filterPieces.push('<div class="filter-item"><span class="label">' + key + ':</span><span class="value">' + displayValue + '</span></div>');
                 });
             }
+
+            var doc = printWindow.document;
+            doc.open();
+            doc.write('<!DOCTYPE html>');
+            doc.write('<html><head><title>' + title + '</title>');
+            doc.write('<style>' +
+                'body{font-family:Arial,Helvetica,sans-serif;margin:28px;color:#1f2d3d;}' +
+                'h1{font-size:24px;margin:0;}' +
+                'h2{font-size:16px;margin:6px 0 0 0;color:#50607d;text-transform:uppercase;letter-spacing:0.08em;}' +
+                'p{margin:6px 0 0 0;color:#6c757d;}' +
+                'table{width:100%;border-collapse:collapse;margin-top:18px;}' +
+                'th,td{border:1px solid #d9dde5;padding:8px 10px;font-size:13px;text-align:left;}' +
+                'th{background:#f5f7fa;font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:0.04em;}' +
+                'tbody tr:nth-child(even){background:#fafbff;}' +
+                '.brand-header{border-bottom:2px solid #1f2d3d;padding-bottom:12px;margin-bottom:18px;text-align:center;}' +
+                '.brand-header .contact{margin-top:10px;font-size:12px;color:#4c5d75;}' +
+                '.brand-header .contact span{display:inline-block;margin:0 6px;}' +
+                '.filters{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;border-top:1px solid #d9dde5;border-bottom:1px solid #d9dde5;padding:10px 0;margin-top:14px;}' +
+                '.filters .filter-item{font-size:12px;color:#4c5d75;padding:0 10px;border-left:1px solid #d9dde5;}' +
+                '.filters .filter-item:first-child{border-left:none;}' +
+                '.filters .filter-item .label{font-weight:600;margin-right:6px;}' +
+                '.print-hint{margin-top:12px;font-size:12px;color:#6c757d;text-align:right;}' +
+                '@media print{.table-responsive{overflow:visible;}}' +
+                '</style>');
+            doc.write('</head><body>');
+            doc.write('<div class="brand-header">');
+            doc.write('<h1>' + (brandInfo.name || 'Hospital Management System') + '</h1>');
+            doc.write('<h2>' + title + '</h2>');
+            if (contactLines.length) {
+                doc.write('<div class="contact">' + contactLines.map(function(item) {
+                    return '<span>' + item + '</span>';
+                }).join('') + '</div>');
+            }
             doc.write('</div>');
             if (filterPieces.length) {
                 doc.write('<div class="filters">' + filterPieces.join('') + '</div>');
             }
-
-            // doc.write('<h6 style="margin-top:18px;">' + title + '</h6>');
-            // if (countText) {
-            //     doc.write('<p>' + countText + '</p>');
-            // }
+            doc.write('<div class="print-hint">Use Ctrl+P to print this page.</div>');
+            if (countText) {
+                doc.write('<p style="margin-top:18px; font-weight:600;">' + countText + '</p>');
+            }
             doc.write(tableHtml);
             doc.write('</body></html>');
             doc.close();
