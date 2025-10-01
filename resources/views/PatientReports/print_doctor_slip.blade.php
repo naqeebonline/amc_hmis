@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
-    <link rel="stylesheet" href="{{asset('')}}Jameel Noori Nastaleeq Regular.ttf">
     <link rel="stylesheet" href="{{asset('assets/css/bootstrap.min.css')}}" />
     <!-- <link rel="stylesheet" href="style.css"> -->
 
@@ -24,14 +23,19 @@
         }
 
         @font-face {
-            font-family: 'CustomFont';
-            /* Name of the font */
-            src: url('{{asset(' ')}}Jameel Noori Nastaleeq Regular.ttf') format('truetype');
-            /* Path to the .ttf file */
+            font-family: 'Jameel Noori Nastaleeq Regular';
+            src: url('{{asset("Jameel Noori Nastaleeq Regular.ttf")}}') format('truetype');
             font-weight: normal;
-            /* Optional: define font weight */
             font-style: normal;
-            /* Optional: define font style */
+            font-display: swap;
+        }
+
+        /* Alternative loading method */
+        @font-face {
+            font-family: 'JameelNoori';
+            src: url('{{asset("Jameel Noori Nastaleeq Regular.ttf")}}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
 
         .inv-header .head {
@@ -126,7 +130,7 @@
         footer h4 {
             font-size: 28px;
             font-weight: bolder;
-            font-family: 'CustomFont', "Jameel Noori Nastaleeq Regular";
+            font-family: 'Jameel Noori Nastaleeq Regular', Arial, sans-serif;
             padding: 0 20px;
         }
 
