@@ -517,3 +517,13 @@ Route::group(['middleware' => 'auth'], function () {
     // New Retail Sale Point Route
     Route::get('retail-sale-point', [\App\Http\Controllers\Admin\SaleController::class, 'retail_sale_point'])->name('pos.retail_sale_point');
 });
+
+// Short Expiry Report Routes
+Route::middleware(['auth'])->prefix('reports')->group(function () {
+    // Short Expiry Report Routes
+    Route::get('short-expiry', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'index'])->name('reports.short_expiry');
+    Route::get('short-expiry-count', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'getShortExpiryCount'])->name('reports.short_expiry_count');
+    Route::get('short-expiry-data', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'getShortExpiryData'])->name('reports.short_expiry_data');
+    Route::get('short-expiry-stats', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'getShortExpiryStats'])->name('reports.short_expiry_stats');
+    Route::get('short-expiry-export', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'exportShortExpiry'])->name('reports.short_expiry_export');
+});
