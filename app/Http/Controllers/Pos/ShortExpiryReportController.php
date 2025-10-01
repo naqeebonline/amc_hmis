@@ -46,9 +46,9 @@ class ShortExpiryReportController extends Controller
     {
         try {
             $currentDate = Carbon::now();
-            $thirtyDaysFromNow = $currentDate->copy()->addDays(30);
+            $thirtyDaysFromNow = $currentDate->copy()->addDays(180);
 
-            // Count items expiring in next 30 days
+            // Count items expiring in next 180 days
             $count = DB::table('grn_details as gd')
                 ->join('products as p', 'gd.ProductID', '=', 'p.ProductID')
                 ->where('gd.RemainingQuantity', '>', 0)

@@ -256,6 +256,7 @@
                         <option value="30" selected>Expiring in 30 days</option>
                         <option value="60">Expiring in 60 days</option>
                         <option value="90">Expiring in 90 days</option>
+                        <option value="180">Expiring in 180 days</option>
                     </select>
                 </div>
 
