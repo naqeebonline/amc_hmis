@@ -7,68 +7,166 @@
         padding: 5px;
     }
 
-    /* Frest/Bootstrap-inspired form polish */
-    #patient_register {
-        border: 1px solid #e3e6f0;
-        border-radius: 0.75rem;
-        box-shadow: 0 2px 12px rgba(3, 55, 117, 0.07);
-        background: #fff;
-        padding: 0.5rem 0.5rem 0.5rem 0.5rem;
-        margin-bottom: 1rem;
-        position: relative;
-    }
-
-    #patient_register .form-control form-control-sm,
-    #patient_register .form-select form-select-sm {
-        font-size: 1rem;
-        border-radius: 0.5rem;
-    }
-
-    #patient_register label.form-label {
-        font-weight: 500;
-        color: #033775;
-    }
-
-    #patient_register .form-section-title {
-        background: linear-gradient(-45deg, #033775, #006ded);
-        color: #fff;
-        font-size: 1.05rem;
-        font-weight: 600;
-        border-radius: 0.75rem 0.75rem 0 0;
-        padding: 0.4rem 0.75rem;
-        margin-bottom: 0.5rem;
-        box-shadow: 0 2px 8px rgba(3, 55, 117, 0.08);
-        letter-spacing: 0.5px;
-    }
-
-    #patient_register .btn-success {
-        background: linear-gradient(-45deg, #033775, #006ded);
-        border: none;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-    }
-
-    #patient_register .btn-success:hover {
-        background: linear-gradient(-45deg, #006ded, #033775);
-    }
-
     .select2-container--default .select2-selection--single {
         min-height: 28px !important;
         height: 28px !important;
-        padding: 0 8px !important;
-        font-size: 0.92rem !important;
-        border-radius: 0.2rem !important;
+        padding: 0 6px !important;
+        font-size: 0.8rem !important;
+        border-radius: 0.375rem !important;
         display: flex !important;
         align-items: center !important;
+        border: 1px solid #d1d5db !important;
     }
 
     .select2-container .select2-selection--single .select2-selection__rendered {
-        line-height: 24px !important;
+        line-height: 26px !important;
         padding-left: 0 !important;
     }
 
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 28px !important;
+    }
+
+    /* Professional Compact Form Styling */
+    .appointment-form-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px 8px 0 0;
+        margin: -1px -1px 0 -1px;
+    }
+
+    .form-header h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-header i {
+        margin-right: 6px;
+        font-size: 0.9rem;
+    }
+
+    .compact-section {
+        background: #f8fafc;
+        border-left: 3px solid #3b82f6;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+        border-radius: 0 6px 6px 0;
+    }
+
+    .section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: 5px;
+        color: #3b82f6;
+        font-size: 0.75rem;
+    }
+
+    .form-control-sm,
+    .form-select-sm {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.8rem;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        height: 28px;
+    }
+
+    .form-control-sm:focus,
+    .form-select-sm:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.125rem rgba(59, 130, 246, 0.25);
+    }
+
+    .form-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+
+    .asterisk {
+        color: #ef4444;
+        font-weight: bold;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        border-radius: 6px;
+        padding: 6px 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .input-icon {
+        position: relative;
+    }
+
+    .input-icon i {
+        position: absolute;
+        left: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        font-size: 0.7rem;
+        z-index: 3;
+    }
+
+    .input-icon .form-control-sm {
+        padding-left: 22px;
+    }
+
+    .age-group {
+        background: #fef3f2;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        padding: 1px;
+    }
+
+    .age-group label {
+        font-size: 0.7rem;
+        color: #dc2626;
+        font-weight: 600;
+        margin: 0 4px;
+    }
+
+    .age-group .form-control-sm {
+        width: 45px !important;
+        height: 24px;
+        padding: 2px 4px;
+        font-size: 0.75rem;
+        text-align: center;
+    }
+
+    .row.g-2>* {
+        padding-right: calc(var(--bs-gutter-x) * 0.25);
+        padding-left: calc(var(--bs-gutter-x) * 0.25);
     }
 </style>
 
@@ -80,140 +178,107 @@
 <div class="row">
     <div class="col-12">
 
-        <!-- Traffic sources -->
-        <div class="card">
-            <div class="card-body">
+        <!-- Patient Appointment Form -->
+        <div class="card appointment-form-card">
+            <div class="form-header">
+                <h5 style="color: white;"><i class="fas fa-calendar-plus"></i>Patient Appointment Form</h5>
+            </div>
+            <div class="card-body p-3">
                 <form class="form-submit-event" id="patient_register">
-                    <div class="form-section-title mb-3"> 
-                        Patient Appointments</div>
-                    <div class="row g-2 align-items-end">
+                    <!-- Hidden Fields -->
+                    <input type="hidden" required id="id" name="id" value="0" class="form-control form-control-sm id_class" />
+                    <input type="hidden" id="cnic" name="cnic" class="form-control form-control-sm" placeholder="" value="0" autocomplete="off" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed" />
+                    <input type="hidden" id="father_husband_name" name="father_husband_name" class="form-control form-control-sm" placeholder="" autocomplete="off">
+                    <input type="hidden" name="district_id" id="district_id" class="form-control form-control-sm" value="22">
+                    <input type="date" style="pointer-events: none; display: none;" required id="regdate" value="{{ date('Y-m-d') }}" name="regdate" class="form-control form-control-sm" autocomplete="off">
+                    <input type="date" required id="dob" name="dob" class="form-control form-control-sm" style="display: none;" autocomplete="off">
 
-                        <div class="col-md-4 col-sm-4">
-                            <label for="opd_type_id" class="form-label">MR No<span class="asterisk">*</span></label>
-                            <input type="text"  id="mr_number" value="" class="form-control form-control-sm" placeholder="MR.No" autocomplete="off">
-                        </div>
-                        
-                        <div class="col-md-4 col-sm-4">
-                            <label for="opd_type_id" class="form-label">OPD Type<span class="asterisk">*</span></label>
-                            <select name="opd_type_id" required id="opd_type_id" class="form-select form-select-sm form-select form-select-sm-sm select2">
-                                <option value="">OPD Type</option>
-                                @foreach ($opd_type as $value)
-                                <option value="{{ $value->id }}">{{ $value->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-4 col-sm-4">
-                            <label for="consultant_id" class="form-label">Consultant<span class="asterisk">*</span></label>
-                            <select name="consultant_id" required id="consultant_id" class="form-select form-select-sm select2">
-                                <option value="">Select Consultant</option>
-                                @foreach ($consultants as $value)
-                                <option value="{{ $value->id }}">{{ $value->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3 col-sm-4" style="display: none;">
-                            <label for="regdate" class="form-label">Reg. Date</label>
-                            <input type="date" style="pointer-events: none" required id="regdate" value="{{ date('Y-m-d') }}" name="regdate" class="form-control form-control-sm" autocomplete="off">
+                    <!-- Search & OPD Details -->
+                    <div class="compact-section">
+                        <div class="section-title"><i class="fas fa-search"></i>Patient Search & OPD Details</div>
+                        <div class="row g-2">
+                            <div class="col-md-3 mb-2">
+                                <label for="mr_number" class="form-label">MR No</label>
+                                <div class="input-icon">
+                                    <i class="fas fa-id-card"></i>
+                                    <input type="text" id="mr_number" value="" class="form-control form-control-sm" placeholder="Enter MR No" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-2">
+                                <label for="opd_type_id" class="form-label">OPD Type<span class="asterisk">*</span></label>
+                                <select name="opd_type_id" required id="opd_type_id" class="form-select form-select-sm select2">
+                                    <option value="">Select OPD Type</option>
+                                    @foreach ($opd_type as $value)
+                                    <option value="{{ $value->id }}">{{ $value->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="consultant_id" class="form-label">Consultant<span class="asterisk">*</span></label>
+                                <select name="consultant_id" required id="consultant_id" class="form-select form-select-sm select2">
+                                    <option value="">Select Consultant</option>
+                                    @foreach ($consultants as $value)
+                                    <option value="{{ $value->id }}">{{ $value->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <label for="location_id" class="form-label">Location<span class="asterisk">*</span></label>
+                                <select name="location_id" required id="location_id" class="form-select form-select-sm">
+                                    <option value="">Select Location</option>
+                                    @foreach ($locations as $location)
+                                    @if($location->id == "53")
+                                    <option value="{{ $location->id }}" selected>{{ $location->name }}</option>
+                                    @else
+                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
+                                    @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 mb-2">
+                                <label for="contact_no" class="form-label">Contact#<span class="asterisk">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fas fa-phone"></i>
+                                    <input type="text" required id="contact_no" oninput="if(this.value.length > 11) this.value = this.value.slice(0, 11);" name="contact_no" class="form-control form-control-sm" placeholder="03xxxxxxxxx" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-2">
+                                <label for="name" class="form-label">Patient Name<span class="asterisk">*</span></label>
+                                <input type="text" required id="name" name="name" class="form-control form-control-sm" placeholder="Enter patient name" autocomplete="off">
+                            </div>
+
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label text-center w-100" style="color: #dc2626; font-weight: 600; font-size: 0.75rem;">Patient Age</label>
+                                <div class="age-group d-flex align-items-center justify-content-center">
+                                    <label>Years:</label>
+                                    <input type="text" id="age" name="age" required class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3" title="Only digits are allowed" />
+                                    <label>Months:</label>
+                                    <input type="text" id="months" value="0" name="months" class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
+                                    <label>Days:</label>
+                                    <input type="text" id="days" value="0" name="days" class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 mb-2">
+                                <label for="gender" class="form-label">Gender<span class="asterisk">*</span></label>
+                                <select name="gender" id="gender" required class="form-select form-select-sm">
+                                    <option selected value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
+                     
 
-                    <div class="row mt-2">
-                        <input type="hidden" required id="id" name="id" value="0"
-                            class="form-control form-control-sm id_class" />
-
-                        <div class="col-md-2 col-sm-4 mb-3">
-                            <label for="nameBasic" class="form-label">Contact#<span
-                                    class="asterisk">*</span></label>
-                            <input type="text" required id="contact_no" oninput="if(this.value.length > 11) this.value = this.value.slice(0, 11);" name="contact_no" class="form-control form-control-sm"
-                                placeholder="" autocomplete="off">
-                        </div>
-
-                        <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
-                            <label class="form-label">CNIC (without -)<span class="asterisk">*</span></label>
-                            <input type="text" id="cnic" name="cnic"
-
-                                class="form-control form-control-sm" placeholder="" value="0" autocomplete="off" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed" />
-                        </div>
-
-
-
-                        <div class="col-md-2 col-sm-4 mb-3">
-                            <label class="form-label">Patient Name<span class="asterisk">*</span></label>
-                            <input type="text" required id="name" name="name" class="form-control form-control-sm"
-                                placeholder="" autocomplete="off">
-                        </div>
-
-                        <div class="col-md-3 col-sm-12 ">
-                            <label style="text-align: center; width: 100%; font-weight: bold; color:red">Age</label>
-                            <div class="d-flex align-items-center">
-                                <label for="years" class="me-2">YY:</label>
-                                <input type="text" id="age" name="age" required class="form-control form-control-sm" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="4" title="Only digits are allowed" />
-
-                                <label for="months" class="me-2">MM:</label>
-                                <input type="text" id="months" value="0" name="months" class="form-control form-control-sm" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
-
-                                <label for="days" class="me-2">DD:</label>
-                                <input type="text" id="days" value="0" name="days" class="form-control form-control-sm" style="width: 50px;" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 col-sm-4 mb-3">
-                            <label class="form-label">Gender:<span class="asterisk">*</span></label>
-                            <select name="gender" id="gender" required class="form-control form-control-sm">
-                                <option selected value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
-                            <label for="nameBasic" class="form-label">Father/Husband Name<span
-                                    class="asterisk">*</span></label>
-                            <input type="text" id="father_husband_name" name="father_husband_name"
-                                class="form-control form-control-sm" placeholder="" autocomplete="off">
-                        </div>
-
-
-
-                        <div class="col-md-2 col-sm-4 mb-3" style="display: none;">
-                            <label for="nameBasic" class="form-label">District<span class="asterisk">*</span></label>
-                            <select name="district_id" id="district_id" class="form-control form-control-sm">
-                                <option value="22" selected>Select District</option>
-                                @foreach ($district as $dist)
-                                <option value="{{ $dist->id }}">{{ $dist->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2 col-sm-4 mb-3">
-                            <label for="nameBasic" class="form-label">location<span class="asterisk">*</span></label>
-
-                            <select name="location_id" required id="location_id" class="form-select form-select-sm">
-                                <option value="">Select Locations</option>
-                                @foreach ($locations as $location)
-                                @if($location->id == "53")
-                                <option value="{{ $location->id }}" selected>{{ $location->name }}</option>
-                                @else
-                                <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                @endif
-                                @endforeach
-                            </select>
-
-
-                        </div>
-
-                        <div class="col-md-3 col-sm-4 mb-3" style="display: none;">
-                            <label for="nameBasic" class="form-label">Dob<span class="asterisk">*</span></label>
-                            <input type="date" required id="dob" name="dob" class="form-control form-control-sm"
-                                placeholder="" autocomplete="off">
-                        </div>
-
-
-
-
-                        <div class="text-left mt-3">
-                            <button class="btn btn-success btn-sm" id="submit_btn">Save</button>
-                        </div>
-
+                    <!-- Submit Button -->
+                    <div class="text-center mt-3">
+                        <button class="btn btn-save" id="submit_btn" type="submit">
+                            <i class="fas fa-save me-1"></i>Save Appointment
+                        </button>
                     </div>
                 </form>
             </div>
@@ -396,7 +461,7 @@
     registered_patients = [];
     setTimeout(function() {
         $(".select2").select2();
-        $("#district_id").select2();
+        // $("#district_id").select2();
         $("#location_id").select2();
 
         $("#edit_consultant_id").select2({
