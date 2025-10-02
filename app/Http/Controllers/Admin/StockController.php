@@ -454,8 +454,10 @@ class StockController extends Controller
 
                     $buttons= '<a  target="_blank" class="btn btn-sm btn-success" href="'.route('pos.add_bill_items',[$data->GRNID]).'">Edit</a>&nbsp;&nbsp;';
                     /*$buttons = $buttons.'<a class="btn btn-sm btn-danger">Delete</a>';*/
-                    $buttons = $buttons.'<a class="btn btn-sm btn-primary approve_bill" bill_id="'.$data->GRNID.'">Approve Bill</a>&nbsp;&nbsp;';
-
+                    if (in_array(auth()->user()->roles->pluck('name')[0], ["Super Admin", "District Super Admin"])) {
+                      $buttons = $buttons.'<a class="btn btn-sm btn-primary approve_bill" bill_id="'.$data->GRNID.'">Approve Bill</a>&nbsp;&nbsp;';
+                    
+                    }
                 }
                 $buttons = $buttons.'<a target="_blank" class="btn btn-sm btn-success" href="'.route('pos.print_purchase_request',[$data->SCID, $data->GRNID]).'">Print</a>';
                 return $buttons;
