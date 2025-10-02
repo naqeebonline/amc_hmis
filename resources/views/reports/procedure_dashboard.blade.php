@@ -36,13 +36,17 @@
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     }
 
-    
+
     .chart-card {
         background: white;
         border-radius: 15px;
         padding: 25px;
         margin-bottom: 25px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-area {
+        min-height: 340px;
     }
 
     .table-responsive {
@@ -197,8 +201,8 @@
             font-size: 0.85rem;
         }
 
-        .chart-card canvas {
-            height: 300px !important;
+        .chart-area {
+            min-height: 260px;
         }
 
         .col-lg-3.col-md-3 {
@@ -221,6 +225,10 @@
         .avatar-initial i {
             font-size: 1rem !important;
         }
+
+        .chart-area {
+            min-height: 220px;
+        }
     }
 
     /* Modal fix styles */
@@ -234,12 +242,29 @@
 
     /* Ensure body doesn't get stuck with modal styles */
     body.modal-open {
-        overflow: hidden;
+        overflow: hidden !important;
+        padding-right: 0 !important;
     }
 
     /* Prevent multiple backdrop issues */
     .modal-backdrop.show {
         opacity: 0.5;
+    }
+
+    /* Prevent page hanging after modal close */
+    body:not(.modal-open) {
+        overflow: auto !important;
+        padding-right: 0 !important;
+    }
+
+    html {
+        overflow: auto !important;
+    }
+
+    /* Force cleanup of modal states */
+    .modal-open .modal {
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
     /* Print Styles */
@@ -349,7 +374,7 @@
 </style>
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css') }}" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="apexcharts-local" src="{{ asset('assets/vendors/js/charts/apexcharts.js') }}"></script>
 @endpush
 
 @section('content')
@@ -410,8 +435,13 @@
                         <i class="bx bx-refresh me-1"></i> Reset Filters
                     </button>
 
-                    <button type="button" class="btn btn-info" id="print-table">
+                    <button type="button" class="btn btn-info me-2" id="print-table">
                         <i class="bx bx-printer me-1"></i> Print Table
+                    </button>
+
+                    <!-- Hidden cleanup button for emergency use -->
+                    <button type="button" class="btn btn-outline-warning" id="force-cleanup" style="display: none;" title="Force cleanup if page is stuck">
+                        <i class="bx bx-recycle me-1"></i> Force Cleanup
                     </button>
                 </div>
             </div>
@@ -579,9 +609,7 @@
                     <h5 class="mb-2 mb-md-0"><i class="tf-icons bx bx-bar-chart"></i> Procedure Types Distribution</h5>
                     <small class="text-muted">Click on bars for detailed view</small>
                 </div>
-                <div style="position: relative; height: 400px; width: 100%;" class="chart-container">
-                    <canvas id="procedureTypeChart"></canvas>
-                </div>
+                <div id="procedureTypeChart" class="chart-area"></div>
             </div>
         </div>
 
@@ -720,6 +748,31 @@
 
         $('#print-table').on('click', function() {
             printProcedures();
+        });
+
+        // Force cleanup button (emergency use)
+        $('#force-cleanup').on('click', function() {
+            cleanupModal();
+            showAlert('Page cleaned up successfully!', 'success');
+        });
+
+        // Show cleanup button if modal issues detected
+        setTimeout(function() {
+            if ($('.modal-backdrop').length > 0 || $('body').hasClass('modal-open')) {
+                $('#force-cleanup').show();
+            }
+        }, 2000);
+
+        // Emergency cleanup on ESC key
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && ($('.modal-backdrop').length > 0 || $('#procedureDetailsModal').length > 0)) {
+                cleanupModal();
+            }
+        });
+
+        // Cleanup on page unload
+        $(window).on('beforeunload', function() {
+            cleanupModal();
         });
 
         // Update print filter display whenever filters change
@@ -899,7 +952,7 @@
     }
 
     function updateProcedureTypeChart(data) {
-        const ctx = document.getElementById('procedureTypeChart').getContext('2d');
+        const chartEl = document.getElementById('procedureTypeChart');
 
         if (procedureTypeChart) {
             procedureTypeChart.destroy();
@@ -907,152 +960,133 @@
 
         // Handle empty data
         if (!data || data.length === 0) {
-            procedureTypeChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['No Data'],
-                    datasets: [{
-                        label: 'No data available',
-                        data: [0],
-                        backgroundColor: ['#e9ecef'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    aspectRatio: 2.5,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
+            chartEl.innerHTML = '<div class="text-center text-muted py-5"><i class="tf-icons bx bx-info-circle fs-1 mb-2"></i><div>No procedure data found</div><small>Try adjusting your filter criteria</small></div>';
             return;
         }
 
-        const total = data.reduce((sum, item) => sum + item.count, 0);
+        // Check if ApexCharts is available, if not load from CDN
+        if (typeof window.ApexCharts === 'undefined') {
+            const fallback = document.createElement('script');
+            fallback.src = 'https://cdn.jsdelivr.net/npm/apexcharts';
+            fallback.onload = function() {
+                renderProcedureChart(data, chartEl);
+            };
+            fallback.onerror = function() {
+                chartEl.innerHTML = '<div class="text-center text-muted py-5">Unable to load chart library.</div>';
+            };
+            document.head.appendChild(fallback);
+            return;
+        }
 
-        procedureTypeChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(item => item.type),
-                datasets: [{
-                    label: 'Number of Procedures',
-                    data: data.map(item => item.count),
-                    backgroundColor: [
-                        '#667eea',
-                        '#f093fb',
-                        '#4facfe',
-                        '#43e97b',
-                        '#fa709a',
-                        '#ff9a9e',
-                        '#a8edea',
-                        '#fed6e3',
-                        '#d299c2',
-                        '#ffecd2'
-                    ],
-                    borderColor: [
-                        '#5a6fd8',
-                        '#e081e9',
-                        '#3d9aec',
-                        '#31d769',
-                        '#e85e88',
-                        '#ed888c',
-                        '#96dbd8',
-                        '#ecc4d1',
-                        '#c087b0',
-                        '#eddac0'
-                    ],
-                    borderWidth: 2,
-                    borderRadius: 5,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 2.5,
-                onClick: (event, elements) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        const procedureType = data[index];
-                        showProcedureDetails(procedureType);
-                    }
+        renderProcedureChart(data, chartEl);
+    }
+
+    function renderProcedureChart(data, chartEl) {
+
+        const total = data.reduce((sum, item) => sum + item.count, 0);
+        const colors = [
+            '#667eea', '#f093fb', '#4facfe', '#43e97b', '#fa709a',
+            '#ff9a9e', '#a8edea', '#fed6e3', '#d299c2', '#ffecd2'
+        ];
+
+        const options = {
+            chart: {
+                type: 'bar',
+                height: 360,
+                toolbar: {
+                    show: false
                 },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: {
-                                size: 12,
-                                weight: 'bold'
-                            }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        titleColor: 'white',
-                        bodyColor: 'white',
-                        cornerRadius: 10,
-                        displayColors: true,
-                        callbacks: {
-                            label: function(context) {
-                                const percentage = ((context.parsed.y / total) * 100).toFixed(1);
-                                return [
-                                    'Procedures: ' + context.parsed.y,
-                                    'Percentage: ' + percentage + '%',
-                                    'Revenue: Rs. ' + (data[context.dataIndex].revenue || 0).toLocaleString(),
-                                    'Click to view details'
-                                ];
-                            }
+                events: {
+                    dataPointSelection: function(event, chartContext, config) {
+                        if (config.dataPointIndex >= 0 && data[config.dataPointIndex]) {
+                            const procedureType = data[config.dataPointIndex];
+                            showProcedureDetails(procedureType);
                         }
                     }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                weight: 'bold'
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Procedures',
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0,0,0,0.1)'
-                        }
-                    }
-                },
-                animation: {
-                    duration: 1000,
-                    easing: 'easeInOutQuart'
                 }
+            },
+            series: [{
+                name: 'Procedures',
+                data: data.map(item => item.count)
+            }],
+            plotOptions: {
+                bar: {
+                    columnWidth: '60%',
+                    borderRadius: 8,
+                    distributed: true
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) {
+                    return val;
+                },
+                offsetY: -16,
+                style: {
+                    fontSize: '12px',
+                    colors: ['#304758']
+                }
+            },
+            xaxis: {
+                categories: data.map(item => item.type),
+                labels: {
+                    rotate: -30,
+                    trim: false,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    }
+                },
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                }
+            },
+            yaxis: {
+                min: 0,
+                forceNiceScale: true,
+                title: {
+                    text: 'Number of Procedures',
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                    }
+                },
+                labels: {
+                    formatter: function(val) {
+                        return Math.floor(val);
+                    }
+                }
+            },
+            colors: colors,
+            grid: {
+                strokeDashArray: 4,
+                borderColor: '#e4e6ef'
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val, opts) {
+                        const index = opts.dataPointIndex;
+                        const percentage = ((val / total) * 100).toFixed(1);
+                        const revenue = data[index].revenue || 0;
+                        return `<div>
+                            <div>Procedures: ${val}</div>
+                            <div>Percentage: ${percentage}%</div>
+                            <div>Revenue: Rs. ${revenue.toLocaleString()}</div>
+                            <div style="font-style: italic; font-size: 12px;">Click to view details</div>
+                        </div>`;
+                    }
+                }
+            },
+            legend: {
+                show: false
             }
-        });
+        };
+
+        procedureTypeChart = new ApexCharts(chartEl, options);
+        procedureTypeChart.render();
     }
 
 
@@ -1203,16 +1237,8 @@
     }
 
     function showProcedureDetails(procedureType) {
-        // Properly clean up any existing modal and backdrop
-        if ($('#procedureDetailsModal').length > 0) {
-            $('#procedureDetailsModal').modal('hide');
-            $('#procedureDetailsModal').remove();
-        }
-
-        // Remove any leftover backdrop
-        $('.modal-backdrop').remove();
-        $('body').removeClass('modal-open');
-        $('body').css('padding-right', '');
+        // Clean up any existing modal safely
+        cleanupModal();
 
         // Show loading modal first
         const loadingModal = `
@@ -1238,12 +1264,9 @@
 
         $('body').append(loadingModal);
 
-        // Add event listeners for proper cleanup
-        $('#procedureDetailsModal').on('hidden.bs.modal', function() {
-            $(this).remove();
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            $('body').css('padding-right', '');
+        // Setup modal cleanup handler
+        $('#procedureDetailsModal').on('hidden.bs.modal.procedureDetails', function() {
+            cleanupModal();
         });
 
         $('#procedureDetailsModal').modal('show');
@@ -1355,26 +1378,20 @@
             `;
 
                 // Replace loading modal with detailed modal
+                $('#procedureDetailsModal').off('hidden.bs.modal.procedureDetails');
                 $('#procedureDetailsModal').modal('hide');
 
                 setTimeout(() => {
-                    $('#procedureDetailsModal').remove();
-                    $('.modal-backdrop').remove();
-                    $('body').removeClass('modal-open');
-                    $('body').css('padding-right', '');
-
+                    cleanupModal();
                     $('body').append(detailedModal);
 
-                    // Add event listeners for proper cleanup
-                    $('#procedureDetailsModal').on('hidden.bs.modal', function() {
-                        $(this).remove();
-                        $('.modal-backdrop').remove();
-                        $('body').removeClass('modal-open');
-                        $('body').css('padding-right', '');
+                    // Setup modal cleanup handler with unique namespace
+                    $('#procedureDetailsModal').on('hidden.bs.modal.procedureDetails', function() {
+                        cleanupModal();
                     });
 
                     $('#procedureDetailsModal').modal('show');
-                }, 300); // Wait for hide animation to complete
+                }, 350); // Wait for hide animation to complete
             },
             error: function() {
                 $('#procedureDetailsModal .modal-body').html(`
@@ -1389,20 +1406,43 @@
     function applyProcedureTypeFilter(procedureType) {
         $('#procedure_type').val(procedureType);
 
-        // Properly close modal
-        $('#procedureDetailsModal').modal('hide');
-
-        // Clean up after modal closes
-        $('#procedureDetailsModal').on('hidden.bs.modal', function() {
-            $(this).remove();
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open');
-            $('body').css('padding-right', '');
-
-            // Reload data after modal is fully closed
+        // Close modal and reload data
+        if ($('#procedureDetailsModal').length > 0) {
+            $('#procedureDetailsModal').off('hidden.bs.modal.procedureDetails');
+            $('#procedureDetailsModal').on('hidden.bs.modal.procedureFilter', function() {
+                cleanupModal();
+                // Reload data after modal is fully closed
+                proceduresTable.ajax.reload();
+                loadDashboardData();
+            });
+            $('#procedureDetailsModal').modal('hide');
+        } else {
+            // If no modal, just reload data
             proceduresTable.ajax.reload();
             loadDashboardData();
+        }
+    }
+
+    // Centralized modal cleanup function
+    function cleanupModal() {
+        // Remove modal and all event listeners
+        if ($('#procedureDetailsModal').length > 0) {
+            $('#procedureDetailsModal').off();
+            $('#procedureDetailsModal').remove();
+        }
+        
+        // Clean up bootstrap modal artifacts
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open').css({
+            'padding-right': '',
+            'overflow': ''
         });
+        
+        // Ensure page scrolling is restored
+        $('html').css('overflow', '');
+        
+        // Clear any stuck modal states
+        $(document).off('keydown.bs.modal');
     }
 
     function showAlert(message, type = 'info') {
