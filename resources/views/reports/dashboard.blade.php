@@ -116,7 +116,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h4 class="text-warning mb-1" id="short-expiry-count">Loading...</h4>
-                                        <p class="mb-0 text-muted small">Products expiring in 30 days</p>
+                                        <p class="mb-0 text-muted small">Products expiring in 180 days</p>
                                     </div>
                                     <div>
                                         <a href="{{ route('reports.short_expiry') }}" class="btn btn-warning btn-sm">
@@ -170,7 +170,7 @@
                     $('#expiry-progress').css('width', response.percentage + '%');
 
                     if (response.count > 0) {
-                        $('#expiry-status').html(`<span class="text-warning">${response.count} items expiring soon</span>`);
+                        $('#expiry-status').html(`<span class="text-warning">${response.count} items expiring in 180 days</span>`);
                     } else {
                         $('#expiry-status').html(`<span class="text-success">No items expiring soon</span>`);
                     }

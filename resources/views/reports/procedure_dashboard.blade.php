@@ -135,20 +135,21 @@
         border: 2px solid #e9ecef;
         padding: 5px 10px;
     }
-    
+
 
     .form-control form-control-sm:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
     }
+
     .form-select {
-    display: block;
-    width: 100%;
-    padding: 0.469rem 1.735rem 0.469rem 0.735rem;
-    -moz-padding-start: calc(0.735rem - 3px);
-    font-size: 0.9375rem;
-    font-weight: 400;
-    line-height: 0.9;
+        display: block;
+        width: 100%;
+        padding: 0.469rem 1.735rem 0.469rem 0.735rem;
+        -moz-padding-start: calc(0.735rem - 3px);
+        font-size: 0.9375rem;
+        font-weight: 400;
+        line-height: 0.9;
     }
 
     .form-select form-select -sm {
@@ -398,7 +399,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-12">
                     <button type="button" class="btn btn-primary me-2" id="apply-filters">
@@ -407,7 +408,7 @@
                     <button type="button" class="btn btn-outline-secondary me-2" id="reset-filters">
                         <i class="bx bx-refresh me-1"></i> Reset Filters
                     </button>
-                  
+
                     <button type="button" class="btn btn-info" id="print-table">
                         <i class="bx bx-printer me-1"></i> Print Table
                     </button>
@@ -500,9 +501,13 @@
                                 <span class="avatar-initial bg-label-success rounded-circle"><i class="bx bx-user-check fs-4"></i></span>
                             </div>
                             <div class="card-info">
-                                <h5 class="card-title mb-0 me-2" id="currently-admit">0</h5>
-                                <small class="text-muted">Currently Admitted</small>
+                                <a target="_blank" href="{{route('pos.in_patient_admission_list')}}">
+
+                                    <h5 class="card-title mb-0 me-2" id="currently-admit">0</h5>
+                                    <small class="text-muted">Currently Admitted</small>
+                                </a>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -886,7 +891,7 @@
 
         // Update count cards
         $('#total-procedures').text(stats.total_procedures.toLocaleString());
-        $('#currently-admit').text(stats.admitted_count.toLocaleString());
+        $('#currently-admit').text(stats.currently_admitted_count.toLocaleString());
         $('#discharged').text(stats.discharged_count.toLocaleString());
         $('#cancelled').text(stats.cancelled_count.toLocaleString());
         $('#referred').text(stats.referred_count.toLocaleString());

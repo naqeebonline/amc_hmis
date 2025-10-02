@@ -146,6 +146,7 @@ class ProcedureDashboardController extends Controller
             'total_hospital_share' => $data->sum('procedure_rate') - $data->sum('consultant_share_amount'),
             'avg_procedure_amount' => $data->avg('procedure_rate') ?? 0,
             'admitted_count' => $data->where('admission_status', 'Admit')->count(),
+            'currently_admitted_count' => InPatientAdmission::where('admission_status', 'Admit')->where('is_active',1)->count(),
             'discharged_count' => $data->where('admission_status', 'Discharged')->count(),
             'cancelled_count' => $data->where('admission_status', 'Canceled')->count(),
             'referred_count' => $data->where('admission_status', 'Reffered')->count(),
