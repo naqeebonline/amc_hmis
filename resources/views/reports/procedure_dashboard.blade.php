@@ -36,6 +36,7 @@
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     }
 
+    
     .chart-card {
         background: white;
         border-radius: 15px;
