@@ -526,6 +526,15 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/appointment-dashboard/day-appointments', [\App\Http\Controllers\AppointmentDashboardController::class, 'dayAppointments'])->name('appointment.dashboard.day');
 
+    // Daily Product Sales Dashboard Routes
+    Route::get('daily-product-sales', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'index'])->name('reports.daily_product_sales');
+    Route::get('daily-product-sales/data', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getProductSalesData'])->name('reports.daily_product_sales.data');
+    Route::get('daily-product-sales/with-cost', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getProductSalesWithPurchasePrice'])->name('reports.daily_product_sales.with_cost');
+    Route::get('daily-product-sales/chart', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getDailySalesChart'])->name('reports.daily_product_sales.chart');
+    Route::get('daily-product-sales/top-products', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getTopSellingProducts'])->name('reports.daily_product_sales.top_products');
+    Route::get('daily-product-sales/statistics', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getSalesStatistics'])->name('reports.daily_product_sales.statistics');
+    Route::get('daily-product-sales/print', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'exportPrintableReport'])->name('reports.daily_product_sales.print');
+
     // New Retail Sale Point Route
     Route::get('retail-sale-point', [\App\Http\Controllers\Admin\SaleController::class, 'retail_sale_point'])->name('pos.retail_sale_point');
 });

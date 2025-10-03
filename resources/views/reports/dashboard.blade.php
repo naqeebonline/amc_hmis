@@ -100,6 +100,41 @@
                     </div>
 
                     <div class="col-lg-3 col-md-3 mb-4">
+                        <div class="card border-primary">
+                            <div class="card-header bg-label-primary">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar me-2">
+                                        <span class="avatar-initial bg-primary rounded-circle"><i class="bx bx-bar-chart-alt-2 fs-4"></i></span>
+                                    </div>
+                                    <div>
+                                        <h6 class="card-title mb-0 text-primary">Daily Product Sales</h6>
+                                        <small class="text-muted">Comprehensive product analysis</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="text-primary mb-1">Product Wise</h4>
+                                        <p class="mb-0 text-muted small">Date range sales analysis</p>
+                                    </div>
+                                    <div>
+                                        <a href="{{ route('reports.daily_product_sales') }}" class="btn btn-primary btn-sm">
+                                            <i class="bx bx-detail me-1"></i>View Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 85%"></div>
+                                    </div>
+                                    <small class="text-muted">Complete sales insights with filters</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-3 mb-4">
                         <div class="card border-warning">
                             <div class="card-header bg-label-warning">
                                 <div class="d-flex align-items-center">
