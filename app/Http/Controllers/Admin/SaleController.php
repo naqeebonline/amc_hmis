@@ -576,6 +576,26 @@ class SaleController extends Controller
             $item_details = [];
             foreach (request()->ProductList as $row) {
                 $TotalSale = ($TotalSale) + (($row['Quantity'] * ($row['UnitePrice'])));
+
+                // Get product to validate discount
+                $product = Product::find($row['ProductID']);
+                $allowPercentage = $product->allow_percentage ?? null;
+                $requestedDiscount = $row['discount_percentage'] ?? 0;
+                $finalDiscountPercentage = 0;
+
+                if ($allowPercentage === 0) {
+                    // If allow_percentage is zero, don't apply any discount
+                    $finalDiscountPercentage = 0;
+                } else if ($allowPercentage > 0) {
+                    // If product has allow_percentage limit
+                    $finalDiscountPercentage = ($requestedDiscount > $allowPercentage) ? $allowPercentage : $requestedDiscount;
+                } else {
+                    // No allow_percentage field set (null) - apply user's discount
+                    $finalDiscountPercentage = $requestedDiscount;
+                }
+
+                $discountAmount = ($row['Quantity'] * $row['UnitePrice'] * $finalDiscountPercentage) / 100;
+
                 $item_details[] = array(
                     'store_id'   => session('store_id'),
                     'SaleID'   => $last_id, //$sale->SaleID,
@@ -587,7 +607,9 @@ class SaleController extends Controller
                     'taxPercentage'  => $row['taxPercentage'],
                     'dose_type'  => $row['dose_type'],
                     'Quantity'  => $row['Quantity'],
-                    'UnitePrice'  => $row['UnitePrice'],
+                    'discount_percentage' => $finalDiscountPercentage,
+                    'discount_percentage_amount' => $discountAmount,
+                    'discount_percentage_amount' => $discountAmount,
                 );
             }
 
@@ -610,6 +632,34 @@ class SaleController extends Controller
         foreach (request()->ProductList as $row) {
             $soldQuantity = $row['Quantity'];
             $result = GrnDetails::where(["ProductID" => $row['ProductID'], "ProductStatus" => 1])->get();
+
+            // Get product to check allow_percentage
+            $product = Product::find($row['ProductID']);
+            $allowPercentage = $product->allow_percentage ?? 0;
+
+            // Apply discount based on allow_percentage logic
+            $requestedDiscount = $row['discount_percentage'] ?? 0;
+            $finalDiscountPercentage = 0;
+
+            if ($allowPercentage === 0) {
+                // If allow_percentage is zero, don't apply any discount
+                $finalDiscountPercentage = 0;
+            } else if ($allowPercentage > 0) {
+                // If product has allow_percentage limit
+                if ($requestedDiscount <= $allowPercentage) {
+                    // User's discount is within limit - apply user's discount
+                    $finalDiscountPercentage = $requestedDiscount;
+                } else {
+                    // User's discount exceeds limit - apply product's allow_percentage
+                    $finalDiscountPercentage = $allowPercentage;
+                }
+            } else {
+                // No allow_percentage field set (null) - apply user's discount
+                $finalDiscountPercentage = $requestedDiscount;
+            }
+
+            $discountAmount = ($row['Quantity'] * $row['UnitePrice'] * $finalDiscountPercentage) / 100;
+
             $Detail_array = array(
                 'store_id'   => session('store_id'),
                 'SaleID'   => $last_id,
@@ -619,6 +669,8 @@ class SaleController extends Controller
                 'UnitePrice'  => $row['UnitePrice'],
                 'taxPercentage'  => $row['taxPercentage'],
                 'dose_type'  => $row['dose_type'],
+                'discount_percentage' => $finalDiscountPercentage,
+                'discount_percentage_amount' => $discountAmount,
             );
             $applyTax = $row['taxPercentage'] / 100;
             foreach ($result as $key => $value) {
@@ -867,6 +919,8 @@ class SaleController extends Controller
         }*/
         $total = ($TotalSale) + $totalTax;
 
+        $invoice_discount = request()->invoice_discount ?? 0;
+
         $SaleArray = array(
             'SCID'     => $SupplierID,
             'InvoiceNo' => $Invoice,
@@ -875,6 +929,7 @@ class SaleController extends Controller
             'TotalSale'     => $total,
             'received_amount'     => $ReceivedAmount,
             'Discount'     =>  0,
+            'invoice_discount' => $invoice_discount,
             'sale_descriptions' => $bill_description,
             'CreatedBy'     => $userID,
             'CreatedAt'     => date('Y-m-d')
@@ -894,12 +949,55 @@ class SaleController extends Controller
 
         foreach (request()->ProductList as $row) {
             $soldQuantity = $row['Quantity'];
+
+            // Validate product discount (same as retail sale)
+            $product = Product::find($row['ProductID']);
+            $discount_percentage = isset($row['discount_percentage']) ? $row['discount_percentage'] : 0;
+            $discount_percentage_amount = isset($row['discount_percentage_amount']) ? $row['discount_percentage_amount'] : 0;
+
+            $returnQuantity = isset($row['ReturnQuantity']) ? $row['ReturnQuantity'] : 0;
+
+            // Calculate actual quantity after returns
+            $actualQuantity = $soldQuantity - $returnQuantity;
+
+            // Apply same rules as retail sale:
+            // 1. If allow_percentage is 0, don't apply any discount
+            // 2. If requested discount > allowed, apply the allowed percentage
+            // 3. If requested discount <= allowed, apply the requested percentage
+            // 4. If quantity after return is zero, then discount_percentage_amount = 0
+            if ($actualQuantity <= 0) {
+                // Rule 4: If quantity after return is zero, then discount_percentage_amount = 0
+                $discount_percentage_amount = 0;
+            } else if ($product) {
+                $allowPercentage = $product->allow_percentage ?? 0;
+
+                if ($allowPercentage === 0) {
+                    // Rule 3: If allow_percentage is zero, don't apply percentage
+                    $discount_percentage = 0;
+                    $discount_percentage_amount = 0;
+                } else if ($discount_percentage > $allowPercentage) {
+                    // Rule 1: If requested > allowed, apply the allowed percentage
+                    $discount_percentage = $allowPercentage;
+                    $unitPrice = $row['UnitePrice'];
+                    // Bill Amount = (quantity - returnquantity) * UnitePrice
+                    $itemTotal = $unitPrice * $actualQuantity;
+                    $discount_percentage_amount = ($itemTotal * $allowPercentage) / 100;
+                } else {
+                    // Rule 2: If requested <= allowed, apply the requested percentage
+                    $unitPrice = $row['UnitePrice'];
+                    $itemTotal = $unitPrice * $actualQuantity;
+                    $discount_percentage_amount = ($itemTotal * $discount_percentage) / 100;
+                }
+            }
             $Detail_array = array(
                 'SaleID'   => $last_id,
                 'ProductID' => $row['ProductID'],
                 'UnitePrice'  => $row['UnitePrice'],
                 'taxPercentage'  => $row['taxPercentage'],
                 'taxAmount'  => $row['taxAmount'],
+                'discount_percentage' => $discount_percentage,
+                'discount_percentage_amount' => $discount_percentage_amount,
+                'ReturnQuantity' => $returnQuantity,
             );
             $Detail_array['Quantity'] = $soldQuantity;
             TempSaleDetails::create($Detail_array);
@@ -1086,17 +1184,11 @@ class SaleController extends Controller
 
     public function return_pharmacy_item()
     {
-
-
         $sale_details = SaleDetails::where(["SDID" => request()->SDID])->first();
-
         $sale = Sale::where(["SaleID" => $sale_details->SaleID])->first();
 
         $admission_id = $sale->admission_id;
         $sale_id = $sale->SaleID;
-
-        $admission_id = $sale->admission_id;
-
         $is_admitted_patient = "no";
 
         //---- check if patient is admitt or not  ---//
@@ -1110,32 +1202,129 @@ class SaleController extends Controller
         }
         //----- end of check -----//
 
-
-
-
-
         $retrun_qty = request()->ReturnQuantity;
-
         $total_return_qty = ($sale_details->ReturnQuantity) + ($retrun_qty);
 
-        $total_sale_amount = ($sale->TotalSale) - ((request()->return_amount) + (request()->return_discount_amount));
+        // Update the sale_details return quantity and recalculate discount amounts
+        $active_quantity_after_return = max(0, $sale_details->Quantity - $total_return_qty);
+
+        // Calculate new proportional discount amount for the returned item
+        $new_discount_percentage_amount = 0;
+        if ($active_quantity_after_return > 0 && $sale_details->Quantity > 0) {
+            $proportion = $active_quantity_after_return / $sale_details->Quantity;
+            if (isset($sale_details->discount_percentage_amount) && $sale_details->discount_percentage_amount > 0) {
+                $new_discount_percentage_amount = $sale_details->discount_percentage_amount * $proportion;
+            } else if (isset($sale_details->discount_percentage) && $sale_details->discount_percentage > 0) {
+                $line_amount_before_discount = $active_quantity_after_return * $sale_details->UnitePrice;
+                $new_discount_percentage_amount = ($line_amount_before_discount * $sale_details->discount_percentage) / 100;
+            }
+        }
+
+        // Update the specific returned item first
+        SaleDetails::where(["SDID" => request()->SDID])->update([
+            'ReturnQuantity' => $total_return_qty,
+            'discount_percentage_amount' => $new_discount_percentage_amount,
+            'return_by' => auth()->user()->id
+        ]);
+        TempSaleDetails::where(["SaleID" => $sale_details->SaleID, "ProductID" => $sale_details->ProductID])->update([
+            'ReturnQuantity' => $total_return_qty,
+            'discount_percentage_amount' => $new_discount_percentage_amount,
+            'return_by' => auth()->user()->id
+        ]);
+
+        // Now update discount_percentage_amount for ALL items in the sale based on their current active quantities
+        $all_sale_details = SaleDetails::where(["SaleID" => $sale_details->SaleID])->get();
+
+        foreach ($all_sale_details as $detail) {
+            $active_quantity = max(0, $detail->Quantity - $detail->ReturnQuantity);
+            $updated_discount_amount = 0;
+
+            if ($active_quantity > 0 && $detail->Quantity > 0) {
+                $proportion = $active_quantity / $detail->Quantity;
+
+                // Get the original discount amount (before any returns)
+                $original_discount_amount = 0;
+                if (isset($detail->discount_percentage) && $detail->discount_percentage > 0) {
+                    $original_line_amount = $detail->Quantity * $detail->UnitePrice;
+                    $original_discount_amount = ($original_line_amount * $detail->discount_percentage) / 100;
+                } else if (isset($detail->discount_percentage_amount)) {
+                    // If we already have a stored amount, use it as reference for proportion
+                    $original_discount_amount = $detail->discount_percentage_amount / ($detail->Quantity > 0 ? ($detail->Quantity - $detail->ReturnQuantity) / $detail->Quantity : 1);
+                }
+
+                $updated_discount_amount = $original_discount_amount * $proportion;
+            }
+
+            // Update the discount amount in database
+            SaleDetails::where(["SDID" => $detail->SDID])->update([
+                'discount_percentage_amount' => $updated_discount_amount
+            ]);
+            TempSaleDetails::where(["SaleID" => $detail->SaleID, "ProductID" => $detail->ProductID])->update([
+                'discount_percentage_amount' => $updated_discount_amount
+            ]);
+        }
+
+        // Fetch fresh data after updating ALL discount amounts
+        $all_sale_details = SaleDetails::where(["SaleID" => $sale_details->SaleID])->get();
+
+        $recalculated_total_before_discount = 0; // Sum of (Quantity - ReturnQuantity) * UnitePrice for all items
+        $recalculated_total_discount_amount = 0; // Sum of all ITEM discount amounts (no invoice_discount here)
+
+        foreach ($all_sale_details as $detail) {
+            $active_quantity = max(0, $detail->Quantity - $detail->ReturnQuantity); // Ensure non-negative
+            $line_amount_before_discount = $active_quantity * $detail->UnitePrice;
+            $recalculated_total_before_discount += $line_amount_before_discount;
+
+            // Calculate ITEM discount amount for this line - only if active_quantity > 0
+            // NOTE: invoice_discount is NOT applied to individual items, only to final bill
+            if ($active_quantity > 0) {
+                if (isset($detail->discount_percentage_amount) && $detail->discount_percentage_amount > 0) {
+                    // Proportional item discount for active quantity
+                    $proportion = $active_quantity / max(1, $detail->Quantity); // Avoid division by zero
+                    $line_discount_amount = $detail->discount_percentage_amount * $proportion;
+                    $recalculated_total_discount_amount += max(0, $line_discount_amount); // Ensure non-negative
+                } else if (isset($detail->discount_percentage) && $detail->discount_percentage > 0) {
+                    // Calculate item discount percentage
+                    $line_discount_amount = ($line_amount_before_discount * $detail->discount_percentage) / 100;
+                    $recalculated_total_discount_amount += max(0, $line_discount_amount); // Ensure non-negative
+                }
+            }
+            // If active_quantity is 0, item discount is automatically 0 (6% of 0 = 0)
+        }
+
+        // Calculate final amounts according to specifications
+        // TotalSale = amount before discount of sum of per item (no invoice_discount applied here)
+        $new_total_sale = max(0, $recalculated_total_before_discount); // Amount before discount, ensure non-negative
+
+        // received_amount = sum of per item sale amount - total discount per item - invoice_discount (applied to final bill only)
+        $amount_after_item_discounts = max(0, $recalculated_total_before_discount - $recalculated_total_discount_amount);
+        $new_received_amount = max(0, $amount_after_item_discounts - ($sale->invoice_discount ?? 0)); // Invoice discount applied to final bill only
 
 
         //---- check if patient is admitt then correct the bill otherwise make entry in pharmacy_return_items table for user closing balance.---//
         //--- close balance will adjust from pharmacy return table only amount will be minus from total sale amount of user during closing  ---//
 
-
         if (($is_admitted_patient == "yes" && $sale->received_amount == 0)) {
-            //dd(["TotalSale"=>$total_sale_amount,"Discount" => ($sale->Discount)-(request()->return_discount_amount)]);
             if ($sale->admission_id == 0) {  // if walking customer sale then also make changes in salepayment table
-                SalePayment::where(["sale_id" => $sale_details->SaleID])->update(["amount" => $total_sale_amount]);
+                SalePayment::where(["sale_id" => $sale_details->SaleID])->update(["amount" => $new_received_amount]);
             }
-            Sale::where(["SaleID" => $sale_details->SaleID])->update(["is_return_made" => 1, "ModifiedAt" => date("Y-m-d H:i:s"), "ModifiedBy" => auth()->user()->id, "TotalSale" => $total_sale_amount, "Discount" => ($sale->Discount) - (request()->return_discount_amount)]);
-            TempSale::where(["SaleID" => $sale_details->SaleID])->update(["is_return_made" => 1, "ModifiedAt" => date("Y-m-d H:i:s"), "ModifiedBy" => auth()->user()->id]);
-            SaleDetails::where(["SDID" => request()->SDID])->update(['ReturnQuantity' => $total_return_qty, 'return_by' => auth()->user()->id]);
-            TempSaleDetails::where(["SaleID" => $sale_details->SaleID, "ProductID" => $sale_details->ProductID])->update(['ReturnQuantity' => $total_return_qty, 'return_by' => auth()->user()->id]);
+            Sale::where(["SaleID" => $sale_details->SaleID])->update([
+                "is_return_made" => 1,
+                "ModifiedAt" => date("Y-m-d H:i:s"),
+                "ModifiedBy" => auth()->user()->id,
+                "TotalSale" => $new_total_sale,
+                "received_amount" => $new_received_amount,
+                "Discount" => $recalculated_total_discount_amount
+            ]);
+            TempSale::where(["SaleID" => $sale_details->SaleID])->update([
+                "is_return_made" => 1,
+                "ModifiedAt" => date("Y-m-d H:i:s"),
+                "ModifiedBy" => auth()->user()->id,
+                "TotalSale" => $new_total_sale,
+                "received_amount" => $new_received_amount,
+                "Discount" => $recalculated_total_discount_amount
+            ]);
         } else {
-
             PharmacyRetrun::create([
                 "sale_id" => $sale_details->SaleID,
                 "sale_detail_id" => request()->SDID,
@@ -1146,14 +1335,27 @@ class SaleController extends Controller
                 "created_at" => date("Y-m-d H:i:s"),
             ]);
 
-            Sale::where(["SaleID" => $sale_details->SaleID])->update(["is_return_made" => 1, "ModifiedAt" => date("Y-m-d H:i:s"), "ModifiedBy" => auth()->user()->id, "TotalSale" => $total_sale_amount, "Discount" => ($sale->Discount) - (request()->return_discount_amount)]);
-            TempSale::where(["SaleID" => $sale_details->SaleID])->update(["is_return_made" => 1, "ModifiedAt" => date("Y-m-d H:i:s"), "ModifiedBy" => auth()->user()->id]);
-            SaleDetails::where(["SDID" => request()->SDID])->update(['ReturnQuantity' => $total_return_qty, 'return_by' => auth()->user()->id]);
-            TempSaleDetails::where(["SaleID" => $sale_details->SaleID, "ProductID" => $sale_details->ProductID])->update(['ReturnQuantity' => $total_return_qty, 'return_by' => auth()->user()->id]);
+            Sale::where(["SaleID" => $sale_details->SaleID])->update([
+                "is_return_made" => 1,
+                "ModifiedAt" => date("Y-m-d H:i:s"),
+                "ModifiedBy" => auth()->user()->id,
+                "TotalSale" => $new_total_sale,
+                "received_amount" => $new_received_amount,
+                "Discount" => $recalculated_total_discount_amount
+            ]);
+            TempSale::where(["SaleID" => $sale_details->SaleID])->update([
+                "is_return_made" => 1,
+                "ModifiedAt" => date("Y-m-d H:i:s"),
+                "ModifiedBy" => auth()->user()->id,
+                "TotalSale" => $new_total_sale,
+                "received_amount" => $new_received_amount,
+                "Discount" => $recalculated_total_discount_amount
+            ]);
+
             if ($admission_id != 0) {
-                SalePayment::where(["admission_id" => $admission_id])->update(["amount" => $total_sale_amount]);
+                SalePayment::where(["admission_id" => $admission_id])->update(["amount" => $new_received_amount]);
             } else {
-                SalePayment::where(["sale_id" => $sale_details->SaleID])->update(["amount" => $total_sale_amount]);
+                SalePayment::where(["sale_id" => $sale_details->SaleID])->update(["amount" => $new_received_amount]);
             }
         }
         //-------- end of check  ------//
@@ -1240,7 +1442,7 @@ class SaleController extends Controller
                 if ($patient->ReturnQuantity == $patient->Quantity) {
                     return "";
                 } else {
-                    return '<a href="javascript:void(0)"  data-details=\'' . $patient . '\' sale-price=\'' . $patient->UnitePrice . '\' data-discount-percentage=\'' . $patient->sale->discount_percentage . '\'  class="btn btn-sm btn-primary return_product">Return</a>';
+                    return '<a href="javascript:void(0)"  data-details=\'' . $patient . '\' sale-price=\'' . $patient->UnitePrice . '\' data-discount-percentage=\'' . $patient->discount_percentage . '\'  class="btn btn-sm btn-primary return_product">Return</a>';
                 }
             })
             ->addColumn("total_amount", function ($value) {
