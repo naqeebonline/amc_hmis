@@ -249,8 +249,8 @@
                     },
 
                     {
-                        data: 'sale.discount_percentage',
-                        name: 'sale.discount_percentage',
+                        data: 'discount_percentage',
+                        name: 'discount_percentage',
                         searchable: true
                     },
 

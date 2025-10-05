@@ -42,7 +42,7 @@ class SupplierPayments extends Controller
 
     public function save_payments(Request $request)
     {
-       
+
         $data = $request->all();
         $data["CreatedBy"] = Auth::user()->id;
         $data["CreatedAt"] = Carbon::today();
@@ -64,13 +64,13 @@ class SupplierPayments extends Controller
             ->addColumn('payment_type', function ($data) {
                 return $data->paymentType->payment_type ?? ''; // Safeguard against null
             })
-           
+
             ->addColumn('action', function ($data) {
                 // Example: Add an Edit/Delete button for actions
                 return '<a class="btn btn-sm btn-primary">Edit</a>
                     <a class="btn btn-sm btn-danger">Delete</a>';
             })
-            ->rawColumns(['payment_type','action']) // Allow raw HTML for action buttons
+            ->rawColumns(['payment_type', 'action']) // Allow raw HTML for action buttons
             ->make(true);
     }
 
@@ -88,10 +88,11 @@ class SupplierPayments extends Controller
 
     // }
 
-    public function purchase_details($id=''){
-        
+    public function purchase_details($id = '')
+    {
+
         $data =  Grn::when($id, function ($query) use ($id) {
-            return $query->where("SCID",$id);
+            return $query->where("SCID", $id);
         });
         //  <a class="btn btn-sm btn-primary" href="'.route('pos.edit_purchase_bill',[$data->GRNID]).'">Edit</a>
         return DataTables::of($data)
@@ -100,28 +101,26 @@ class SupplierPayments extends Controller
             })
             ->addColumn('action', function ($data) {
 
-                return '<a class="btn btn-sm btn-success" href="'.route('pos.print_purchase',[$data->SCID, $data->GRNID]).'">Print Bill</a>
-                <a class="btn btn-sm btn-success" href="'.route('pos.add_bill_items',[$data->GRNID]).'">Edit</a>
+                return '<a class="btn btn-sm btn-success" href="' . route('pos.print_purchase', [$data->SCID, $data->GRNID]) . '">Print Bill</a>
+                <a class="btn btn-sm btn-success" href="' . route('pos.add_bill_items', [$data->GRNID]) . '">Edit</a>
                
                     <a class="btn btn-sm btn-danger">Delete</a>';
             })
-            ->rawColumns(['final_bill','action']) // Allow raw HTML for action buttons
+            ->rawColumns(['final_bill', 'action']) // Allow raw HTML for action buttons
             ->make(true);
-
-        
     }
 
-    function supplier_previous_balance($customer_id,$date=''){
-        $customer = Customer::where(["sup_cus_details.SCID"=>$customer_id])->first();
+    function supplier_previous_balance($customer_id, $date = '')
+    {
+        $customer = Customer::where(["sup_cus_details.SCID" => $customer_id])->first();
 
-        $openingBalance=$customer->OpeningBalance;
-        if(!$openingBalance){
-            $openingBalance=0;
+        $openingBalance = $customer->OpeningBalance;
+        if (!$openingBalance) {
+            $openingBalance = 0;
         }
-        $where=array('SCID'=>$customer_id);
-        if($date!=''){
-            $where['Date <']=$date;
-
+        $where = array('SCID' => $customer_id);
+        if ($date != '') {
+            $where['Date <'] = $date;
         }
         /*$TotalSale = Grn::where(["SCID"=>$customer_id])
             ->when($date, function ($query) use ($date) {
@@ -141,18 +140,17 @@ class SupplierPayments extends Controller
         $per_item_discount = $totals->per_item_discount;
 
 
-        $TotalPaid = PaymentDetail::where(["SCID"=>$customer_id])
+        $TotalPaid = PaymentDetail::where(["SCID" => $customer_id])
             ->when($date, function ($query) use ($date) {
-                return $query->where('Dated', '<', date("Y-m-d",strtotime($date)));
+                return $query->where('Dated', '<', date("Y-m-d", strtotime($date)));
             })->sum('Amount');
 
         $TotalAmount = ($openingBalance + $TotalSale) - ($totalDiscount) - ($per_item_discount) - $TotalPaid;
-        if($TotalAmount){
+        if ($TotalAmount) {
             return $TotalAmount;
-        }else{
+        } else {
             return 0;
         }
-
     }
 
     public function get_purchase_bill_items($id)
@@ -163,18 +161,18 @@ class SupplierPayments extends Controller
 
             ->addColumn('total', function ($data) {
                 return ($data->Quantity * $data->pack_price);
-
             })
             ->addColumn('action', function ($data) {
-                return '<a class="btn btn-sm btn-primary edit_bill_item" data-details=\''.$data.'\'>Edit</a>
+                return '<a class="btn btn-sm btn-primary edit_bill_item" data-details=\'' . $data . '\'>Edit</a>
                     ';
             })
-            ->rawColumns(['total','action']) // Allow raw HTML for action buttons
+            ->rawColumns(['total', 'action']) // Allow raw HTML for action buttons
             ->make(true);
     }
-    
 
-    public function add_bill_items($id){
+
+    public function add_bill_items($id)
+    {
         /*$data["products"]= Product::with('generic_name')
             ->when(session('store_id'),function ($q){
                 $q->where('store_id',session('store_id'));
@@ -193,7 +191,7 @@ class SupplierPayments extends Controller
             ->get();
         //$data["products"] = [];
         $data['grn'] = GrnRequest::where('GRNID', $id)->with("products")->with('store')->first();
-        $data['purchase'] = GrnRequestDetails::where('GRNID', $id)->with("products")->orderBy("GDID","DESC")->where(["ProductStatus" => 1])->paginate(400);
+        $data['purchase'] = GrnRequestDetails::where('GRNID', $id)->with("products")->orderBy("GDID", "DESC")->where(["ProductStatus" => 1])->paginate(400);
         $data['id'] = $id;
 
 
@@ -205,11 +203,11 @@ class SupplierPayments extends Controller
     public function print_thermel_purchase_details($SaleID)
     {
 
-        
+
         $date = date("Y-m-d");
 
         $data['record'] = Sale::where(['SaleID' => $SaleID])->get();
-        $data['patient'] = Patient::where(["id"=> $data['record'][0]->patient_id])->first();
+        $data['patient'] = Patient::where(["id" => $data['record'][0]->patient_id])->first();
         $customer_id = $data['record'][0]->SCID;
         $billDate = date("d-m-Y", strtotime($data['record'][0]->Date));
 
@@ -270,16 +268,16 @@ class SupplierPayments extends Controller
         $date = date("Y-m-d");
         $data['record'] = Sale::where(['SaleID' => $SaleID])->with('created_by')->first();
 
-        $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
+        $data['patient'] = Patient::where(["id" => $data['record']->patient_id])->first();
         $data['appointment_patient_name'] = 'Walking Customer';
-        if($data['record']->admission_id){
-            $data['appointment_patient_name'] = $data['patient'] ? "In-Patient <br><br>MR# ".$data['patient']->mr_no." | Name: ".$data['patient']->name : "";
-        }elseif ($data['record']->appointment_id){
+        if ($data['record']->admission_id) {
+            $data['appointment_patient_name'] = $data['patient'] ? "In-Patient <br><br>MR# " . $data['patient']->mr_no . " | Name: " . $data['patient']->name : "";
+        } elseif ($data['record']->appointment_id) {
             $appointments = Appointment::where('is_active', 1)
                 ->where('id', $data['record']->appointment_id) // last 5 days
                 ->with(['patient'])
                 ->first();
-            $data['appointment_patient_name'] = $appointments ? "Out Patient <br><br>MR# ".$appointments->patient?->mr_no." | Name: ".$appointments->patient?->name." <br><br>Appointment# ".$appointments->appointment_number : "";
+            $data['appointment_patient_name'] = $appointments ? "Out Patient <br><br>MR# " . $appointments->patient?->mr_no . " | Name: " . $appointments->patient?->name . " <br><br>Appointment# " . $appointments->appointment_number : "";
         }
 
         $customer_id = $data['record']->SCID;
@@ -334,13 +332,13 @@ class SupplierPayments extends Controller
 
 
         $data['TotalAmount'] = $totalAmount;
-        $data['TotalDiscount'] = ($totalAmount * $discount_percentage)/100;
+        $data['TotalDiscount'] = ($totalAmount * $discount_percentage) / 100;
 
         $data['show_customer_contact'] = "true";
 
         $data['customer'] = Customer::where("SCID", $customer_id)->get();
 
-      //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
         //$this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
 
 
@@ -353,16 +351,16 @@ class SupplierPayments extends Controller
         $data['record'] = TempSale::with(['created_by'])->where(['SaleID' => $SaleID])->first();
 
 
-        $data['patient'] = Patient::where(["id"=> $data['record']->patient_id])->first();
+        $data['patient'] = Patient::where(["id" => $data['record']->patient_id])->first();
         $data['appointment_patient_name'] = 'Walking Customer';
-        if($data['record']->admission_id){
-            $data['appointment_patient_name'] = $data['patient'] ? "In-Patient <br><br>MR# ".$data['patient']->mr_no." | Name: ".$data['patient']->name : "";
-        }elseif ($data['record']->appointment_id){
+        if ($data['record']->admission_id) {
+            $data['appointment_patient_name'] = $data['patient'] ? "In-Patient <br><br>MR# " . $data['patient']->mr_no . " | Name: " . $data['patient']->name : "";
+        } elseif ($data['record']->appointment_id) {
             $appointments = Appointment::where('is_active', 1)
                 ->where('id', $data['record']->appointment_id) // last 5 days
                 ->with(['patient'])
                 ->first();
-            $data['appointment_patient_name'] = $appointments ? "Out Patient <br><br>MR# ".$appointments->patient?->mr_no." | Name: ".$appointments->patient?->name." <br><br>Appointment# ".$appointments->appointment_number : "";
+            $data['appointment_patient_name'] = $appointments ? "Out Patient <br><br>MR# " . $appointments->patient?->mr_no . " | Name: " . $appointments->patient?->name . " <br><br>Appointment# " . $appointments->appointment_number : "";
         }
 
         $customer_id = $data['record']->SCID;
@@ -379,9 +377,30 @@ class SupplierPayments extends Controller
         $data['prev_balance'] = (new CustomerPayments())->customer_previous_balance($customer_id, '');
 
         foreach ($data['data'] as $rec) {
-            $rec->AvaliableQuantity = ($rec->Quantity) - ($rec->ReturnQuantity);
+            $rec->AvaliableQuantity = max(0, ($rec->Quantity) - ($rec->ReturnQuantity));
             $rec->totalAmount = ($rec->AvaliableQuantity) * ($rec->UnitePrice);
-            $totalAmount = ($totalAmount) + ($rec->totalAmount);
+
+            // Calculate proportional discount amount for active quantity after returns
+            if ($rec->AvaliableQuantity > 0) {
+                if (isset($rec->discount_percentage_amount) && $rec->discount_percentage_amount > 0) {
+                    // Calculate proportional discount based on active quantity
+                    $proportion = $rec->AvaliableQuantity / max(1, $rec->Quantity); // Avoid division by zero
+                    $rec->itemDiscountAmount = $rec->discount_percentage_amount * $proportion;
+                } else if (isset($rec->discount_percentage) && $rec->discount_percentage > 0) {
+                    // Calculate discount from percentage for active quantity
+                    $rec->itemDiscountAmount = ($rec->totalAmount * $rec->discount_percentage) / 100;
+                } else {
+                    $rec->itemDiscountAmount = 0;
+                }
+            } else {
+                // If no active quantity, no discount
+                $rec->itemDiscountAmount = 0;
+            }
+
+            // Apply discount to total amount
+            $rec->totalAmountAfterDiscount = max(0, $rec->totalAmount - $rec->itemDiscountAmount);
+            $totalAmount = ($totalAmount) + ($rec->totalAmountAfterDiscount);
+
             if ($rec->ReturnQuantity > 0) {
                 $return = "Yes";
             }
@@ -417,13 +436,13 @@ class SupplierPayments extends Controller
 
 
         $data['TotalAmount'] = $totalAmount;
-        $data['TotalDiscount'] = ($totalAmount * $discount_percentage)/100;
+        $data['TotalDiscount'] = ($totalAmount * $discount_percentage) / 100;
 
         $data['show_customer_contact'] = "true";
 
         $data['customer'] = Customer::where("SCID", $customer_id)->get();
 
-      //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
         //$this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
 
 
@@ -492,13 +511,13 @@ class SupplierPayments extends Controller
 
 
         $data['TotalAmount'] = $totalAmount;
-        $data['TotalDiscount'] = ($totalAmount * $discount_percentage)/100;
+        $data['TotalDiscount'] = ($totalAmount * $discount_percentage) / 100;
 
         $data['show_customer_contact'] = "true";
 
         $data['customer'] = [];
 
-      //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
+        //  $this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
         //$this->printFormattedReceipt($data['data'], $data['record'], $data['patient'], $data['TotalDiscount']);
 
 
@@ -512,7 +531,7 @@ class SupplierPayments extends Controller
             $printer = new Printer($connector);
 
             $printer->setJustification(Printer::JUSTIFY_CENTER);
-            $printer->text(env('COMPANY_NAME')."\n");
+            $printer->text(env('COMPANY_NAME') . "\n");
             $printer->text(date("d-m-Y h:i A") . "\n");
             $printer->text("------------------------------------------\n");
 
@@ -524,10 +543,10 @@ class SupplierPayments extends Controller
             // Table Header
             $printer->text(
                 str_pad("No", 4) .
-                str_pad("Item", 18) .
-                str_pad("Qty", 5, ' ', STR_PAD_LEFT) .
-                str_pad("Price", 7, ' ', STR_PAD_LEFT) .
-                str_pad("Amt", 8, ' ', STR_PAD_LEFT) . "\n"
+                    str_pad("Item", 18) .
+                    str_pad("Qty", 5, ' ', STR_PAD_LEFT) .
+                    str_pad("Price", 7, ' ', STR_PAD_LEFT) .
+                    str_pad("Amt", 8, ' ', STR_PAD_LEFT) . "\n"
             );
             $printer->text("------------------------------------------\n");
 
@@ -543,10 +562,10 @@ class SupplierPayments extends Controller
 
                 $printer->text(
                     str_pad($i++, 4) .
-                    str_pad($name, 18) .
-                    str_pad($qty, 5, ' ', STR_PAD_LEFT) .
-                    str_pad($price, 7, ' ', STR_PAD_LEFT) .
-                    str_pad($amount, 8, ' ', STR_PAD_LEFT) . "\n"
+                        str_pad($name, 18) .
+                        str_pad($qty, 5, ' ', STR_PAD_LEFT) .
+                        str_pad($price, 7, ' ', STR_PAD_LEFT) .
+                        str_pad($amount, 8, ' ', STR_PAD_LEFT) . "\n"
                 );
 
                 if ($d->ReturnQuantity > 0) {
@@ -569,20 +588,20 @@ class SupplierPayments extends Controller
             $printer->close();
 
             return response("Printed successfully");
-
         } catch (\Exception $e) {
             return response("Print failed: " . $e->getMessage(), 500);
         }
     }
 
-    public function previous_bills(){
+    public function previous_bills()
+    {
         $bills = Sale::orderBy("SaleID", "DESC")->with("patient")
-            ->where('store_id',env('SEHAT_CARD_PHARMACY_STORE_ID'))
+            ->where('store_id', env('SEHAT_CARD_PHARMACY_STORE_ID'))
 
             ->limit(50);
 
         return DataTables::of($bills)
-            
+
             ->addColumn('action', function ($data) {
                 return '<a target="_blank" href="' . route("pos.print_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Thermal</a>';
             })
@@ -591,13 +610,14 @@ class SupplierPayments extends Controller
             ->make(true);
     }
 
-    public function retail_previous_bills(){
+    public function retail_previous_bills()
+    {
         $bills = Sale::orderBy("SaleID", "DESC")->with("patient")->with('created_by')
-            ->when(session('store_id'),function ($q){
-                $q->where('store_id',session('store_id'));
+            ->when(session('store_id'), function ($q) {
+                $q->where('store_id', session('store_id'));
             })
-            ->where("admission_id","=",0)
-           /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
+            ->where("admission_id", "=", 0)
+            /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
                 return $q->where(["CreatedBy" => auth()->user()->id]);
             })*/
             ->limit(600);
@@ -607,11 +627,11 @@ class SupplierPayments extends Controller
             ->addColumn('action', function ($data) {
                 $buttons = "";
                 $buttons .= '<a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
-                if($data->is_return_made == 1){
+                if ($data->is_return_made == 1) {
                     /*$buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';*/
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
-                    $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
-                }else{
+                    $buttons .= '&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
+                } else {
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                 }
 
@@ -621,20 +641,21 @@ class SupplierPayments extends Controller
             ->make(true);
     }
 
-    public function pharmacy_transfer_bills(){
+    public function pharmacy_transfer_bills()
+    {
         $bills = PharmacyTransfer::orderBy("id", "DESC")->with("patient")->with('created_by')
-            ->where("admission_id","=",0)
+            ->where("admission_id", "=", 0)
             ->limit(600);
 
         return DataTables::of($bills)
 
             ->addColumn('action', function ($data) {
                 $buttons = "";
-                if($data->is_return_made == 1){
+                if ($data->is_return_made == 1) {
                     /*$buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';*/
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_pharmacy_transfer_bill", [$data->id]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
-                    $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
-                }else{
+                    $buttons .= '&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
+                } else {
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_pharmacy_transfer_bill", [$data->id]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                 }
 
@@ -644,15 +665,16 @@ class SupplierPayments extends Controller
             ->make(true);
     }
 
-    public function in_patient_retail_previous_bills(){
+    public function in_patient_retail_previous_bills()
+    {
         $bills = Sale::orderBy("SaleID", "DESC")->with("patient")->with('created_by')
-            ->when(session('store_id'),function ($q){
-                $q->where('store_id',session('store_id'));
+            ->when(session('store_id'), function ($q) {
+                $q->where('store_id', session('store_id'));
             })
-           /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
+            /* ->when((userRole() != "Super Admin" && userRole() != "Receiption User"), function ($q) {
                 return $q->where(["CreatedBy" => auth()->user()->id]);
             })*/
-           ->where("admission_id","!=",0)
+            ->where("admission_id", "!=", 0)
             ->limit(600);
 
         return DataTables::of($bills)
@@ -660,11 +682,11 @@ class SupplierPayments extends Controller
             ->addColumn('action', function ($data) {
                 $buttons = "";
                 $buttons .= '<a target="_blank" href="' . route("pos.return_pharmacy_product", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Return</a>';
-                if($data->is_return_made == 1){
+                if ($data->is_return_made == 1) {
                     /*$buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';*/
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_retail_thermel_purchase_details", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
-                    $buttons .='&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
-                }else{
+                    $buttons .= '&nbsp;&nbsp;<a class="btn btn-sm btn-danger" title="Return is taken in this invoice" href="javascript:void(0)" style="height:5px;width:5px;font-weight: bold;">&nbsp;&nbsp;.&nbsp;&nbsp;</a>';
+                } else {
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                 }
 
@@ -673,32 +695,29 @@ class SupplierPayments extends Controller
             ->rawColumns(["action"])
             ->make(true);
     }
-    
-    public function print_purchase($SCID, $GRNID){
+
+    public function print_purchase($SCID, $GRNID)
+    {
         $data["supplier"] = Customer::where("Type", 1)->where("SCID", $SCID)->with("market")->first();
-        $data["products"]= Product::where("IsActive", 1)->get();
-        $data['purchase'] = GrnDetails::where('GRNID', $GRNID)->with("grn","products")->orderBy("GDID","DESC")->where(["GRNID" => $GRNID])->get();
-        $data['id'] = $GRNID;
-        
-        // return $data;
-        return view('reports/print_purchase', $data);
-    }
-
-    public function print_purchase_request($SCID, $GRNID){
-        $data["supplier"] = Customer::where("Type", 1)->where("SCID", $SCID)->with("market")->first();
-        $data["products"]= Product::where("IsActive", 1)->get();
-        $data["grn_request"]= GrnRequest::where("GRNID", $GRNID)->first();
-        $data['purchase'] = GrnRequestDetails::where('GRNID', $GRNID)->with("products")->orderBy("GDID","DESC")->where(["GRNID" => $GRNID])->get();
-
-
+        $data["products"] = Product::where("IsActive", 1)->get();
+        $data['purchase'] = GrnDetails::where('GRNID', $GRNID)->with("grn", "products")->orderBy("GDID", "DESC")->where(["GRNID" => $GRNID])->get();
         $data['id'] = $GRNID;
 
         // return $data;
         return view('reports/print_purchase', $data);
     }
 
+    public function print_purchase_request($SCID, $GRNID)
+    {
+        $data["supplier"] = Customer::where("Type", 1)->where("SCID", $SCID)->with("market")->first();
+        $data["products"] = Product::where("IsActive", 1)->get();
+        $data["grn_request"] = GrnRequest::where("GRNID", $GRNID)->first();
+        $data['purchase'] = GrnRequestDetails::where('GRNID', $GRNID)->with("products")->orderBy("GDID", "DESC")->where(["GRNID" => $GRNID])->get();
 
 
-    
-    
+        $data['id'] = $GRNID;
+
+        // return $data;
+        return view('reports/print_purchase', $data);
+    }
 }
