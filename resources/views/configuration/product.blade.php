@@ -57,6 +57,7 @@
                                         <th >Purchase Price</th>
                                         <th >Sale Price</th>
                                         <th >Quantity Limit</th>
+                                        <th >Allow Discount %</th>
                                         <th >Barcode</th>
                                         <th  style="width: 10%">Action</th>
                                     </tr>
@@ -175,6 +176,12 @@
                         <div class="col-md-6 mb-3">
                             <label for="quantity_limit" class="form-label">Quantity Limit</label>
                             <input type="number" id="low_limit" name="low_limit" class="form-control" placeholder="Enter quantity limit" autocomplete="off">
+                        </div>
+
+                        <!-- Allow Percentage -->
+                        <div class="col-md-6 mb-3">
+                            <label for="allow_percentage" class="form-label">Allow Discount %</label>
+                            <input type="number" id="allow_percentage" name="allow_percentage" class="form-control" placeholder="Enter allowed discount percentage" autocomplete="off" min="0" max="100" step="0.01">
                         </div>
 
                         <!-- Barcode Number -->
@@ -296,6 +303,7 @@
             $("#SalePrice").val('');
             $("#low_limit").val('');
             $("#BarCode").val('');
+            $("#allow_percentage").val('');
             $("#main_category_id").val('');
             $("#sub_category_id").val('').trigger("change");
 
@@ -327,6 +335,7 @@
             $("#SalePrice").val(details.SalePrice);
             $("#low_limit").val(details.low_limit);
             $("#BarCode").val(details.BarCode);
+            $("#allow_percentage").val(details.allow_percentage || 0);
             $("#main_category_id").val(details.main_category_id);
 
             $("#item_form_id").val(details.item_form_id).trigger('change');;
@@ -439,6 +448,14 @@
                     {data: 'PurchasePrice', name: 'PurchasePrice',searchable: true},
                     {data: 'SalePrice', name: 'SalePrice',searchable: true},
                     {data: 'low_limit', name: 'low_limit',searchable: true},
+                    {
+                        data: 'allow_percentage',
+                        name: 'allow_percentage',
+                        searchable: true,
+                        render: function(data, type, row) {
+                            return (data || 0) + '%';
+                        }
+                    },
                     {data: 'BarCode', name: 'BarCode',searchable: true},
                     {data: 'action', name: 'action', orderable: false, searchable: false}
                 ],
