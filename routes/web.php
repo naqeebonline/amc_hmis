@@ -526,6 +526,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/appointment-dashboard/day-appointments', [\App\Http\Controllers\AppointmentDashboardController::class, 'dayAppointments'])->name('appointment.dashboard.day');
 
+
+    
     // Daily Product Sales Dashboard Routes
     Route::get('daily-product-sales', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'index'])->name('reports.daily_product_sales');
     Route::get('daily-product-sales/data', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getProductSalesData'])->name('reports.daily_product_sales.data');
