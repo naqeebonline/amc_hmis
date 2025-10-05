@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +13,13 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/run-optimize-clear', function (Request $request) {
+    // Optional: protect with a secret key
+    
+
+    Artisan::call('optimize:clear');
+    return "Optimize cleared successfully!";
+});
 
 Route::get("add_is_sync_field", [\App\Http\Controllers\Admin\StockController::class, 'add_is_sync_field']);
 Route::get("import_all_products_to_bill", [\App\Http\Controllers\Admin\StockController::class, 'import_all_products_to_bill'])->name('pos.import_all_products_to_bill');
@@ -527,7 +535,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/appointment-dashboard/day-appointments', [\App\Http\Controllers\AppointmentDashboardController::class, 'dayAppointments'])->name('appointment.dashboard.day');
 
 
-    
+
     // Daily Product Sales Dashboard Routes
     Route::get('daily-product-sales', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'index'])->name('reports.daily_product_sales');
     Route::get('daily-product-sales/data', [\App\Http\Controllers\Reports\DailyProductSalesController::class, 'getProductSalesData'])->name('reports.daily_product_sales.data');
