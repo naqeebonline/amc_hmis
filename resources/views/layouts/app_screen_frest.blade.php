@@ -213,7 +213,7 @@
             background: transparent;
             z-index: 1;
         }
-        /* .content-wrapper::after{
+        .content-wrapper::after{
             content:"";
             position: absolute;
             top: 0;
@@ -222,7 +222,7 @@
             background:linear-gradient(-45deg, #033775, #006ded);
             width: 100%;
             height: 200px;
-        } */
+        }
         .bg-navbar-theme .navbar-nav > .nav-link, .bg-navbar-theme .navbar-nav > .nav-item > .nav-link, .bg-navbar-theme .navbar-nav > .nav > .nav-item > .nav-link{
             color:#fff !important;
         }
@@ -264,6 +264,7 @@
         .menu-vertical .menu-item .menu-link{
             font-size: 0.85rem !important;
         }
+
     </style>
 </head>
 
@@ -285,9 +286,8 @@
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" style="background: #0250ab !important">
                 <div class="app-brand demo">
                     <a href="{{ route('home') }}" class="app-brand-link">
-                        <span class="app-brand-text demo menu-text fw-bold ms-2" style="color:white; text-decoration: underline; font-size: 16px;">
-                            <!-- <img src="{{ asset('assets/site-images/logo.png') }}" width="150"> -->
-                             AMC
+                        <span class="app-brand-text demo menu-text fw-bold ms-2">
+                            <img src="{{ asset('assets/site-images/logo.png') }}" width="150">
                         </span>
                     </a>
 
@@ -295,11 +295,6 @@
                         <i class="bx menu-toggle-icon d-none d-xl-block fs-4 align-middle"></i>
                         <i class="bx bx-x d-block d-xl-none bx-sm align-middle"></i>
                     </a>
-
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
-              <i class="bx menu-toggle-icon d-none d-xl-block fs-4 align-middle"></i>
-              <i class="bx bx-x d-block d-xl-none bx-sm align-middle"></i>
-            </a>
                 </div>
 
                 <div class="menu-divider mt-0"></div>
@@ -367,7 +362,7 @@
 
                     <li class="menu-item">
                         <a href="{{ url($current_app->route) }}" class="menu-link active">
-                        <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <span data-i18n="Dashboards" style="color: #FFFFFF">Dashboard</span>
                         </a>
                     </li>
@@ -465,7 +460,7 @@
                             <ul class="navbar-nav flex-row align-items-center ms-auto">
                                 @if(getUserRole() == "Super Admin" || getUserRole() == "Finance" || getUserRole() == "Receiption User")
                                     <li>
-                                        <a class="btn btn-sm btn-success" target="_blank" href="{{route('pos.syncData')}}" style="margin-right: 40px; color: white;font-weight: bold;">Sync Local Data</a>
+                                        <a class="btn btn-success" target="_blank" href="{{route('pos.syncData')}}" style="margin-right: 40px; color: white;font-weight: bold;">Sync Local Data</a>
                                     </li>
                                 @endif
                                 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
@@ -473,7 +468,7 @@
                                         <i class="bx bx-bell bx-sm"></i>
                                         <span class="badge bg-danger rounded-pill badge-notifications" id="notification_count"></span>
                                     </a>--}}
-                                    <select class="form-control form-control-sm" id="my_store_id">
+                                    <select class="form-control" id="my_store_id">
                                         <option value="">Select Store...</option>
                                         @foreach(app('stores') as $key => $value)
                                             <option value="{{$value->id}}" {{(session('store_id') == $value->id) ? "selected" : ""}}>{{$value->store_name}}</option>

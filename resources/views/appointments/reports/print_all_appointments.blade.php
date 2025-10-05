@@ -273,7 +273,6 @@
                 <td ></td>
                 <td ></td>
                 <td ></td>
-                <td ></td>
                 <td style="font-weight: bold" >{{ $totalFees }}</td>
                 <td style="font-weight: bold">{{$totalHospitalShare}}</td>
                 <td style="font-weight: bold">{{$totalConsultantShare}}</td>

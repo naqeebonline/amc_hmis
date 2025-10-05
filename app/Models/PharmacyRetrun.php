@@ -3,14 +3,12 @@
 namespace App\Models;
 
 use App\Models\Patient\Patient;
-use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PharmacyRetrun extends Model
 {
     use HasFactory;
-    use Syncable;
     protected $table = "pharmacy_return_items";
     protected $primaryKey = 'id';
     protected $guarded = ["id"];

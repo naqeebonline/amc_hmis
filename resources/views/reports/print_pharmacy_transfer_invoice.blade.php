@@ -34,9 +34,11 @@
 
     <div class="main">
         <h6 style="font-size: 14px">Invoice#: {{ $record->InvoiceNo ?? "" }} | Created At: {{ $record->CreatedAt ?? "" }}</h6>
-         
-         
-        <h6 style="font-size: 14px">{{ ucwords(str_replace('_', ' ', $record->transfer_type ?? ""))  }} </h6>
+        {{--<h6 style="font-size: 14px">Name: {{ $patient->name ?? '' }}</h6>--}}
+        @if($appointment_patient_name !='')
+            <h6 style="font-size: 14px">{!! $appointment_patient_name !!} </h6>
+        @endif
+
         <h6 style="font-size: 14px">Created By: {{ $record->created_by->name ?? "" }} | Printed By: {{ auth()->user()->name ?? "" }}</h6>
 
         <table style="margin-top: 5px">

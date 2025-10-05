@@ -113,23 +113,6 @@ class GeneralConfigController extends Controller
             ->make(true);
     }
 
-    public function print_service_type()
-    {
-        $serviceTypes = ServiceType::where(['is_active' => 1])
-            ->orderBy('name')
-            ->get();
-
-        return view('general_configuration.service_type_print', [
-            'title' => 'Akakhel Medical Complex - Service Type Report',
-            'hospitalName' => 'Akakhel Medical Complex',
-            'reportTitle' => 'Service Type Report',
-            'contactPhone' => '03149465659',
-            'contactEmails' => ['naqeebonline@gmail.com', 'info@amch.org.pk'],
-            'serviceTypes' => $serviceTypes,
-            'generated_at' => now(),
-        ]);
-    }
-
     public function save_service_type()
     {
         $code = str_replace(' ', '_', request()->name);

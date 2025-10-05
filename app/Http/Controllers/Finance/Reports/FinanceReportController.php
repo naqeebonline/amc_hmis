@@ -254,8 +254,7 @@ class FinanceReportController extends Controller
                 'fh.head_code',
                 'fh.name as head_title',
                 'ft.debit',
-                'ft.credit',
-                'ft.remarks'
+                'ft.credit'
             )
             ->where('ft.voucher_id', $voucher_id)
             ->where(function ($q) {
@@ -275,7 +274,6 @@ class FinanceReportController extends Controller
             $rows->push([
                 'head_code' => $t->head_code,
                 'head_title' => $t->head_title,
-                'remarks' => $t->remarks,
                 'debit' => $t->debit,
                 'credit' => $t->credit,
                 'balance' => $t->debit > 0 ? $t->debit : $t->credit,

@@ -2,14 +2,12 @@
 
 namespace App\Models\Patient;
 
-use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PatientNurseNote extends Model
 {
     use HasFactory;
-    use Syncable;
     protected $table = "patient_nurse_notes";
     protected $guarded = ["id"];
     protected $primaryKey = 'id';

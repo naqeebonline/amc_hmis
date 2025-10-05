@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Settings\Entities\MyRole;
@@ -10,7 +9,6 @@ use Modules\Settings\Entities\MyRole;
 class Users extends Model
 {
     use HasFactory;
-    use Syncable;
     protected $table = "users";
     protected $guarded = ["id"];
 

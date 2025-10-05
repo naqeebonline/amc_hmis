@@ -28,8 +28,7 @@ class SyncController extends Controller
 
         $syncedIds = [];
 
-        foreach ($records as $key => $data) {
-
+        foreach ($records as $data) {
             if (!isset($data['id'])) {
                 continue; // skip invalid
             }
@@ -68,34 +67,15 @@ public function syncLoclDataWithLive()
         "in_patient_admissions",
         "patient_investigations",
         "patients",
-        "products",
-        "product_kits",
-        "main_category",
-        "sub_category",
-        "item_generic_name",
-        "item_make",
         "consultants",
         "patient_investigation_result",
-        "patient_investigations_payments",
         "appointments",
         "sale",
         "sale_details",
-        "sale_payments",
         "temp_sale",
         "temp_sale_details",
         "grn",
         "grn_details",
-        "pharmacy_transfer",
-        "pharmacy_transfer_details",
-        "pharmacy_return_items",
-        "investigation_category",
-        "investigation_sub_category",
-        "investigation_sub_category_parameters",
-        "consultant_procedures",
-        "consultant_procedure_pricing",
-        "consultant_speciality",
-        "consultant_type",
-
 
     ];
 

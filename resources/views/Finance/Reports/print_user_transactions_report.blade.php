@@ -356,7 +356,7 @@
                     <tr>
                         <td>{{$key + 1}}</td>
                         <td>
-                            <a target="_blank" href="{{route('pos.print_customer_bill',[$value->sale_id ?? 0])}}">
+                            <a target="_blank" href="{{route('pos.print_retail_thermel_purchase_details',[$value->sale_id ?? 0])}}">
                                 {{$value->sale?->InvoiceNo ?? "In-Patient Amount Received on Discharge"}}
                         </a>
                     </td>
@@ -379,46 +379,7 @@
             </table>
         @endif
 
-        @if(count($pharmacy_item_returns) > 0)
-            <p style="text-align: center; font-weight: bold; font-size:15px;margin-top: 6px">Pharmacy Sale Details</p>
-            <table style="width: 100%">
-                <tr>
-                    <th style="width: 10%">S.No</th>
-                    <th style="width: 20%">Product Name</th>
-                    <th style="width: 10%">Return Qty</th>
-                    <th style="width: 10%">Unit Price</th>
-                    <th style="width: 10%">Return Amount</th>
-                    <th style="width: 10%">Return By</th>
-                </tr>
-                <?php $total_return=0; ?>
-                @foreach($pharmacy_item_returns as $key => $value)
-                    <?php $total_return = ($total_return) + ($value->returnAmount ?? 0); ?>
-                    @if($value->admission_id == 0 || $value->admission_id == "null")
-
-                        <tr>
-                            <td style="width: 5%">{{$key + 1}}</td>
-                            <td style="width: 15%">{{$value->product->ProductName ?? ''}}</td>
-                            <td style="width: 10%">{{$value->ReturnQuantity}}</td>
-                            <td style="width: 10%">{{$value->UnitePrice}}</td>
-                            {{--<td style="width: 10%">{{($value->ReturnQuantity) * ($value->UnitePrice)}}</td>--}}
-                            <td style="width: 10%">{{$value->returnAmount ?? "0"}}</td>
-                            <td style="width: 10%">{{$value->return_by_user->name ?? ''}}</td>
-
-                        </tr>
-                    @endif
-                @endforeach
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><b>Total:</b></td>
-                    <td><b>{{$total_return}}</b></td>
-                    <td></td>
-                </tr>
-            </table>
-
-
-       @endif
+     
     </section>
 
 

@@ -1798,36 +1798,10 @@ class PatientAdmissionController extends Controller
 
     public function calculate_patient_discharge_amount()
     {
-
-        $patient_admission = InPatientAdmission::where("id",request()->admission_id)->first();
-        if(request()->has('consultant_charges') && $patient_admission->consultant_charges != request()->consultant_charges){
-            $consultant_charges = request()->consultant_charges;
-            $consultant_share_amount = ($consultant_charges) * (($patient_admission->consultant_share ?? 0)/100);
-            InPatientAdmission::where("id",request()->admission_id)->update(
-                [
-                    "consultant_charges"            => request()->consultant_charges,
-                    "consultant_share_amount"       => $consultant_share_amount,
-                    "updated_by"            => auth()->user()->id,
-                    "updated_at"            => date("Y-m-d H:i:s"),
-                ]
-            );
-        }
-        if(request()->has('procedure_rate') && $patient_admission->procedure_rate != request()->procedure_rate){
-            InPatientAdmission::where("id",request()->admission_id)->update(
-                [
-                    "procedure_rate"            => request()->procedure_rate,
-                    "updated_by"            => auth()->user()->id,
-                    "updated_at"            => date("Y-m-d H:i:s"),
-                ]
-            );
-        }
-       // dd($patient_admission);
-
         $service_charges_id = request()->service_charges_id;
         $service_charges_amount = request()->service_charges_amount;
         $data = [];
-        $user_role = getUserRole();
-
+        
         foreach ($service_charges_id as $key => $value){
             $service = ServiceType::where("id",$service_charges_id[$key])->first();
             $data= [
@@ -1836,17 +1810,18 @@ class PatientAdmissionController extends Controller
                 "service_type_id" => $service_charges_id[$key],
                 "actual_price" => $service->price ?? 0,
                 "service_rate" => $service_charges_amount[$key],
-                "service_date" => date("Y-m-d H:i:s-"),
-                "created_at" => date("Y-m-d H:i:s-"),
+                "service_date" => date("Y-m-d H:i:s"),
+                "created_by" => auth()->user()->id,
+                "is_posted" => 0,
+                "created_at" => date("Y-m-d H:i:s"),
             ];
-            //---- its because closing amount goes to super admin when created_by updated on super admin id ---/
-            if($user_role != "Super Admin"){
-                $data['created_by'] = auth()->user()->id;
-            }
-            PatientServiceCharges::updateOrCreate(
+            $param = ["patient_id" => request()->patient_id, "admission_id" => request()->admission_id, "service_type_id" => $service_charges_id[$key],"is_active"=>1];
+          
+         $res =   PatientServiceCharges::updateOrCreate(
                 ["patient_id" => request()->patient_id, "admission_id" => request()->admission_id, "service_type_id" => $service_charges_id[$key],"is_active"=>1],
                 $data
             );
+            
         }
         return redirect()->back()->with("success","Record Saved Successfully");
     }
@@ -1859,7 +1834,9 @@ class PatientAdmissionController extends Controller
         $pharmacy_sale = request()->pharmacy_sale ?? 0;
 
         if($investigations > 0){
-            PatientInvestigationPayment::create([
+            PatientInvestigationPayment::updateOrCreate(
+                ["patient_id"=>request()->patient_id,"admission_id"=>request()->admission_id],
+                [
                 "patient_id"=>request()->patient_id,
                 "admission_id"=>request()->admission_id,
                 "amount"=>$investigations,
@@ -1869,9 +1846,9 @@ class PatientAdmissionController extends Controller
             ]);
         }
         if($pharmacy_sale > 0){
-            SalePayment::create([
-                "patient_id"=>request()->patient_id,
-                "admission_id"=>request()->admission_id,
+            SalePayment::updateOrCreate(
+                ["patient_id"=>request()->patient_id,"admission_id"=>request()->admission_id],
+                [
                 "amount"=>$pharmacy_sale,
                 "remarks"=>"payment_received_on_discharge",
                 "created_by"=>auth()->user()->id,

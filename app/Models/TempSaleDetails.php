@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TempSaleDetails extends Model
 {
     use HasFactory;
-    use Syncable;
     protected $table = "temp_sale_details";
     protected $primaryKey = 'id';
     protected $guarded = ["id"];

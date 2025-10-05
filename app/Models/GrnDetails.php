@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\Syncable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class GrnDetails extends Model
 {
     use HasFactory;
-    use Syncable;
     protected $table = "grn_details";
     protected $primaryKey = 'GDID';
     protected $guarded = ["GDID"];

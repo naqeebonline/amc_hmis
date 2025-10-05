@@ -233,8 +233,7 @@
             <thead>
             <tr>
                 <th style="width:5%">S.No</th>
-                <th style="width:30%">Remarks</th>
-                <th style="width:30%">Account Title</th>
+                <th style="width:55%">Account Title</th>
                 <th>Debit (Rupees)</th>
                 <th>Credit (Rupees)</th>
                 <th>Balance</th>
@@ -245,7 +244,6 @@
 
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $row['remarks'] ?? "" }}</td>
                     <td>{{ $row['head_code'] }} - {{ $row['head_title'] }}</td>
                     <td>{{ number_format($row['debit'], 0) }}</td>
                     <td>{{ number_format($row['credit'], 0) }}</td>
@@ -260,7 +258,7 @@
 
             @endforeach
             <tr>
-                <td colspan="3"><strong>Total in Words: {{ numberToWords($totalDebit) }}</strong></td>
+                <td colspan="2"><strong>Total in Words: {{ numberToWords($totalDebit) }}</strong></td>
                 <td><strong></strong></td>
                 <td><strong>{{ number_format($totalCredit, 0) }}</strong></td>
                 <td></td>
