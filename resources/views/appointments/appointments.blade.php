@@ -190,14 +190,14 @@
                     <input type="hidden" id="cnic" name="cnic" class="form-control form-control-sm" placeholder="" value="0" autocomplete="off" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="13" title="Only digits are allowed" />
                     <input type="hidden" id="father_husband_name" name="father_husband_name" class="form-control form-control-sm" placeholder="" autocomplete="off">
                     <input type="hidden" name="district_id" id="district_id" class="form-control form-control-sm" value="22">
-                    <input type="date" style="pointer-events: none; display: none;" required id="regdate" value="{{ date('Y-m-d') }}" name="regdate" class="form-control form-control-sm" autocomplete="off">
+                    <input type="date" style="pointer-events: none; width:200px; float:right;" required id="regdate" value="{{ date('Y-m-d') }}" name="regdate" class="form-control form-control-sm" autocomplete="off">
                     <input type="date" required id="dob" name="dob" class="form-control form-control-sm" style="display: none;" autocomplete="off">
 
                     <!-- Search & OPD Details -->
                     <div class="compact-section">
                         <div class="section-title"><i class="fas fa-search"></i>Patient Search & OPD Details</div>
                         <div class="row g-2">
-                            <div class="col-md-3 mb-2">
+                            <div class="col-md-4 mb-2">
                                 <label for="mr_number" class="form-label">MR No</label>
                                 <div class="input-icon">
                                     <i class="fas fa-id-card"></i>
@@ -205,7 +205,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-3 mb-2">
+                            <div class="col-md-4 mb-2">
                                 <label for="opd_type_id" class="form-label">OPD Type<span class="asterisk">*</span></label>
                                 <select name="opd_type_id" required id="opd_type_id" class="form-select form-select-sm select2">
                                     <option value="">Select OPD Type</option>
@@ -223,19 +223,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2 mb-2">
-                                <label for="location_id" class="form-label">Location<span class="asterisk">*</span></label>
-                                <select name="location_id" required id="location_id" class="form-select form-select-sm">
-                                    <option value="">Select Location</option>
-                                    @foreach ($locations as $location)
-                                    @if($location->id == "53")
-                                    <option value="{{ $location->id }}" selected>{{ $location->name }}</option>
-                                    @else
-                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
-                                    @endif
-                                    @endforeach
-                                </select>
-                            </div>
+
 
                             <div class="col-md-3 mb-2">
                                 <label for="contact_no" class="form-label">Contact#<span class="asterisk">*</span></label>
@@ -269,10 +257,24 @@
                                     <option value="female">Female</option>
                                 </select>
                             </div>
+
+                            <div class="col-md-2 mb-2">
+                                <label for="location_id" class="form-label">Location<span class="asterisk">*</span></label>
+                                <select name="location_id" required id="location_id" class="form-select form-select-sm">
+                                    <option value="">Select Location</option>
+                                    @foreach ($locations as $location)
+                                    @if($location->id == "53")
+                                    <option value="{{ $location->id }}" selected>{{ $location->name }}</option>
+                                    @else
+                                    <option value="{{ $location->id }}">{{ $location->name }}</option>
+                                    @endif
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                     
+
 
                     <!-- Submit Button -->
                     <div class="text-center mt-3">
