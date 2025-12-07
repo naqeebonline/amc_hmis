@@ -548,3 +548,14 @@ Route::middleware(['auth'])->prefix('reports')->group(function () {
     Route::get('short-expiry-stats', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'getShortExpiryStats'])->name('reports.short_expiry_stats');
     Route::get('short-expiry-export', [\App\Http\Controllers\Pos\ShortExpiryReportController::class, 'exportShortExpiry'])->name('reports.short_expiry_export');
 });
+
+// HX Complaints Routes - Nursing Counter
+Route::middleware(['auth'])->group(function () {
+    Route::get('nursing-hx-complaints', [\App\Http\Controllers\Admin\HxComplaintController::class, 'nursing_hx_complaints'])->name('hx.nursing_hx_complaints');
+    Route::get('hx/get-today-appointments', [\App\Http\Controllers\Admin\HxComplaintController::class, 'get_today_appointments'])->name('hx.get_today_appointments');
+    Route::get('hx/get-appointment-details', [\App\Http\Controllers\Admin\HxComplaintController::class, 'get_appointment_details'])->name('hx.get_appointment_details');
+    Route::post('hx/save-hx-complaint', [\App\Http\Controllers\Admin\HxComplaintController::class, 'save_hx_complaint'])->name('hx.save_hx_complaint');
+    Route::get('hx/get-hx-complaint', [\App\Http\Controllers\Admin\HxComplaintController::class, 'get_hx_complaint'])->name('hx.get_hx_complaint');
+    Route::get('hx/get-list-hx-complaints', [\App\Http\Controllers\Admin\HxComplaintController::class, 'get_list_hx_complaints'])->name('hx.get_list_hx_complaints');
+    Route::post('hx/delete-hx-complaint', [\App\Http\Controllers\Admin\HxComplaintController::class, 'delete_hx_complaint'])->name('hx.delete_hx_complaint');
+});

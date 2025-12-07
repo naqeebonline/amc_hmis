@@ -23,9 +23,9 @@ class AppointmentController extends Controller
     public function appointment()
     {
         $data['users'] = Users::whereHas('roles', function ($q) {
-            $q->where('name', 'Super Admin') ->orWhere('name', 'like', '%Receiption User%');
-        })->get(["id","name"]);
-        $data["consultants"] = Consultants::where(["is_active"=>1])->get();
+            $q->where('name', 'Super Admin')->orWhere('name', 'like', '%Receiption User%');
+        })->get(["id", "name"]);
+        $data["consultants"] = Consultants::where(["is_active" => 1])->get();
         $data["relations"] = Relation::get();
         $data["district"] = District::get();
         $data["locations"] = PatientLocation::get();
@@ -37,47 +37,87 @@ class AppointmentController extends Controller
     public function print_appointment($id)
     {
 
-        $appointment = Appointment::with(["patient","opd_type","consultant","created_by","location"])->where(["is_active"=>1])
-          ->where("id",$id)
+        $appointment = Appointment::with(["patient", "opd_type", "consultant", "created_by", "location"])->where(["is_active" => 1])
+            ->where("id", $id)
             ->first();
         $data["data"] = $appointment;
+
         return view("PatientReports.print_doctor_slip", $data);
+    }
+
+    public function print_e_prescription($id)
+    {
+        $appointment = Appointment::with(["patient", "opd_type", "consultant", "created_by", "location"])->where(["is_active" => 1])
+            ->where("id", $id)
+            ->first();
+        $data["data"] = $appointment;
+
+        // Fetch sale details with medications for this appointment
+        $sale = \App\Models\Sale::where('appointment_id', $id)
+            ->orderBy('SaleID', 'DESC')
+            ->first();
+
+        if ($sale) {
+            $saleDetails = \App\Models\SaleDetails::with('product')
+                ->where('SaleID', $sale->SaleID)
+                ->get();
+            $data["medications"] = $saleDetails;
+            $data["sale"] = $sale;
+        } else {
+            $data["medications"] = collect();
+            $data["sale"] = null;
+        }
+
+        // Fetch HX complaints for this appointment
+        $hxComplaint = \App\Models\HxComplaint::where('appointment_id', $id)
+            ->where('is_active', 1)
+            ->first();
+        $data["hx_complaint"] = $hxComplaint;
+
+        // Fetch patient investigations for this appointment
+        $investigations = \App\Models\Patient\PatientInvestigation::with('investigation')
+            ->where('appointment_id', $id)
+            ->get();
+        $data["investigations"] = $investigations;
+
+        return view("PatientReports.print_e_prescription", $data);
     }
 
     public function list_appointments()
     {
 
-        $res = Appointment::with(["patient","opd_type","consultant","created_by_user"])->where(["is_active"=>1])
+        $res = Appointment::with(["patient", "opd_type", "consultant", "created_by_user"])->where(["is_active" => 1])
             ->select('appointments.*')
             ->leftJoin('users', 'appointments.created_by', '=', 'users.id')
-        ->when(request()->from_date,function ($q){
-           // dd("here");
-            $q->whereDate("appointment_date",">=",request()->from_date);
-        })
-       ->when(request()->to_date,function ($q){
-                $q->whereDate("appointment_date","<=",request()->to_date);
+            ->when(request()->from_date, function ($q) {
+                // dd("here");
+                $q->whereDate("appointment_date", ">=", request()->from_date);
             })
-            ->when(request()->opd_type_id,function ($q){
-                $q->where("opd_type_id",request()->opd_type_id);
+            ->when(request()->to_date, function ($q) {
+                $q->whereDate("appointment_date", "<=", request()->to_date);
             })
-            ->when(request()->consultant_id,function ($q){
-                $q->where("consultant_id",request()->consultant_id);
+            ->when(request()->opd_type_id, function ($q) {
+                $q->where("opd_type_id", request()->opd_type_id);
             })
-            ->when(request()->created_by,function ($q){
-                $q->where("created_by",request()->created_by);
+            ->when(request()->consultant_id, function ($q) {
+                $q->where("consultant_id", request()->consultant_id);
             })
-        ->orderBy("id","desc");
+            ->when(request()->created_by, function ($q) {
+                $q->where("created_by", request()->created_by);
+            })
+            ->orderBy("id", "desc");
 
         return DataTables::of($res)
-            ->addColumn('actions', function($cert) {
+            ->addColumn('actions', function ($cert) {
                 $details = json_encode($cert);
                 //if(in_array(auth()->user()->roles->pluck('name')[0],["Super Admin","District Super Admin"])){
                 $html = "";
-                $html .= '<a target="_blank" href="'.route('pos.print_appointment',[$cert->id]).'" class="btn btn-success btn-icon btn-sm" data-id="'.$cert->id.'" type="submit"><i class="bx bx-printer tf-icons"></i></a>&nbsp;&nbsp;';
-                    if((getUserRole() == 'Super Admin' || getUserRole() == 'Finance')){
-                        $html .= '<a href="javascript:void(0)" data-details=\''.$details.'\' class="btn btn-warning btn-icon btn-sm edit_record" data-name="'.$cert->name.'" data-id="'.$cert->id.'"><i class="tf-icons bx bx-pencil"></i></a>&nbsp;&nbsp;';
-                        $html .= '<button class="btn btn-danger btn-icon btn-sm delete_record" data-id="'.$cert->id.'" type="submit"><i class="bx bx-trash tf-icons"></i></button>&nbsp;&nbsp;';
-                    }
+                $html .= '<a target="_blank" href="' . route('pos.print_appointment', [$cert->id]) . '" class="btn btn-success btn-icon btn-sm" data-id="' . $cert->id . '" type="submit" title="Print Appointment"><i class="bx bx-printer tf-icons"></i></a>&nbsp;&nbsp;';
+                $html .= '<a target="_blank" href="' . route('pos.print_e_prescription', [$cert->id]) . '" class="btn btn-primary btn-icon btn-sm" data-id="' . $cert->id . '" type="submit" title="Print E-Prescription"><i class="bx bx-file tf-icons"></i></a>&nbsp;&nbsp;';
+                if ((getUserRole() == 'Super Admin' || getUserRole() == 'Finance')) {
+                    $html .= '<a href="javascript:void(0)" data-details=\'' . $details . '\' class="btn btn-warning btn-icon btn-sm edit_record" data-name="' . $cert->name . '" data-id="' . $cert->id . '"><i class="tf-icons bx bx-pencil"></i></a>&nbsp;&nbsp;';
+                    $html .= '<button class="btn btn-danger btn-icon btn-sm delete_record" data-id="' . $cert->id . '" type="submit"><i class="bx bx-trash tf-icons"></i></button>&nbsp;&nbsp;';
+                }
 
 
 
@@ -86,11 +126,11 @@ class AppointmentController extends Controller
                 }*/
                 return $html;
             })
-            ->addColumn('created_by_user', function($row) {
+            ->addColumn('created_by_user', function ($row) {
                 return $row->created_by_user->name ?? '';
             })
             ->addIndexColumn()
-            ->rawColumns(["actions","created_by_user"])
+            ->rawColumns(["actions", "created_by_user"])
             ->make(true);
     }
 
@@ -98,21 +138,21 @@ class AppointmentController extends Controller
     {
         $data = request()->except(['_token', "id"]);
 
-        if(request()->id == 0){
+        if (request()->id == 0) {
             $number = (new PatientController())->generateMrNumber();
             $data['mr_no'] = $number;
-            $data['regdate'] = request()->regdate." ".date("H:i:s");
+            $data['regdate'] = request()->regdate . " " . date("H:i:s");
             $data['patient_type'] = "hospital_patient";
         }
-       $patient =  Patient::updateOrCreate(
+        $patient =  Patient::updateOrCreate(
             ["id" => request()->id],
             $data
         );
 
 
-        $appointment = Appointment::where(["patient_id"=> $patient->id, "consultant_id"=>request()->consultant_id,"opd_type_id"=>request()->opd_type_id])
-            ->whereDate('appointment_date',request()->regdate)
-            ->where("is_active",1)
+        $appointment = Appointment::where(["patient_id" => $patient->id, "consultant_id" => request()->consultant_id, "opd_type_id" => request()->opd_type_id])
+            ->whereDate('appointment_date', request()->regdate)
+            ->where("is_active", 1)
             ->first();
         if ($appointment) {
             // Appointment exists
@@ -123,8 +163,8 @@ class AppointmentController extends Controller
         }
 
 
-        $consultant = Consultants::where(["id"=>request()->consultant_id])->first();
-        $opd_type = OpdType::where(["id"=>request()->opd_type_id])->first();
+        $consultant = Consultants::where(["id" => request()->consultant_id])->first();
+        $opd_type = OpdType::where(["id" => request()->opd_type_id])->first();
         /*if(request()->opd_type_id == 1){
             $fees = $consultant->general_opd_fee;
             $hospital_share = $consultant->general_opd_fee;
@@ -178,29 +218,29 @@ class AppointmentController extends Controller
 
         $data = [
             "patient_id"    => $patient->id,
-            "appointment_number"=> $number,
+            "appointment_number" => $number,
             "consultant_id" => request()->consultant_id,
             "opd_type_id"   => request()->opd_type_id,
             "fee"   => $fees,
             "hospital_share"   => $hospital_share,
             "consultant_share"   => $consultant_share,
-            "appointment_date"   => request()->regdate." ".date("H:i:s"),
+            "appointment_date"   => request()->regdate . " " . date("H:i:s"),
             "created_by"   => auth()->user()->id,
 
         ];
 
         $appointment = Appointment::create($data);
         return response()->json([
-            "status"=> true,
-            "appointment_id"=> $appointment->id,
-            "message"=> "Record save successfully."
+            "status" => true,
+            "appointment_id" => $appointment->id,
+            "message" => "Record save successfully."
         ]);
     }
 
     public function update_appointment()
     {
-        $consultant = Consultants::where(["id"=>request()->consultant_id])->first();
-        $opd_type = OpdType::where(["id"=>request()->opd_type_id])->first();
+        $consultant = Consultants::where(["id" => request()->consultant_id])->first();
+        $opd_type = OpdType::where(["id" => request()->opd_type_id])->first();
         $fees = 0;
         $hospital_share = 0;
         $consultant_share = 0;
@@ -257,39 +297,39 @@ class AppointmentController extends Controller
 
         ];
 
-       // dd($data,request()->id);
-        $appointment = Appointment::where(["id"=>request()->id])->update($data);
+        // dd($data,request()->id);
+        $appointment = Appointment::where(["id" => request()->id])->update($data);
         return response()->json([
-            "status"=> true,
-            "appointment_id"=>request()->id,
-            "message"=> "Record Updated successfully."
+            "status" => true,
+            "appointment_id" => request()->id,
+            "message" => "Record Updated successfully."
         ]);
     }
 
-    public function print_all_appointments($from_date,$to_date,$opd_type_id,$consultant_id,$user_id)
+    public function print_all_appointments($from_date, $to_date, $opd_type_id, $consultant_id, $user_id)
     {
 
-        $res = Appointment::with(["patient","opd_type","consultant","created_by_user"])->where(["is_active"=>1])
-            ->when(($from_date && $from_date !='nill'),function ($q) use($from_date){
+        $res = Appointment::with(["patient", "opd_type", "consultant", "created_by_user"])->where(["is_active" => 1])
+            ->when(($from_date && $from_date != 'nill'), function ($q) use ($from_date) {
                 // dd("here");
-                $q->whereDate("appointment_date",">=",$from_date);
+                $q->whereDate("appointment_date", ">=", $from_date);
             })
-            ->when(($to_date && $to_date !='nill'),function ($q) use($to_date){
-                $q->whereDate("appointment_date","<=",$to_date);
+            ->when(($to_date && $to_date != 'nill'), function ($q) use ($to_date) {
+                $q->whereDate("appointment_date", "<=", $to_date);
             })
-            ->when($opd_type_id,function ($q) use ($opd_type_id){
-                $q->where("opd_type_id",$opd_type_id);
+            ->when($opd_type_id, function ($q) use ($opd_type_id) {
+                $q->where("opd_type_id", $opd_type_id);
             })
-            ->when($consultant_id,function ($q) use($consultant_id){
-                $q->where("consultant_id",$consultant_id);
+            ->when($consultant_id, function ($q) use ($consultant_id) {
+                $q->where("consultant_id", $consultant_id);
             })
-            ->when($user_id,function ($q) use($user_id){
-                $q->where("created_by",$user_id);
+            ->when($user_id, function ($q) use ($user_id) {
+                $q->where("created_by", $user_id);
             })
-        ->get();
+            ->get();
 
-        $data['from_date'] = ($from_date && $from_date !='nill') ? $from_date : "-";
-        $data['to_date'] = ($to_date && $to_date !='nill') ? $to_date : "-";
+        $data['from_date'] = ($from_date && $from_date != 'nill') ? $from_date : "-";
+        $data['to_date'] = ($to_date && $to_date != 'nill') ? $to_date : "-";
         $data['data'] = $res;
         return view("appointments.reports.print_all_appointments", $data);
     }

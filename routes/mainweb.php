@@ -14,6 +14,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('list_appointments', [\App\Http\Controllers\Appointments\AppointmentController::class, 'list_appointments'])->name('pos.list_appointments');
     Route::get('print_appointment/{id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_appointment'])->name('pos.print_appointment');
+    Route::get('print_e_prescription/{id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_e_prescription'])->name('pos.print_e_prescription');
     Route::get('print_all_appointments/{from_date?}/{to_date?}/{opd_type?}/{consultant_id?}/{user_id?}', [\App\Http\Controllers\Appointments\AppointmentController::class, 'print_all_appointments'])->name('pos.print_all_appointments');
 
     Route::post('save_appointments', [\App\Http\Controllers\Appointments\AppointmentController::class, 'save_appointments'])->name('pos.save_appointments');
@@ -33,8 +34,4 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('update_ward_request_items', [\App\Http\Controllers\PatientController\WardController::class, 'update_ward_request_items'])->name('pos.update_ward_request_items');
     Route::get('delete_ward_request_item/{id}', [\App\Http\Controllers\PatientController\WardController::class, 'delete_ward_request_item'])->name('pos.delete_ward_request_item');
     Route::get('sync_patient_data', [\App\Http\Controllers\PatientController\WardController::class, 'sync_patient_data'])->name('pos.sync_patient_data');
-
-
-
-
 });

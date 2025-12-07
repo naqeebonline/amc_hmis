@@ -635,6 +635,11 @@ class SupplierPayments extends Controller
                     $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_customer_bill", [$data->SaleID]) . '" class="btn btn-sm btn-success ">Print Bill</a>';
                 }
 
+                // Add Print E-Prescription button if appointment_id exists
+                if ($data->appointment_id && $data->appointment_id > 0) {
+                    $buttons .= '&nbsp;&nbsp;<a target="_blank" href="' . route("pos.print_e_prescription", [$data->appointment_id]) . '" class="btn btn-sm btn-primary ">Print E-Prescription</a>';
+                }
+
                 return $buttons;
             })
             ->rawColumns(["action"])

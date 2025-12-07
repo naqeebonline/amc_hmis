@@ -34,6 +34,7 @@
 
     <div class="main">
         <h6 style="font-size: 16px; text-align: center; text-decoration: underline">Patient Payments Slip</h6>
+        <h6 style="font-size: 14px">MR#: {{ $admission->patient->mr_no ?? "" }}</h6>
         <h6 style="font-size: 14px">Patient Name: {{ $admission->patient->name ?? "" }}</h6>
         <h6 style="font-size: 14px">Admission Date: {{ date("d-m-Y H:i:s",strtotime($admission->admission_date)) ?? "" }}</h6>
 

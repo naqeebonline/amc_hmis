@@ -17,6 +17,10 @@
 	<div class="customer">
 		<table>
 			<tr>
+				<td style="font-weight: bold;font-size: 13px">MR#:</td>
+				<th style="text-align: left;font-size: 13px"> {{$data[0]->patient->mr_no ?? ""}}</th>
+			</tr>
+			<tr>
 				<td style="font-weight: bold;font-size: 13px">Invoice</td>
 				<th style="text-align: left;font-size: 13px"> {{$data[0]->invoice_no ?? ""}}</th>
 			</tr>

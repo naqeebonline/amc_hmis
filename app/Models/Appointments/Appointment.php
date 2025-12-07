@@ -42,16 +42,21 @@ class Appointment extends Model
 
     public function created_by()
     {
-        return $this->belongsTo(Users::class, 'created_by','id');
+        return $this->belongsTo(Users::class, 'created_by', 'id');
     }
 
     public function created_by_user()
     {
-        return $this->belongsTo(Users::class, 'created_by','id');
+        return $this->belongsTo(Users::class, 'created_by', 'id');
+    }
+
+    public function hxComplaint()
+    {
+        return $this->hasOne(\App\Models\HxComplaint::class, 'appointment_id', 'id');
     }
 
     public function getAppointmentDateAttribute($value)
     {
-        return date("Y-m-d h:i A",strtotime($value));
+        return date("Y-m-d h:i A", strtotime($value));
     }
 }

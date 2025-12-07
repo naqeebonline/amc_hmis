@@ -148,12 +148,18 @@
                     <input type="hidden" required id="id" name="id" value="0" class="form-control form-control-sm id_class" />
                     <input type="hidden" name="list_investigations" id="list_investigations">
                     <input type="hidden" name="invoice_no" id="invoice_no">
+                    <input type="hidden" name="selected_appointment_id" id="selected_appointment_id" value="0">
 
                     <!-- MR Number Search Bar -->
                     <div class="mr-search-bar">
                         <div class="row">
                             <div class="col-md-3">
                                 <input type="text" id="mr_number" value="" class="form-control form-control-sm" placeholder="Enter MR Number" autocomplete="off">
+                            </div>
+                            <div class="col-md-5">
+                                <select id="appointment_id" name="appointment_id" class="form-control form-control-sm">
+                                    <option value="">Select Appointment (Last 24 Hours)</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -190,16 +196,16 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
-                                <label class="form-label text-center w-100" style="color: #dc2626; font-weight: 600; font-size: 0.75rem;">Patient Age</label>
-                                <div class="age-group d-flex align-items-center justify-content-center">
-                                    <label>YY:</label>
-                                    <input type="text" id="age" name="age" required class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3" title="Only digits are allowed" />
-                                    <label>MM:</label>
-                                    <input type="text" id="months" value="0" name="months" class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
-                                    <label>DD:</label>
-                                    <input type="text" id="days" value="0" name="days" class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
-                                </div>
-                            </div>
+                                        <label class="form-label text-center w-100" style="color: #dc2626; font-weight: 600; font-size: 0.75rem;">Patient Age</label>
+                                        <div class="age-group d-flex align-items-center justify-content-center">
+                                            <label>YY:</label>
+                                            <input type="text" id="age" name="age" required class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="3" title="Only digits are allowed" />
+                                            <label>MM:</label>
+                                            <input type="text" id="months" value="0" name="months" class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
+                                            <label>DD:</label>
+                                            <input type="text" id="days" value="0" name="days" class="form-control form-control-sm" pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" maxlength="2" title="Only digits are allowed" />
+                                        </div>
+                                    </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="location_id" class="form-label">Location<span class="asterisk">*</span></label>
@@ -255,23 +261,23 @@
                                 </div>
 
                                 <!-- Investigation Selection -->
-                                 <div class="row">
-                                <div class="col-md-8 mb-2">
-                                    <label for="investigation_id" class="form-label">Select Investigation<span class="asterisk">*</span></label>
-                                    <select id="investigation_id" class="form-select form-select-sm">
-                                        <option value="">Choose Investigation...</option>
-                                        @foreach ($investigation as $value)
-                                        <option sale_price="{{$value->sale_price}}" investigation_name="{{ $value->name }}" value="{{ $value->id }}">{{ $value->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <div class="row">
+                                    <div class="col-md-8 mb-2">
+                                        <label for="investigation_id" class="form-label">Select Investigation<span class="asterisk">*</span></label>
+                                        <select id="investigation_id" class="form-select form-select-sm">
+                                            <option value="">Choose Investigation...</option>
+                                            @foreach ($investigation as $value)
+                                            <option sale_price="{{$value->sale_price}}" investigation_name="{{ $value->name }}" value="{{ $value->id }}">{{ $value->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                <!-- Frequency Input -->
+                                    <!-- Frequency Input -->
                                     <div class="col-md-4 mb-2">
                                         <label for="frequency" class="form-label">Frequency</label>
                                         <input type="number" class="form-control form-control-sm" id="frequency" value="1" placeholder="Enter frequency" min="1">
                                     </div>
-                                 </div>
+                                </div>
 
                                 <!-- Investigation Table -->
                                 <div class="table-responsive">
@@ -488,6 +494,7 @@
         $("#investigation_id").select2();
         $("#location_id").select2();
         $("#consultant_id").select2();
+        $("#appointment_id").select2();
 
         $("#edit_consultant_id").select2({
             dropdownParent: $('.my_modal')
@@ -498,6 +505,9 @@
 
         time = Date.now();
         $("#invoice_no").val(time);
+
+        // Load today's appointments
+        loadTodayAppointments();
 
     }, 2000);
 
@@ -734,6 +744,99 @@
     $("body").on("change", "#dob", function() {
         calculateAgeDetails($(this).val());
     });
+
+    // Load today's appointments
+    function loadTodayAppointments() {
+        // Calculate date 24 hours ago
+        var now = new Date();
+        var yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        var fromDate = yesterday.toISOString().split('T')[0];
+        var toDate = now.toISOString().split('T')[0];
+
+        $.ajax({
+            type: 'GET',
+            url: "{{ route('pos.list_appointments') }}",
+            data: {
+                from_date: fromDate,
+                to_date: toDate,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(res) {
+                if (res.data && res.data.length > 0) {
+                    $("#appointment_id").html('<option value="">Select Appointment (Last 24 Hours)</option>');
+                    $.each(res.data, function(index, appointment) {
+                        if (appointment.patient) {
+                            var displayText = appointment.patient.name;
+                            var mrNumber = appointment.patient.mr_no || appointment.patient.mr_number || '';
+                            if (mrNumber) {
+                                displayText += ' - MR: ' + mrNumber;
+                            }
+                            displayText += ' - ' + appointment.patient.contact_no;
+                            if (appointment.consultant) {
+                                displayText += ' - Dr. ' + appointment.consultant.name;
+                            }
+                            // Store appointment_id, mr_number, contact_no and consultant_id in the option value as JSON
+                            var optionData = JSON.stringify({
+                                appointment_id: appointment.id,
+                                mr_number: mrNumber,
+                                contact_no: appointment.patient.contact_no,
+                                consultant_id: appointment.consultant_id || 0
+                            });
+                            $("#appointment_id").append('<option value=\'' + optionData + '\'>' + displayText + '</option>');
+                        }
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading appointments:', error);
+            }
+        });
+    }
+
+    // Handle appointment selection - trigger mr_number blur event
+    $("body").on("change", "#appointment_id", function() {
+        var selectedValue = $(this).val();
+        if (selectedValue) {
+            try {
+                var appointmentData = JSON.parse(selectedValue);
+                var appointmentId = appointmentData.appointment_id;
+                var mrNumber = appointmentData.mr_number;
+                var contactNo = appointmentData.contact_no;
+                var consultantId = appointmentData.consultant_id;
+
+                // Store the appointment_id in the hidden field
+                if (appointmentId) {
+                    $("#selected_appointment_id").val(appointmentId);
+                }
+
+                // Use MR number if available, otherwise fall back to contact number
+                if (mrNumber) {
+                    $("#mr_number").val(mrNumber);
+
+                    // Set consultant_id if available
+                    if (consultantId && consultantId > 0) {
+                        $("#consultant_id").val(consultantId).trigger('change');
+                    }
+
+                    // Trigger blur event to fetch patient information
+                    $("#mr_number").trigger("blur");
+                } else if (contactNo) {
+                    $("#contact_no").val(contactNo);
+
+                    // Set consultant_id if available
+                    if (consultantId && consultantId > 0) {
+                        $("#consultant_id").val(consultantId).trigger('change');
+                    }
+
+                    // Trigger blur event to fetch patient information
+                    $("#contact_no").trigger("blur");
+                }
+            } catch (e) {
+                console.error('Error parsing appointment data:', e);
+            }
+        }
+    });
+
     $("body").on("blur", "#contact_no", function() {
 
 
@@ -781,16 +884,14 @@
 
     $("body").on("blur", "#mr_number", function() {
         var mr_number = $("#mr_number").val();
-
-
         var id = $("#id").val();
-        if ((mr_number.length > 3 || contact_no.length > 8)) {
+
+        if (mr_number.length > 3) {
             $.ajax({
                 type: 'post',
                 url: "{{ route('pos.get_patient_by_cnic') }}",
                 data: {
                     mr_number: mr_number,
-
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(res) {
@@ -1076,6 +1177,8 @@
         let time = Date.now();
         $("#discount_percentage").val('0');
         $("#invoice_no").val(time);
+        $("#selected_appointment_id").val('0');
+        $("#appointment_id").val('').trigger('change');
         list_investigation = [];
         load_investigation();
         $(".id_class").val("0");

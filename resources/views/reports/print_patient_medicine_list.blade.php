@@ -33,7 +33,9 @@
     </div>
     <hr style="border: 1px solid black;">
     <div class="main">
+        <h6 style="font-size: 14px">MR#: {{ $admission->patient->mr_no ?? "" }}</h6>
         <h6 style="font-size: 14px">Patient Name: {{ $admission->patient->name ?? "" }}</h6>
+        
         <h6 style="font-size: 14px">Admission Date: {{ date("d-m-Y H:i A",strtotime($admission->admission_date)) ?? "" }}</h6>
 
 

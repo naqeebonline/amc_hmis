@@ -4,21 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice</title>
+    <title>E-Prescription with HX</title>
     <link rel="stylesheet" href="{{asset('assets/css/bootstrap.min.css')}}" />
-    <!-- <link rel="stylesheet" href="style.css"> -->
 
     <style>
         @media print {
             @page {
                 margin: 0;
-                /* Removes the default margin */
             }
 
             body {
                 margin: 0;
                 padding: 15px;
-                /* Ensures the body content aligns with the page */
             }
         }
 
@@ -30,7 +27,6 @@
             font-display: swap;
         }
 
-        /* Alternative loading method */
         @font-face {
             font-family: 'JameelNoori';
             src: url('{{asset("Jameel Noori Nastaleeq Regular.ttf")}}') format('truetype');
@@ -58,7 +54,6 @@
             font-size: 12px;
             margin: 0;
             line-height: 1.3;
-
         }
 
         .inv-header ul li:last-child {
@@ -71,7 +66,6 @@
         }
 
         .logo {
-            /* height: 40px; */
             object-fit: contain;
         }
 
@@ -120,10 +114,6 @@
             border-top: 5px solid #333;
             position: relative;
             padding: 5px 0;
-            /* bottom:10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 20px); */
             position: relative;
         }
 
@@ -137,7 +127,6 @@
         footer p {
             font-size: 10px;
             color: #000 !important;
-
         }
 
         footer a {
@@ -154,6 +143,39 @@
             padding-right: 40px;
             font-size: 14px;
             margin-bottom: 5px !important;
+        }
+
+        /* HX Complaints Styling */
+        .hx-section {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .hx-section .hx-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+        }
+
+        .hx-section .complaint-text {
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid #007bff;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .vital-signs p {
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+
+        .vital-signs strong {
+            color: #d9534f;
         }
     </style>
 </head>
@@ -174,11 +196,6 @@
 
                         <ul class="list-unstyled">
                             <li style="text-align: center;">{!! $data->consultant->description !!}</li>
-
-                            {{--<li>{{ucfirst($data->consultant->consultant_speciality->name) ?? ""}}</li>
-                            <li>{{ucfirst($data->consultant->consultant_type->name) ?? ""}}</li>
-                            <li>PMDC# {{$data->consultant->pmdc_number ?? ""}}</li>--}}
-
                         </ul>
                         <p style="text-align: center;"><b>PMDC#{!! $data->consultant->pmdc_number !!} </b></p>
                         <p style="text-align: center">{!! DNS1D::getBarcodeSVG($data->appointment_number, 'C128', 2, 20, 'black', false) !!}</p>
@@ -188,7 +205,6 @@
                         <p><strong>{{date('l, F d, Y', strtotime($data->appointment_date))}} <br /> {{date('h:i A', strtotime($data->appointment_date))}}</strong></p>
                         <p><strong>{{ucfirst($data->opd_type->name) ?? ''}}</strong></p>
                         <p><strong>Appointment#: {{config('app.BRANCH_CODE')}} {{ $data->appointment_number }}</strong></p>
-
                     </div>
 
                 </div>
@@ -218,8 +234,6 @@
                             </span></p>
                     </div>
 
-
-
                     <div class="gender col-4 pe-2 height">
                         <p><strong>Weight (KG)</strong> <span style="width: 100%; text-align: center;font-weight: bold"></span></p>
                     </div>
@@ -247,30 +261,97 @@
         </header>
 
         <div class="main">
-            <div class="row h-100 ">
+            <div class="row h-100">
                 <div class="col-3 side border-end position-relative">
                     <img class="rx-logo" src="{{asset('')}}rx.png" alt="">
-                    <p style="font-weight: bold">HX/Complaints</p>
-                    <div style="margin-top: 300px !important;">
-                        <p>O/E</p>
-                        <p>BP ____________</p>
-                        <p>Temp ____________</p>
-                        <p>Pulse ____________</p>
-                        <p>R/R ____________</p>
-                        <p>Investigations</p>
+
+                    <div class="hx-section">
+                        <p class="hx-title">HX/Complaints</p>
+
+                        @if(isset($hx_complaint) && $hx_complaint)
+                        <!-- Display Chief Complaint -->
+                        @if($hx_complaint->complaint)
+                        <div class="complaint-text">
+                            <strong>Chief Complaint:</strong><br>
+                            {{ $hx_complaint->complaint }}
+                        </div>
+                        @endif
+
+                        <!-- Display Vital Signs -->
+                        <div class="vital-signs">
+                            <p style="font-weight: bold; margin-bottom: 5px;">O/E (Vital Signs)</p>
+                            <p>BP: <strong>{{ $hx_complaint->bp ?? '____________' }}</strong></p>
+                            <p>Temp: <strong>{{ $hx_complaint->temp ?? '____________' }}</strong></p>
+                            <p>Pulse: <strong>{{ $hx_complaint->pulse ?? '____________' }}</strong></p>
+                            <p>R/R: <strong>{{ $hx_complaint->rr ?? '____________' }}</strong></p>
+                        </div>
+
+                        <!-- Display Investigation -->
+                        @if($hx_complaint->investigation)
+                        <div style="margin-top: 10px;">
+                            <p style="font-weight: bold; margin-bottom: 3px;">Investigations Advised:</p>
+                            <div style="background: #f9f9f9; padding: 6px; border-radius: 4px; font-size: 10px; line-height: 1.4;">
+                                {{ strtoupper($hx_complaint->investigation) }}
+                            </div>
+                        </div>
+                        @else
+                        <p style="margin-top: 10px;">Investigations: ____________</p>
+                        @endif
+
+                        <!-- Display Investigation Tests List -->
+                        @if(isset($investigations) && $investigations->count() > 0)
+                        <div style="margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 8px;">
+                            <p style="font-weight: bold; margin-bottom: 5px; font-size: 11px;">Investigation Done:</p>
+                            <div style="font-size: 9px; line-height: 1.6;">
+                                @foreach($investigations as $inv)
+                                <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                                    <span style="margin-right: 5px; color: #10b981; font-weight: bold;">✓</span>
+                                    <span style="font-weight: 600;">{{ $inv->investigation->name ?? 'N/A' }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        @else
+                        <!-- Show blank fields if no HX complaint recorded -->
+                        <div style="margin-top: 300px;">
+                            <p>O/E</p>
+                            <p>BP ____________</p>
+                            <p>Temp ____________</p>
+                            <p>Pulse ____________</p>
+                            <p>R/R ____________</p>
+                            <p>Investigations ____________</p>
+                        </div>
+
+                        <!-- Display Investigation Tests List even when no HX -->
+                        @if(isset($investigations) && $investigations->count() > 0)
+                        <div style="margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 8px;">
+                            <p style="font-weight: bold; margin-bottom: 5px; font-size: 11px;">Investigation Tests:</p>
+                            <div style="font-size: 9px; line-height: 1.6;">
+                                @foreach($investigations as $inv)
+                                <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                                    <span style="margin-right: 5px; color: #10b981; font-weight: bold;">✓</span>
+                                    <span style="font-weight: 600;">{{ $inv->investigation->name ?? 'N/A' }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                        @endif
                     </div>
                 </div>
+
                 <div class="col-9">
                     <div class="row g-0 pt_detail">
-                        <div class="name col-4  height mt-4">
-                            <p class=""><strong style="width: 100px; "></strong> <span
+                        <div class="name col-4 height mt-4">
+                            <p class=""><strong style="width: 100px;"></strong> <span
                                     style="width: 100%;font-weight: bold">Medicine</span></p>
                         </div>
 
-                        <div class="gender col-3  height mt-4">
+                        <div class="gender col-3 height mt-4">
                             <p><strong></strong> <span style="width: 100%;font-weight: bold">Dose</span></p>
                         </div>
-                        <div class="gender col-3  height mt-4">
+                        <div class="gender col-3 height mt-4">
                             <p><strong></strong> <span style="width: 100%;font-weight: bold">Route</span></p>
                         </div>
                         <div class="gender col-2 pe-2 height mt-4">
@@ -322,17 +403,13 @@
             </div>
         </div>
 
-
-
         <footer class="footer">
-
             <div class="text-end ft-sign">
-
                 <p class="m-0"><strong>Sign & Stamp</strong></p>
                 <p class="m-0"><strong>Not Valid For Court Purpose</strong></p>
             </div>
             <div class="row align-items-center">
-                <div class="col-8  ">
+                <div class="col-8">
                     <h4 class="my-0">{{config('app.COMPANY_ADDRESS')}}</h4>
                 </div>
                 <div class="col-4">
@@ -343,19 +420,13 @@
             </div>
         </footer>
 
-
-
     </div>
-
 
 </body>
 <script>
     window.onload = function() {
-        window.print(); // Automatically triggers the print dialog
+        window.print();
     };
-    /* window.onafterprint = function() {
-         window.close(); // Close the window after printing
-     };*/
 </script>
 
 </html>
