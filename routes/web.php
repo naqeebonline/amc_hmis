@@ -559,3 +559,27 @@ Route::middleware(['auth'])->group(function () {
     Route::get('hx/get-list-hx-complaints', [\App\Http\Controllers\Admin\HxComplaintController::class, 'get_list_hx_complaints'])->name('hx.get_list_hx_complaints');
     Route::post('hx/delete-hx-complaint', [\App\Http\Controllers\Admin\HxComplaintController::class, 'delete_hx_complaint'])->name('hx.delete_hx_complaint');
 });
+
+// Expiry Date Update Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('expiry-update', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'expiry_update_view'])->name('expiry.expiry_update_view');
+    Route::get('expiry/get-grn-details', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'get_grn_details'])->name('expiry.get_grn_details');
+    Route::post('expiry/update-expiry-date', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'update_expiry_date'])->name('expiry.update_expiry_date');
+    Route::get('expiry/print-report', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'print_expiry_report'])->name('expiry.print_expiry_report');
+
+    // Return Expired Items Routes
+    Route::get('return-expired-items', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'return_expired_items_view'])->name('expiry.return_expired_items');
+    Route::get('expiry/get-returnable-items', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'get_returnable_items'])->name('expiry.get_returnable_items');
+    Route::post('expiry/save-return-to-supplier', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'save_return_to_supplier'])->name('expiry.save_return_to_supplier');
+
+    // GRN Returns List & Management Routes
+    Route::get('grn-returns-list', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'grn_returns_list'])->name('expiry.grn_returns_list');
+    Route::get('expiry/get-grn-returns-list', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'get_grn_returns_list'])->name('expiry.get_grn_returns_list');
+    Route::post('expiry/approve-grn-return', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'approve_grn_return'])->name('expiry.approve_grn_return');
+    Route::post('expiry/reject-grn-return', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'reject_grn_return'])->name('expiry.reject_grn_return');
+    Route::post('expiry/delete-grn-return', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'delete_grn_return'])->name('expiry.delete_grn_return');
+    Route::get('expiry/view-grn-return/{id}', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'view_grn_return'])->name('expiry.view_grn_return');
+    Route::get('expiry/edit-grn-return/{id}', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'edit_grn_return'])->name('expiry.edit_grn_return');
+    Route::get('expiry/print-grn-return/{id}', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'print_grn_return'])->name('expiry.print_grn_return');
+    Route::post('expiry/update-grn-return', [\App\Http\Controllers\Admin\ExpiryUpdateController::class, 'update_grn_return'])->name('expiry.update_grn_return');
+});
